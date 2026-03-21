@@ -203,6 +203,50 @@ export async function gameRoutes(app: FastifyInstance) {
     return { game };
   });
 
+  // Get user's game history
+  app.get<{
+    Querystring: { page?: string; limit?: string };
+  }>("/api/games/history", async (request) => {
+    const userId = request.user.userId;
+    const page = Math.max(1, parseInt(request.query.page || "1"));
+    const limit = Math.min(50, Math.max(1, parseInt(request.query.limit || "20")));
+
+    const where = {
+      status: { in: ["COMPLETED" as const, "ABORTED" as const] },
+      OR: [{ whiteId: userId }, { blackId: userId }],
+    };
+
+    const [games, total] = await Promise.all([
+      prisma.game.findMany({
+        where,
+        select: {
+          id: true,
+          status: true,
+          result: true,
+          termination: true,
+          timeControl: true,
+          isVsBot: true,
+          botElo: true,
+          createdAt: true,
+          endedAt: true,
+          whiteId: true,
+          blackId: true,
+          white: { select: { username: true, rating: true } },
+          black: { select: { username: true, rating: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.game.count({ where }),
+    ]);
+
+    return {
+      games,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    };
+  });
+
   // ── Bot Games ───────────────────────────────────────
 
   // Create bot game

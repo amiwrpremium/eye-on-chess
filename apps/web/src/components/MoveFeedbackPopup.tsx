@@ -16,6 +16,7 @@ const LABELS: Record<string, { text: string; color: string }> = {
   MISTAKE: { text: "Mistake", color: "text-orange-400" },
   BLUNDER: { text: "Blunder!", color: "text-red-400" },
   FORCED: { text: "Forced", color: "text-gray-500" },
+  BOOK: { text: "Book Move", color: "text-purple-400" },
 };
 
 export default function MoveFeedbackPopup({ classification }: MoveFeedbackPopupProps) {

@@ -63,6 +63,12 @@ export default function PlayPage() {
             Challenge a Friend
           </Link>
           <Link
+            href="/history"
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
+          >
+            Game History
+          </Link>
+          <Link
             href={`/profile/${user.username}`}
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
           >

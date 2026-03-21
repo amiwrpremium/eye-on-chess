@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum GameStatus {
+  WAITING
+  ACTIVE
+  COMPLETED
+  ABORTED
+}
+
+enum GameResult {
+  WHITE_WIN
+  BLACK_WIN
+  DRAW
+  ABORTED
+}
+
+enum Termination {
+  CHECKMATE
+  RESIGNATION
+  TIMEOUT
+  AGREEMENT
+}
+
+enum TimeControl {
+  BULLET
+  BLITZ
+  RAPID
+  CLASSICAL
+  UNLIMITED
+}
+
+enum MoveClassification {
+  BRILLIANT
+  GREAT
+  BEST
+  EXCELLENT
+  GOOD
+  INACCURACY
+  MISTAKE
+  BLUNDER
+  FORCED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ── Models ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  rating       Int      @default(1200)
+  role         UserRole @default(USER)
+  active       Boolean  @default(true)
+  verified     Boolean  @default(false)
+  darkMode     Boolean  @default(true)
+  boardTheme   String   @default("classic")
+  pieceSet     String   @default("classic")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gamesAsWhite        Game[]         @relation("WhitePlayer")
+  gamesAsBlack        Game[]         @relation("BlackPlayer")
+  friendshipsInitiated Friendship[]  @relation("Requester")
+  friendshipsReceived  Friendship[]  @relation("Addressee")
+  refreshTokens       RefreshToken[]
+  auditLogs           AuditLog[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  requester User @relation("Requester", fields: [requesterId], references: [id])
+  addressee User @relation("Addressee", fields: [addresseeId], references: [id])
+
+  @@unique([requesterId, addresseeId])
+}
+
+model Game {
+  id            String      @id @default(cuid())
+  whiteId       String?
+  blackId       String?
+  status        GameStatus  @default(WAITING)
+  result        GameResult?
+  termination   Termination?
+  pgn           String      @default("")
+  fen           String      @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+  timeControl   TimeControl @default(RAPID)
+  initialTime   Int         @default(600)
+  increment     Int         @default(0)
+  whiteTimeLeft Int?
+  blackTimeLeft Int?
+  isVsBot       Boolean     @default(false)
+  botElo        Int?
+  createdAt     DateTime    @default(now())
+  startedAt     DateTime?
+  endedAt       DateTime?
+
+  white    User?          @relation("WhitePlayer", fields: [whiteId], references: [id])
+  black    User?          @relation("BlackPlayer", fields: [blackId], references: [id])
+  moves    Move[]
+  analysis GameAnalysis?
+}
+
+model Move {
+  id        String   @id @default(cuid())
+  gameId    String
+  ply       Int
+  san       String
+  uci       String
+  fen       String
+  timeTaken Int?
+  createdAt DateTime @default(now())
+
+  game     Game           @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  feedback MoveFeedback?
+
+  @@index([gameId])
+}
+
+model GameAnalysis {
+  id            String   @id @default(cuid())
+  gameId        String   @unique
+  whiteAccuracy Float?
+  blackAccuracy Float?
+  createdAt     DateTime @default(now())
+
+  game     Game           @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  feedback MoveFeedback[]
+}
+
+model MoveFeedback {
+  id             String             @id @default(cuid())
+  analysisId     String
+  moveId         String             @unique
+  ply            Int
+  classification MoveClassification
+  bestMove       String?
+  evalBefore     Int?
+  evalAfter      Int?
+
+  analysis GameAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  move     Move         @relation(fields: [moveId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId])
+}
+
+model SiteSettings {
+  id                       String  @id @default("singleton")
+  siteName                 String  @default("EyeOnChess")
+  registrationOpen         Boolean @default(true)
+  maxUsers                 Int     @default(0)
+  requireEmailVerification Boolean @default(false)
+  updatedAt                DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  targetType String
+  targetId   String?
+  details    String?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([createdAt])
+}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
 import { connectSocket, getSocket } from "../../../lib/socket";
+import ConfirmModal from "../../../components/ConfirmModal";
 
 interface Friend {
   friendshipId: string;
@@ -37,6 +38,7 @@ export default function ChallengeFriendPage() {
   const [showCustom, setShowCustom] = useState(false);
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState("");
+  const [confirmChallenge, setConfirmChallenge] = useState<string | null>(null); // preset or "custom"
 
   useEffect(() => {
     fetchMe();
@@ -167,7 +169,7 @@ export default function ChallengeFriendPage() {
               {PRESETS.map((p) => (
                 <button
                   key={p.key}
-                  onClick={() => sendChallenge(p.key)}
+                  onClick={() => setConfirmChallenge(p.key)}
                   disabled={sending}
                   className="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 rounded text-sm font-medium transition-colors"
                 >
@@ -212,7 +214,7 @@ export default function ChallengeFriendPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => sendChallenge()}
+                  onClick={() => setConfirmChallenge("custom")}
                   disabled={sending}
                   className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded font-medium text-sm transition-colors"
                 >
@@ -228,6 +230,21 @@ export default function ChallengeFriendPage() {
             &larr; Back to Play
           </Link>
         </div>
+
+        <ConfirmModal
+          open={!!confirmChallenge}
+          title="Send Challenge?"
+          message={`Challenge ${selectedFriend?.username || "friend"} (${selectedFriend?.rating || "?"})\nTime: ${confirmChallenge === "custom" ? `${customMinutes}+${customIncrement}` : PRESETS.find((p) => p.key === confirmChallenge)?.label || confirmChallenge || ""}`}
+          confirmLabel="Send Challenge"
+          confirmVariant="primary"
+          onConfirm={() => {
+            const preset = confirmChallenge;
+            setConfirmChallenge(null);
+            if (preset === "custom") sendChallenge();
+            else sendChallenge(preset || undefined);
+          }}
+          onCancel={() => setConfirmChallenge(null)}
+        />
       </div>
     </main>
   );

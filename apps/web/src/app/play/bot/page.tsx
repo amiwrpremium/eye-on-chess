@@ -120,6 +120,7 @@ export default function PlayBotPage() {
   const [timeControl, setTimeControl] = useState("RAPID");
   const [error, setError] = useState("");
   const [confirmResign, setConfirmResign] = useState(false);
+  const [confirmStart, setConfirmStart] = useState(false);
 
   const engineEval = useEngineEval(fen, showEvalBar && phase === "game");
 
@@ -397,7 +398,7 @@ export default function PlayBotPage() {
           </div>
 
           <button
-            onClick={startGame}
+            onClick={() => setConfirmStart(true)}
             className="w-full py-3 bg-green-600 hover:bg-green-700 rounded-lg text-lg font-bold transition-colors"
           >
             Start Game
@@ -408,6 +409,19 @@ export default function PlayBotPage() {
               &larr; Back to Play
             </Link>
           </div>
+
+          <ConfirmModal
+            open={confirmStart}
+            title="Start Game?"
+            message={`Bot: ${botElo} Elo (${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustom ? `${customMinutes}+${customIncrement}` : PRESETS.find((p) => p.key === selectedPreset)?.label || selectedPreset}`}
+            confirmLabel="Start"
+            confirmVariant="primary"
+            onConfirm={() => {
+              setConfirmStart(false);
+              startGame();
+            }}
+            onCancel={() => setConfirmStart(false)}
+          />
         </div>
       </main>
     );

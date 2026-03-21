@@ -8,6 +8,7 @@ import { connectSocket, getSocket } from "../../../lib/socket";
 import ChessBoard from "../../../components/ChessBoard";
 import MoveList from "../../../components/MoveList";
 import PlayerClock from "../../../components/PlayerClock";
+import ConfirmModal from "../../../components/ConfirmModal";
 
 interface Player {
   id: string;
@@ -54,6 +55,9 @@ export default function GamePage() {
   const [drawOffered, setDrawOffered] = useState(false);
   const [drawIncoming, setDrawIncoming] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
+  const [confirmResign, setConfirmResign] = useState(false);
+  const [confirmDraw, setConfirmDraw] = useState(false);
+  const [confirmAcceptDraw, setConfirmAcceptDraw] = useState(false);
 
   const joinedRef = useRef(false);
 
@@ -347,7 +351,7 @@ export default function GamePage() {
                 {drawIncoming ? (
                   <div className="flex-1 flex gap-2">
                     <button
-                      onClick={acceptDraw}
+                      onClick={() => setConfirmAcceptDraw(true)}
                       className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium transition-colors"
                     >
                       Accept Draw
@@ -362,14 +366,14 @@ export default function GamePage() {
                 ) : (
                   <>
                     <button
-                      onClick={offerDraw}
+                      onClick={() => setConfirmDraw(true)}
                       disabled={drawOffered}
                       className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded text-sm font-medium transition-colors"
                     >
                       {drawOffered ? "Draw Offered" : "Offer Draw"}
                     </button>
                     <button
-                      onClick={resign}
+                      onClick={() => setConfirmResign(true)}
                       className="flex-1 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition-colors"
                     >
                       Resign
@@ -444,6 +448,44 @@ export default function GamePage() {
           </div>
         </div>
       )}
+
+      {/* Confirmation modals */}
+      <ConfirmModal
+        open={confirmResign}
+        title="Resign?"
+        message="Are you sure you want to resign this game? Your opponent will win."
+        confirmLabel="Resign"
+        confirmVariant="danger"
+        onConfirm={() => {
+          resign();
+          setConfirmResign(false);
+        }}
+        onCancel={() => setConfirmResign(false)}
+      />
+      <ConfirmModal
+        open={confirmDraw}
+        title="Offer Draw?"
+        message="Are you sure you want to offer a draw to your opponent?"
+        confirmLabel="Offer Draw"
+        confirmVariant="primary"
+        onConfirm={() => {
+          offerDraw();
+          setConfirmDraw(false);
+        }}
+        onCancel={() => setConfirmDraw(false)}
+      />
+      <ConfirmModal
+        open={confirmAcceptDraw}
+        title="Accept Draw?"
+        message="Are you sure you want to accept the draw offer? The game will end as a draw."
+        confirmLabel="Accept"
+        confirmVariant="primary"
+        onConfirm={() => {
+          acceptDraw();
+          setConfirmAcceptDraw(false);
+        }}
+        onCancel={() => setConfirmAcceptDraw(false)}
+      />
     </main>
   );
 }

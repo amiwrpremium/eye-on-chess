@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
+import metricsPlugin from "fastify-metrics";
 import { authRoutes } from "./routes/auth.js";
 import { userRoutes } from "./routes/users.js";
 import { friendRoutes } from "./routes/friends.js";
@@ -10,6 +11,9 @@ import { adminRoutes } from "./routes/admin.js";
 import { setupSocket } from "./lib/socket.js";
 import { setupGameSocket } from "./lib/gameSocket.js";
 import { getSiteSettings } from "./lib/settings.js";
+import { prisma } from "./lib/prisma.js";
+import { redis } from "./lib/redis.js";
+
 async function main() {
   const fastify = Fastify({
     logger: {
@@ -24,6 +28,13 @@ async function main() {
   });
 
   await fastify.register(cookie);
+
+  // Prometheus metrics at /metrics
+  await fastify.register(metricsPlugin, {
+    endpoint: "/metrics",
+    defaultMetrics: { enabled: true },
+    routeMetrics: { enabled: true },
+  });
 
   await fastify.register(authRoutes);
   await fastify.register(userRoutes);
@@ -43,6 +54,16 @@ async function main() {
       siteUrl: process.env.SITE_URL || "http://localhost",
       registrationOpen: settings.registrationOpen,
     };
+  });
+
+  // Custom metrics endpoint with app-specific gauges
+  fastify.get("/api/metrics/app", async () => {
+    const [totalUsers, activeGames, analysisQueue] = await Promise.all([
+      prisma.user.count(),
+      prisma.game.count({ where: { status: "ACTIVE" } }),
+      redis.llen("analysis:queue"),
+    ]);
+    return { totalUsers, activeGames, analysisQueue };
   });
 
   try {

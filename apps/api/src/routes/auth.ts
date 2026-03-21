@@ -177,8 +177,12 @@ export async function authRoutes(app: FastifyInstance) {
       return reply.status(401).send({ error: "Invalid or expired refresh token" });
     }
 
-    // Rotate: delete old, create new
-    await prisma.refreshToken.delete({ where: { id: stored.id } });
+    // Rotate: delete old, create new (handle concurrent requests gracefully)
+    const deleted = await prisma.refreshToken.deleteMany({ where: { id: stored.id } });
+    if (deleted.count === 0) {
+      // Another concurrent request already rotated this token
+      return reply.status(401).send({ error: "Token already used" });
+    }
 
     const { accessToken, rawRefreshToken } = await createTokens(stored.user);
 

@@ -12,8 +12,8 @@ export default function PlayPage() {
   const { user, isLoading, fetchMe, logout } = useAuthStore();
 
   useEffect(() => {
-    fetchMe();
-  }, [fetchMe]);
+    if (!user) fetchMe();
+  }, [user, fetchMe]);
 
   useEffect(() => {
     if (!isLoading && !user) {

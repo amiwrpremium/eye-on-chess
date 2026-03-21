@@ -34,6 +34,9 @@ function syncSettings(user: User) {
   }
 }
 
+// Prevent concurrent fetchMe calls
+let fetchMePromise: Promise<void> | null = null;
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true,
@@ -51,7 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email, password) => {
     const { data } = await api.post("/api/auth/login", { email, password });
     setAccessToken(data.accessToken);
-    set({ user: data.user });
+    set({ user: data.user, isLoading: false });
     syncSettings(data.user);
   },
 
@@ -72,16 +75,27 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   fetchMe: async () => {
-    try {
-      const refreshRes = await api.post("/api/auth/refresh");
-      setAccessToken(refreshRes.data.accessToken);
-
-      const { data } = await api.get("/api/auth/me");
-      set({ user: data.user, isLoading: false });
-      syncSettings(data.user);
-    } catch {
-      setAccessToken(null);
-      set({ user: null, isLoading: false });
+    // Deduplicate: if already fetching, wait for the existing promise
+    if (fetchMePromise) {
+      return fetchMePromise;
     }
+
+    fetchMePromise = (async () => {
+      try {
+        const refreshRes = await api.post("/api/auth/refresh");
+        setAccessToken(refreshRes.data.accessToken);
+
+        const { data } = await api.get("/api/auth/me");
+        set({ user: data.user, isLoading: false });
+        syncSettings(data.user);
+      } catch {
+        setAccessToken(null);
+        set({ user: null, isLoading: false });
+      } finally {
+        fetchMePromise = null;
+      }
+    })();
+
+    return fetchMePromise;
   },
 }));

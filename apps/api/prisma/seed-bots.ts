@@ -1,19 +1,65 @@
 /**
- * Bot personality seeder — populates the BotProfile table from the shared
- * BOT_PERSONALITIES definitions. Idempotent via upsert on botId.
+ * Bot personality seeder — reads bot definitions from deployment/config/bots.yml
+ * and populates the BotProfile table. Idempotent via upsert on botId.
  *
  * Run with: make seed-bots
  */
 import { PrismaClient } from "@prisma/client";
-import { BOT_PERSONALITIES } from "@eyeonchess/chess";
+import { readFileSync } from "fs";
+import { parse } from "yaml";
+import { resolve } from "path";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log("Seeding bot profiles...\n");
+interface BotDef {
+  id: string;
+  name: string;
+  elo: number;
+  description: string;
+  avatar: string;
+  tier: string;
+  category: string;
+  randomMoveChance: number;
+  blunderChance: number;
+  captureGreed: number;
+  aggressionBias: number;
+  maxDepth: number;
+  queenEarly: boolean;
+  pawnPusher: boolean;
+}
 
-  for (let i = 0; i < BOT_PERSONALITIES.length; i++) {
-    const bot = BOT_PERSONALITIES[i];
+function loadBotsFromYaml(): BotDef[] {
+  const paths = [
+    resolve(process.cwd(), "../../deployment/config/bots.yml"),
+    resolve(process.cwd(), "deployment/config/bots.yml"),
+    resolve(__dirname, "../../../deployment/config/bots.yml"),
+    "/app/config/bots.yml",
+  ];
+
+  for (const p of paths) {
+    try {
+      const content = readFileSync(p, "utf-8");
+      const data = parse(content);
+      if (data?.bots && Array.isArray(data.bots)) {
+        console.log(`Loaded bots from: ${p}`);
+        return data.bots;
+      }
+    } catch {
+      // Try next path
+    }
+  }
+
+  console.error("Could not find bots.yml — tried:", paths.join(", "));
+  process.exit(1);
+}
+
+async function main() {
+  console.log("Seeding bot profiles from bots.yml...\n");
+
+  const bots = loadBotsFromYaml();
+
+  for (let i = 0; i < bots.length; i++) {
+    const bot = bots[i];
     await prisma.botProfile.upsert({
       where: { botId: bot.id },
       update: {
@@ -53,7 +99,7 @@ async function main() {
     console.log(`  ${bot.avatar} ${bot.name} (${bot.elo}) — ${bot.category}`);
   }
 
-  console.log(`\nSeeded ${BOT_PERSONALITIES.length} bot profiles.`);
+  console.log(`\nSeeded ${bots.length} bot profiles from YAML.`);
 }
 
 main()

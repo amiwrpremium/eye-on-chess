@@ -86,6 +86,7 @@ services:
       - ../apps/api/prisma:/app/apps/api/prisma
       - ../packages/chess/src:/app/packages/chess/src
       - ./config/rate-limits.yml:/app/config/rate-limits.yml:ro
+      - ./config/bots.yml:/app/config/bots.yml:ro
     depends_on:
       postgres:
         condition: service_healthy

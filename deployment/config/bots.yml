@@ -1,0 +1,476 @@
+# Bot Personality Definitions
+# Edit this file to customize bot behavior. Run `make seed-bots` to apply changes.
+# Each bot has behavior parameters that control its playstyle.
+#
+# Tiers:
+#   custom (200-1200)     — Pure JS minimax with personality quirks
+#   hybrid (1300-1900)    — Stockfish at limited depth with blunder injection
+#   engine (2000+)        — Stockfish with UCI_Elo limiting
+#
+# Categories: beginner, novice, intermediate, advanced, expert, master, grandmaster
+
+bots:
+  - id: amir
+    name: Amir
+    elo: 200
+    description: "Moves randomly. Hangs everything. Doesn't know what check is."
+    avatar: "\U0001F476"
+    tier: custom
+    category: beginner
+    randomMoveChance: 0.45
+    blunderChance: 0.3
+    captureGreed: 0.2
+    aggressionBias: 0
+    maxDepth: 1
+    queenEarly: false
+    pawnPusher: true
+
+  - id: timmy
+    name: Timmy
+    elo: 300
+    description: "Loves pushing edge pawns. Moves king for fun."
+    avatar: "\U0001F9D2"
+    tier: custom
+    category: beginner
+    randomMoveChance: 0.4
+    blunderChance: 0.25
+    captureGreed: 0.3
+    aggressionBias: 0
+    maxDepth: 1
+    queenEarly: false
+    pawnPusher: true
+
+  - id: bella
+    name: Bella
+    elo: 400
+    description: "Captures everything possible. Queen out on move 2."
+    avatar: "\U0001F467"
+    tier: custom
+    category: beginner
+    randomMoveChance: 0.3
+    blunderChance: 0.25
+    captureGreed: 0.9
+    aggressionBias: 0.3
+    maxDepth: 1
+    queenEarly: true
+    pawnPusher: false
+
+  - id: rusty
+    name: Rusty
+    elo: 500
+    description: "Knows how pieces move but forgets about threats."
+    avatar: "\U0001F9D3"
+    tier: custom
+    category: novice
+    randomMoveChance: 0.25
+    blunderChance: 0.3
+    captureGreed: 0.4
+    aggressionBias: 0
+    maxDepth: 1
+    queenEarly: false
+    pawnPusher: false
+
+  - id: chloe
+    name: Chloe
+    elo: 600
+    description: "Only pushes center pawns. Never develops pieces."
+    avatar: "\U0001F469"
+    tier: custom
+    category: novice
+    randomMoveChance: 0.2
+    blunderChance: 0.2
+    captureGreed: 0.3
+    aggressionBias: -0.2
+    maxDepth: 1
+    queenEarly: false
+    pawnPusher: true
+
+  - id: omar
+    name: Omar
+    elo: 700
+    description: "Only attacks with the queen. Ignores everything else."
+    avatar: "\U0001F468"
+    tier: custom
+    category: novice
+    randomMoveChance: 0.15
+    blunderChance: 0.2
+    captureGreed: 0.5
+    aggressionBias: 0.8
+    maxDepth: 2
+    queenEarly: true
+    pawnPusher: false
+
+  - id: noodle
+    name: Noodle
+    elo: 800
+    description: "Plays okay openings then falls apart. Inconsistent."
+    avatar: "\U0001F35C"
+    tier: custom
+    category: novice
+    randomMoveChance: 0.2
+    blunderChance: 0.15
+    captureGreed: 0.4
+    aggressionBias: 0.1
+    maxDepth: 2
+    queenEarly: false
+    pawnPusher: false
+
+  - id: elena
+    name: Elena
+    elo: 900
+    description: "Takes every piece she can. Falls for every trap."
+    avatar: "\U0001F478"
+    tier: custom
+    category: intermediate
+    randomMoveChance: 0.1
+    blunderChance: 0.15
+    captureGreed: 0.85
+    aggressionBias: 0.2
+    maxDepth: 2
+    queenEarly: false
+    pawnPusher: false
+
+  - id: scout
+    name: Scout
+    elo: 1000
+    description: "Plays very defensively. Never attacks. Retreats at any threat."
+    avatar: "\U0001F9D0"
+    tier: custom
+    category: intermediate
+    randomMoveChance: 0.1
+    blunderChance: 0.12
+    captureGreed: 0.2
+    aggressionBias: -0.7
+    maxDepth: 2
+    queenEarly: false
+    pawnPusher: false
+
+  - id: ahmed
+    name: Ahmed
+    elo: 1100
+    description: "Knows 5 moves of opening theory then panics."
+    avatar: "\U0001F468\u200D\U0001F393"
+    tier: custom
+    category: intermediate
+    randomMoveChance: 0.08
+    blunderChance: 0.15
+    captureGreed: 0.4
+    aggressionBias: 0.1
+    maxDepth: 2
+    queenEarly: false
+    pawnPusher: false
+
+  - id: maple
+    name: Maple
+    elo: 1200
+    description: "Average club player. Hangs pieces occasionally."
+    avatar: "\U0001F341"
+    tier: custom
+    category: intermediate
+    randomMoveChance: 0.05
+    blunderChance: 0.1
+    captureGreed: 0.4
+    aggressionBias: 0
+    maxDepth: 3
+    queenEarly: false
+    pawnPusher: false
+
+  - id: viktor
+    name: Viktor
+    elo: 1300
+    description: "All-out attack. Sacrifices pieces recklessly for king hunt."
+    avatar: "\u2694\uFE0F"
+    tier: hybrid
+    category: advanced
+    randomMoveChance: 0.05
+    blunderChance: 0.12
+    captureGreed: 0.5
+    aggressionBias: 0.9
+    maxDepth: 4
+    queenEarly: false
+    pawnPusher: false
+
+  - id: sophie
+    name: Sophie
+    elo: 1400
+    description: "Trades everything. Grinds for endgame. Boring but solid."
+    avatar: "\U0001F9D1\u200D\U0001F4BC"
+    tier: hybrid
+    category: advanced
+    randomMoveChance: 0.03
+    blunderChance: 0.1
+    captureGreed: 0.7
+    aggressionBias: -0.3
+    maxDepth: 5
+    queenEarly: false
+    pawnPusher: false
+
+  - id: jin
+    name: Jin
+    elo: 1500
+    description: "Loves traps and gambits. Sets up forks."
+    avatar: "\U0001F3AD"
+    tier: hybrid
+    category: advanced
+    randomMoveChance: 0.03
+    blunderChance: 0.08
+    captureGreed: 0.4
+    aggressionBias: 0.4
+    maxDepth: 5
+    queenEarly: false
+    pawnPusher: false
+
+  - id: diana
+    name: Diana
+    elo: 1600
+    description: "Positional player. Good structure. Weak at sharp tactics."
+    avatar: "\U0001F451"
+    tier: hybrid
+    category: advanced
+    randomMoveChance: 0.02
+    blunderChance: 0.07
+    captureGreed: 0.3
+    aggressionBias: -0.1
+    maxDepth: 6
+    queenEarly: false
+    pawnPusher: false
+
+  - id: rook
+    name: Rook
+    elo: 1700
+    description: "Endgame nerd. Plays for endgame from move 1. Slow middlegame."
+    avatar: "\U0001F3F0"
+    tier: hybrid
+    category: expert
+    randomMoveChance: 0.02
+    blunderChance: 0.05
+    captureGreed: 0.5
+    aggressionBias: -0.2
+    maxDepth: 7
+    queenEarly: false
+    pawnPusher: false
+
+  - id: nina
+    name: Nina
+    elo: 1800
+    description: "Sharp openings. Attacks but sometimes overextends."
+    avatar: "\U0001F525"
+    tier: hybrid
+    category: expert
+    randomMoveChance: 0.01
+    blunderChance: 0.05
+    captureGreed: 0.4
+    aggressionBias: 0.6
+    maxDepth: 8
+    queenEarly: false
+    pawnPusher: false
+
+  - id: felix
+    name: Felix
+    elo: 1900
+    description: "All-rounder. No major weaknesses. Occasional calculation error."
+    avatar: "\U0001F3AF"
+    tier: hybrid
+    category: expert
+    randomMoveChance: 0.01
+    blunderChance: 0.03
+    captureGreed: 0.35
+    aggressionBias: 0.1
+    maxDepth: 9
+    queenEarly: false
+    pawnPusher: false
+
+  - id: hana
+    name: Hana
+    elo: 2000
+    description: "Technical. Converts advantages precisely. Rarely blunders."
+    avatar: "\U0001F338"
+    tier: engine
+    category: expert
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 12
+    queenEarly: false
+    pawnPusher: false
+
+  - id: kaspar
+    name: Kaspar
+    elo: 2100
+    description: "Tactician. Finds combinations. Strong in complex positions."
+    avatar: "\U0001F9E0"
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.4
+    aggressionBias: 0.3
+    maxDepth: 13
+    queenEarly: false
+    pawnPusher: false
+
+  - id: yuki
+    name: Yuki
+    elo: 2200
+    description: "Calm. Never rushes. Deep positional understanding."
+    avatar: "\u2744\uFE0F"
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.3
+    aggressionBias: -0.1
+    maxDepth: 14
+    queenEarly: false
+    pawnPusher: false
+
+  - id: boris
+    name: Boris
+    elo: 2300
+    description: "Classical old-school play. Strong preparation."
+    avatar: "\U0001F3C6"
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 15
+    queenEarly: false
+    pawnPusher: false
+
+  - id: aria
+    name: Aria
+    elo: 2400
+    description: "Dynamic. Adapts style to position. Very few weaknesses."
+    avatar: "\U0001F3B6"
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0.1
+    maxDepth: 15
+    queenEarly: false
+    pawnPusher: false
+
+  - id: sven
+    name: Sven
+    elo: 2500
+    description: "Candidate master strength. Rare mistakes."
+    avatar: "\U0001F9D1\u200D\u2696\uFE0F"
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 16
+    queenEarly: false
+    pawnPusher: false
+
+  - id: mei
+    name: Mei
+    elo: 2600
+    description: "IM strength. Very strong. Almost no errors."
+    avatar: "\U0001F30A"
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 16
+    queenEarly: false
+    pawnPusher: false
+
+  - id: atlas
+    name: Atlas
+    elo: 2700
+    description: "GM strength. You'll probably lose."
+    avatar: "\U0001F30D"
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 17
+    queenEarly: false
+    pawnPusher: false
+
+  - id: titan
+    name: Titan
+    elo: 2800
+    description: "Super GM. Full strength. Good luck."
+    avatar: "\u26A1"
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+
+  - id: oracle
+    name: Oracle
+    elo: 2900
+    description: "Engine level. Sees everything. No mercy."
+    avatar: "\U0001F52E"
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+
+  - id: quantum
+    name: Quantum
+    elo: 3000
+    description: "Inhuman. Full Stockfish. Sees everything."
+    avatar: "\U0001F300"
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+
+  - id: nexus
+    name: Nexus
+    elo: 3100
+    description: "Beyond human. Pure calculation. No weaknesses."
+    avatar: "\U0001F916"
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+
+  - id: erfan
+    name: Erfan
+    elo: 3200
+    description: "God mode. Unlimited Stockfish. The final boss."
+    avatar: "\U0001F47E"
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false

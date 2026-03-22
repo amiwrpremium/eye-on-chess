@@ -1,7 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
-import { BOT_PERSONALITIES } from "@eyeonchess/chess";
+import { readFileSync } from "fs";
+import { parse } from "yaml";
+import { resolve } from "path";
 
 const prisma = new PrismaClient();
 
@@ -66,11 +68,43 @@ async function main() {
 
   console.log(`Seeded admin: ${user.username} (${user.email})`);
 
-  // Seed bot profiles
+  // Seed bot profiles from YAML
   const existingBots = await prisma.botProfile.count();
   if (existingBots === 0) {
-    for (let i = 0; i < BOT_PERSONALITIES.length; i++) {
-      const bot = BOT_PERSONALITIES[i];
+    const yamlPaths = [
+      resolve(process.cwd(), "../../deployment/config/bots.yml"),
+      resolve(process.cwd(), "deployment/config/bots.yml"),
+      "/app/config/bots.yml",
+    ];
+    let bots: {
+      id: string;
+      name: string;
+      elo: number;
+      description: string;
+      avatar: string;
+      tier: string;
+      category: string;
+      randomMoveChance: number;
+      blunderChance: number;
+      captureGreed: number;
+      aggressionBias: number;
+      maxDepth: number;
+      queenEarly: boolean;
+      pawnPusher: boolean;
+    }[] = [];
+    for (const p of yamlPaths) {
+      try {
+        const data = parse(readFileSync(p, "utf-8"));
+        if (data?.bots) {
+          bots = data.bots;
+          break;
+        }
+      } catch {
+        /* try next */
+      }
+    }
+    for (let i = 0; i < bots.length; i++) {
+      const bot = bots[i];
       await prisma.botProfile.create({
         data: {
           botId: bot.id,
@@ -91,7 +125,7 @@ async function main() {
         },
       });
     }
-    console.log(`Seeded ${BOT_PERSONALITIES.length} bot profiles`);
+    if (bots.length > 0) console.log(`Seeded ${bots.length} bot profiles from YAML`);
   }
 }
 

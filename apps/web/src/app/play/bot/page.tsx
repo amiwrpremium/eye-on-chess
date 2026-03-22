@@ -62,14 +62,25 @@ export default function PlayBotPage() {
   const sound = useSound();
   const isOnline = useOnlineStatus();
 
-  // Bot list (fetch from API, fallback to hardcoded)
-  const [botList, setBotList] = useState<BotPersonality[]>(BOT_PERSONALITIES);
+  // Bot list (fetch from API → cache to localStorage → fallback to hardcoded)
+  const [botList, setBotList] = useState<BotPersonality[]>(() => {
+    try {
+      const cached = localStorage.getItem("eyeonchess-bots");
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return BOT_PERSONALITIES;
+  });
   useEffect(() => {
     if (isOnline) {
       api
         .get("/api/bots")
         .then(({ data }) => {
-          if (data.bots && data.bots.length > 0) setBotList(data.bots);
+          if (data.bots && data.bots.length > 0) {
+            setBotList(data.bots);
+            try {
+              localStorage.setItem("eyeonchess-bots", JSON.stringify(data.bots));
+            } catch {}
+          }
         })
         .catch(() => {});
     }

@@ -98,6 +98,9 @@ export default function PlayBotPage() {
   const [hintSource, setHintSource] = useState<string | null>(null);
   const [hintDest, setHintDest] = useState<string | null>(null);
 
+  // Threats
+  const [threatArrows, setThreatArrows] = useState<{ from: string; to: string }[]>([]);
+
   // Game state
   const [gameId, setGameId] = useState<string | null>(null);
   const [game, setGame] = useState(() => new Chess());
@@ -315,7 +318,19 @@ export default function PlayBotPage() {
         setGameOver(result);
         setPhase("ended");
         sound.playGameOver();
+        setThreatArrows([]);
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, moveUci], result);
+      } else if (activeSettings.threats) {
+        // Show opponent's best response as a threat arrow
+        stockfish.evaluate(chess.fen()).then((ev) => {
+          if (ev.bestMove) {
+            setThreatArrows([{ from: ev.bestMove.slice(0, 2), to: ev.bestMove.slice(2, 4) }]);
+          } else {
+            setThreatArrows([]);
+          }
+        });
+      } else {
+        setThreatArrows([]);
       }
     } finally {
       setThinking(false);
@@ -343,6 +358,7 @@ export default function PlayBotPage() {
       setHintStep(0);
       setHintSource(null);
       setHintDest(null);
+      setThreatArrows([]);
       if (activeSettings.moveFeedback) {
         setFeedback(classifyMoveFast(fenBefore, chess.fen(), newSans));
       } else {
@@ -528,6 +544,7 @@ export default function PlayBotPage() {
   const arrows: { from: string; to: string; color: string }[] = [];
   if (hintStep === 2 && hintSource && hintDest)
     arrows.push({ from: hintSource, to: hintDest, color: "green" });
+  for (const t of threatArrows) arrows.push({ from: t.from, to: t.to, color: "red" });
   const highlightedSquares: { square: string; color: string }[] = [];
   if (hintStep >= 1 && hintSource) highlightedSquares.push({ square: hintSource, color: "green" });
 

@@ -58,6 +58,8 @@ export default function GamePage() {
   const [confirmResign, setConfirmResign] = useState(false);
   const [confirmDraw, setConfirmDraw] = useState(false);
   const [confirmAcceptDraw, setConfirmAcceptDraw] = useState(false);
+  const [rematchOffered, setRematchOffered] = useState(false);
+  const [rematchIncoming, setRematchIncoming] = useState(false);
 
   const joinedRef = useRef(false);
 
@@ -159,6 +161,14 @@ export default function GamePage() {
       setDrawOffered(false);
     });
 
+    socket.on("game:rematch:offered", () => {
+      setRematchIncoming(true);
+    });
+
+    socket.on("game:rematch:started", (data: { newGameId: string }) => {
+      router.push(`/game/${data.newGameId}`);
+    });
+
     socket.on("game:error", (data: { message: string }) => {
       console.error("Game error:", data.message);
     });
@@ -180,6 +190,8 @@ export default function GamePage() {
       socket.off("game:over");
       socket.off("game:draw:offered");
       socket.off("game:draw:declined");
+      socket.off("game:rematch:offered");
+      socket.off("game:rematch:started");
       socket.off("game:error");
     };
   }, [gameId, user]);
@@ -436,15 +448,55 @@ export default function GamePage() {
                 </div>
               </div>
             )}
-            <button
-              onClick={() => {
-                setGameOver(null);
-                router.push("/play");
-              }}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium transition-colors"
-            >
-              Back to Play
-            </button>
+            <div className="flex gap-3">
+              {rematchIncoming ? (
+                <>
+                  <button
+                    onClick={() => {
+                      const socket = getSocket();
+                      if (socket) socket.emit("game:rematch:accept", gameId);
+                    }}
+                    className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded font-medium transition-colors"
+                  >
+                    Accept Rematch
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRematchIncoming(false);
+                      router.push("/play");
+                    }}
+                    className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
+                  >
+                    Decline
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      const socket = getSocket();
+                      if (socket) {
+                        socket.emit("game:rematch:offer", gameId);
+                        setRematchOffered(true);
+                      }
+                    }}
+                    disabled={rematchOffered}
+                    className="flex-1 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded font-medium transition-colors"
+                  >
+                    {rematchOffered ? "Offered..." : "Rematch"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setGameOver(null);
+                      router.push("/play");
+                    }}
+                    className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
+                  >
+                    Back
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

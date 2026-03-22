@@ -424,6 +424,47 @@ export default function PlayBotPage() {
     setEvalScore(0);
   }
 
+  function rematch() {
+    // Swap colors and start immediately with same settings
+    const swappedColor = playerIsWhite ? "black" : "white";
+    setColorChoice(swappedColor as "white" | "black");
+    setGameOver(null);
+    setFeedback(null);
+    setError("");
+    setHintStep(0);
+    setEvalScore(0);
+    // Start with swapped color, same elo, same mode
+    const isWhite = !playerIsWhite;
+    const chess = new Chess();
+    setActiveSettings(getActiveMode());
+    setGame(chess);
+    setPlayerIsWhite(isWhite);
+    setMoves([]);
+    setAllSans([]);
+    setAllUciMoves([]);
+    setCurrentPly(0);
+    setLastMove(undefined);
+    setGameId(null);
+    setOfflineGameId(generateOfflineGameId());
+    setGameStartTime(new Date().toISOString());
+
+    if (isOnline) {
+      api
+        .post("/api/games/bot", {
+          botElo,
+          color: isWhite ? "white" : "black",
+          preset: showCustomTime ? undefined : selectedTime,
+          initialTime: showCustomTime ? customMinutes * 60 : undefined,
+          increment: showCustomTime ? customIncrement : undefined,
+        })
+        .then(({ data }) => setGameId(data.game.id))
+        .catch(() => {});
+    }
+
+    setPhase("game");
+    if (!isWhite) makeBotMove(chess, []);
+  }
+
   if (isLoading || !user) {
     return (
       <main className="flex items-center justify-center min-h-screen">
@@ -794,10 +835,16 @@ export default function PlayBotPage() {
             <p className="text-gray-300 mb-4">{gameOver}</p>
             <div className="flex gap-3">
               <button
+                onClick={rematch}
+                className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded font-medium transition-colors"
+              >
+                Rematch
+              </button>
+              <button
                 onClick={playAgain}
                 className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium transition-colors"
               >
-                Play Again
+                New Game
               </button>
               {gameId && isOnline && (
                 <button

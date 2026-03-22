@@ -226,6 +226,66 @@ export function setupGameSocket(io: SocketServer) {
       drawOffers.delete(gameId);
       socket.to(`game:${gameId}`).emit("game:draw:declined");
     });
+
+    // Rematch offer
+    socket.on("game:rematch:offer", async (gameId: string) => {
+      const game = await prisma.game.findUnique({
+        where: { id: gameId },
+        select: {
+          whiteId: true,
+          blackId: true,
+          timeControl: true,
+          initialTime: true,
+          increment: true,
+          status: true,
+        },
+      });
+      if (!game || game.status !== "COMPLETED") return;
+
+      socket.to(`game:${gameId}`).emit("game:rematch:offered", {
+        by: userId,
+        gameId,
+        timeControl: game.timeControl,
+        initialTime: game.initialTime,
+        increment: game.increment,
+      });
+    });
+
+    // Accept rematch
+    socket.on("game:rematch:accept", async (gameId: string) => {
+      const oldGame = await prisma.game.findUnique({
+        where: { id: gameId },
+        select: {
+          whiteId: true,
+          blackId: true,
+          timeControl: true,
+          initialTime: true,
+          increment: true,
+        },
+      });
+      if (!oldGame) return;
+
+      // Create new game with swapped colors
+      const newGame = await prisma.game.create({
+        data: {
+          whiteId: oldGame.blackId,
+          blackId: oldGame.whiteId,
+          status: "ACTIVE",
+          timeControl: oldGame.timeControl,
+          initialTime: oldGame.initialTime,
+          increment: oldGame.increment,
+          whiteTimeLeft: oldGame.initialTime * 1000,
+          blackTimeLeft: oldGame.initialTime * 1000,
+          startedAt: new Date(),
+        },
+      });
+
+      if (oldGame.timeControl !== "UNLIMITED") {
+        await initClocks(newGame.id, oldGame.initialTime * 1000, oldGame.increment * 1000);
+      }
+
+      io.to(`game:${gameId}`).emit("game:rematch:started", { newGameId: newGame.id });
+    });
   });
 
   // Timeout check loop — every 1 second

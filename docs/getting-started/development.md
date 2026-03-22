@@ -60,6 +60,7 @@ make shell-postgres # Opens psql shell
 make db-migrate    # Run pending migrations
 make db-seed       # Re-run seed script
 make db-reset      # Reset DB (destroys all data)
+make seed-bots     # Seed/reseed bot personalities from bots.yml
 make seed-demo     # Populate with demo data (see below)
 ```
 

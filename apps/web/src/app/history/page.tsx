@@ -6,6 +6,7 @@ import Link from "next/link";
 import api from "../../lib/api";
 import { useAuthStore } from "../../stores/auth";
 import { Skeleton } from "../../components/Skeleton";
+import GameNoteEditor from "../../components/GameNoteEditor";
 
 interface GameRecord {
   id: string;
@@ -136,7 +137,8 @@ export default function HistoryPage() {
                         <span className="ml-2">{new Date(g.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <div className="flex gap-2 shrink-0 ml-2">
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                      <GameNoteEditor gameId={g.id} compact />
                       <Link
                         href={`/game/${g.id}/analysis`}
                         className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs font-medium transition-colors"

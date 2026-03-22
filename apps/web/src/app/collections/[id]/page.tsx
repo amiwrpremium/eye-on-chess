@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
+import GameNoteEditor from "../../../components/GameNoteEditor";
 
 interface GameRecord {
   id: string;
@@ -89,6 +90,7 @@ export default function CollectionDetailPage() {
                     {new Date(g.createdAt).toLocaleDateString()}
                   </p>
                 </div>
+                <GameNoteEditor gameId={g.id} compact />
                 <Link
                   href={`/game/${g.id}/analysis`}
                   className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"

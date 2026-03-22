@@ -90,6 +90,7 @@ model User {
   collections         Collection[]
   invitesCreated      Invite[]       @relation("InviteCreator")
   invitedVia          Invite?        @relation("InviteUsedBy")
+  gameNotes           GameNote[]
 }
 
 model RefreshToken {
@@ -144,6 +145,7 @@ model Game {
   moves           Move[]
   analysis        GameAnalysis?
   gameCollections GameCollection[]
+  gameNotes       GameNote[]
 }
 
 model Move {
@@ -252,4 +254,20 @@ model Invite {
 
   @@index([creatorId])
   @@index([code])
+}
+
+model GameNote {
+  id        String   @id @default(cuid())
+  userId    String
+  gameId    String
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([userId])
+  @@index([gameId])
 }

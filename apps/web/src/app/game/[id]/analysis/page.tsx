@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import GameNoteEditor from "../../../../components/GameNoteEditor";
 import api from "../../../../lib/api";
 import { useAuthStore } from "../../../../stores/auth";
 import ChessBoard from "../../../../components/ChessBoard";
@@ -388,6 +389,8 @@ export default function AnalysisPage() {
                 ))}
               </div>
             </div>
+
+            <GameNoteEditor gameId={gameId} />
 
             <div className="text-center">
               <Link href={`/game/${gameId}`} className="text-gray-400 hover:text-white text-sm">

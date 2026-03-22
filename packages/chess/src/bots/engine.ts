@@ -58,12 +58,6 @@ const PST_MAP: Record<string, number[]> = {
   k: PST_KING,
 };
 
-function squareIndex(sq: string): number {
-  const file = sq.charCodeAt(0) - 97;
-  const rank = parseInt(sq[1]) - 1;
-  return (7 - rank) * 8 + file;
-}
-
 function evaluateBoard(chess: Chess): number {
   let score = 0;
   const board = chess.board();

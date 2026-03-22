@@ -32,12 +32,7 @@ import MoveList from "../../../components/MoveList";
 import CapturedPieces from "../../../components/CapturedPieces";
 import MoveFeedbackPopup from "../../../components/MoveFeedbackPopup";
 import ConfirmModal from "../../../components/ConfirmModal";
-
-interface MoveRecord {
-  ply: number;
-  san: string;
-  fen: string;
-}
+import type { MoveRecord } from "@eyeonchess/chess";
 
 const TIME_PRESETS = [
   { label: "1+0", key: "bullet_1_0" },

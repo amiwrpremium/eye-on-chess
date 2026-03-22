@@ -3,14 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import api from "../lib/api";
-
-interface ActivityEvent {
-  type: "game_won" | "game_lost" | "game_draw" | "game_analyzed" | "friend_added";
-  message: string;
-  timestamp: string;
-  link: string | null;
-  usernames: string[];
-}
+import type { ActivityEvent } from "@eyeonchess/chess";
 
 const ICONS: Record<string, string> = {
   game_won: "🏆",

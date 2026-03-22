@@ -14,27 +14,8 @@ import ReactionPicker from "../../../components/ReactionPicker";
 import ReactionOverlay, { type ActiveReaction } from "../../../components/ReactionOverlay";
 import { useSound, detectMoveSound } from "../../../lib/useSound";
 import { useKeyboardShortcuts } from "../../../lib/useKeyboardShortcuts";
-import type { ReactionType } from "@eyeonchess/chess";
-
-interface Player {
-  id: string;
-  username: string;
-  rating: number;
-  avatarUrl: string | null;
-}
-
-interface MoveRecord {
-  ply: number;
-  san: string;
-  fen: string;
-}
-
-interface Clocks {
-  whiteTimeLeft: number;
-  blackTimeLeft: number;
-  turn: "white" | "black";
-  lastMoveTimestamp: number;
-}
+import type { Player, MoveRecord, ClockState, ReactionType } from "@eyeonchess/chess";
+import { RESULT_LABELS, TERMINATION_LABELS } from "@eyeonchess/chess";
 
 interface GameOver {
   result: string;
@@ -54,7 +35,7 @@ export default function GamePage() {
   const [moves, setMoves] = useState<MoveRecord[]>([]);
   const [currentPly, setCurrentPly] = useState(0);
   const [lastMove, setLastMove] = useState<[string, string] | undefined>();
-  const [clocks, setClocks] = useState<Clocks | null>(null);
+  const [clocks, setClocks] = useState<ClockState | null>(null);
   const [status, setStatus] = useState<string>("WAITING");
   const [timeControl, setTimeControl] = useState<string>("RAPID");
   const [gameOver, setGameOver] = useState<GameOver | null>(null);
@@ -325,19 +306,7 @@ export default function GamePage() {
   const isUnlimited = timeControl === "UNLIMITED";
 
   function resultLabel(go: GameOver) {
-    const labels: Record<string, string> = {
-      WHITE_WIN: "White wins",
-      BLACK_WIN: "Black wins",
-      DRAW: "Draw",
-      ABORTED: "Game aborted",
-    };
-    const termLabels: Record<string, string> = {
-      CHECKMATE: "by checkmate",
-      RESIGNATION: "by resignation",
-      TIMEOUT: "on time",
-      AGREEMENT: "by agreement",
-    };
-    return `${labels[go.result] || go.result} ${termLabels[go.termination] || ""}`;
+    return `${RESULT_LABELS[go.result] || go.result} ${TERMINATION_LABELS[go.termination] || ""}`;
   }
 
   return (

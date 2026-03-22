@@ -12,6 +12,8 @@ import { useAuthStore } from "../../../../stores/auth";
 import ChessBoard from "../../../../components/ChessBoard";
 import EvaluationBar from "../../../../components/EvaluationBar";
 import EvalGraph from "../../../../components/EvalGraph";
+import type { Player } from "@eyeonchess/chess";
+import { CLASSIFICATION_COLORS, CLASSIFICATION_SYMBOLS } from "@eyeonchess/chess";
 
 interface FeedbackEntry {
   ply: number;
@@ -30,36 +32,6 @@ interface Analysis {
   opening: { name: string; eco: string } | null;
   feedback: FeedbackEntry[];
 }
-
-interface Player {
-  id: string;
-  username: string;
-  rating: number;
-}
-
-const CLASSIFICATION_COLORS: Record<string, string> = {
-  BRILLIANT: "text-cyan-400",
-  GREAT: "text-blue-400",
-  BEST: "text-green-400",
-  EXCELLENT: "text-green-300",
-  GOOD: "text-gray-300",
-  INACCURACY: "text-yellow-400",
-  MISTAKE: "text-orange-400",
-  BLUNDER: "text-red-400",
-  FORCED: "text-gray-500",
-};
-
-const CLASSIFICATION_SYMBOLS: Record<string, string> = {
-  BRILLIANT: "!!",
-  GREAT: "!",
-  BEST: "★",
-  EXCELLENT: "●",
-  GOOD: "●",
-  INACCURACY: "?!",
-  MISTAKE: "?",
-  BLUNDER: "??",
-  FORCED: "□",
-};
 
 export default function AnalysisPage() {
   const params = useParams();

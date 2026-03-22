@@ -8,6 +8,7 @@ import { useAuthStore } from "../../stores/auth";
 import { Skeleton } from "../../components/Skeleton";
 import GameNoteEditor from "../../components/GameNoteEditor";
 import ExportPGN from "../../components/ExportPGN";
+import { RESULT_LABELS } from "@eyeonchess/chess";
 
 interface GameRecord {
   id: string;
@@ -24,13 +25,6 @@ interface GameRecord {
   white: { username: string; rating: number } | null;
   black: { username: string; rating: number } | null;
 }
-
-const RESULT_LABELS: Record<string, string> = {
-  WHITE_WIN: "White Won",
-  BLACK_WIN: "Black Won",
-  DRAW: "Draw",
-  ABORTED: "Aborted",
-};
 
 export default function HistoryPage() {
   const router = useRouter();

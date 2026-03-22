@@ -88,6 +88,8 @@ model User {
   refreshTokens       RefreshToken[]
   auditLogs           AuditLog[]
   collections         Collection[]
+  invitesCreated      Invite[]       @relation("InviteCreator")
+  invitedVia          Invite?        @relation("InviteUsedBy")
 }
 
 model RefreshToken {
@@ -235,4 +237,19 @@ model GameCollection {
 
   @@unique([gameId, collectionId])
   @@index([collectionId])
+}
+
+model Invite {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  creatorId String
+  usedById  String?   @unique
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  creator User  @relation("InviteCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  usedBy  User? @relation("InviteUsedBy", fields: [usedById], references: [id], onDelete: SetNull)
+
+  @@index([creatorId])
+  @@index([code])
 }

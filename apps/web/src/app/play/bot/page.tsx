@@ -53,25 +53,6 @@ function eloLabel(elo: number): string {
   return "Engine";
 }
 
-function classifyMoveFast(fenBefore: string, fenAfter: string, moveSans: string[]): string | null {
-  const opening = lookupOpeningClient(moveSans);
-  if (opening) return "BOOK";
-  const pv: Record<string, number> = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 0 };
-  function ev(f: string): number {
-    const c = new Chess(f);
-    let s = 0;
-    for (const row of c.board())
-      for (const sq of row) if (sq) s += (sq.color === "w" ? 1 : -1) * (pv[sq.type] || 0);
-    return s;
-  }
-  const cpLoss =
-    fenBefore.split(" ")[1] === "w" ? ev(fenBefore) - ev(fenAfter) : ev(fenAfter) - ev(fenBefore);
-  if (cpLoss <= 50) return null;
-  if (cpLoss <= 100) return "INACCURACY";
-  if (cpLoss <= 200) return "MISTAKE";
-  return "BLUNDER";
-}
-
 export default function PlayBotPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
@@ -311,10 +292,6 @@ export default function PlayBotPage() {
       setCurrentPly(ply);
       setLastMove([from, to]);
       sound.playForMove(move);
-      if (activeSettings.evalBar) {
-        const ev = await stockfish.evaluate(chess.fen());
-        setEvalScore(ev.score);
-      }
       if (chess.isGameOver()) {
         const result = chess.isCheckmate()
           ? chess.turn() === "w"
@@ -327,30 +304,35 @@ export default function PlayBotPage() {
         setThreatArrows([]);
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, moveUci], result);
       } else {
-        // Compute threats, suggestions, and engine line after bot moves
-        if (activeSettings.threats || activeSettings.suggestions || activeSettings.engine) {
-          stockfish.evaluate(chess.fen()).then((ev) => {
-            if (activeSettings.threats && ev.bestMove) {
-              setThreatArrows([{ from: ev.bestMove.slice(0, 2), to: ev.bestMove.slice(2, 4) }]);
-            } else {
-              setThreatArrows([]);
-            }
-            if (activeSettings.suggestions && ev.bestMove) {
-              setSuggestionArrow({ from: ev.bestMove.slice(0, 2), to: ev.bestMove.slice(2, 4) });
-            } else {
-              setSuggestionArrow(null);
-            }
-            if (activeSettings.engine && ev.bestMove) {
-              const score = ev.score;
-              const scoreStr =
-                Math.abs(score) > 99000
-                  ? `M${Math.sign(score) > 0 ? "" : "-"}${Math.ceil(Math.abs(100000 - Math.abs(score)) / 2)}`
-                  : `${score > 0 ? "+" : ""}${(score / 100).toFixed(1)}`;
-              setEngineLine(`${scoreStr} ${ev.bestMove.slice(0, 2)}-${ev.bestMove.slice(2, 4)}`);
-            } else {
-              setEngineLine(null);
-            }
-          });
+        // Single eval call for all features (evalBar, threats, suggestions, engine)
+        const needsEval =
+          activeSettings.evalBar ||
+          activeSettings.threats ||
+          activeSettings.suggestions ||
+          activeSettings.engine;
+        if (needsEval) {
+          const ev = await stockfish.evaluate(chess.fen());
+          if (activeSettings.evalBar) setEvalScore(ev.score);
+          if (activeSettings.threats && ev.bestMove) {
+            setThreatArrows([{ from: ev.bestMove.slice(0, 2), to: ev.bestMove.slice(2, 4) }]);
+          } else {
+            setThreatArrows([]);
+          }
+          if (activeSettings.suggestions && ev.bestMove) {
+            setSuggestionArrow({ from: ev.bestMove.slice(0, 2), to: ev.bestMove.slice(2, 4) });
+          } else {
+            setSuggestionArrow(null);
+          }
+          if (activeSettings.engine && ev.bestMove) {
+            const score = ev.score;
+            const scoreStr =
+              Math.abs(score) > 99000
+                ? `M${Math.sign(score) > 0 ? "" : "-"}${Math.ceil(Math.abs(100000 - Math.abs(score)) / 2)}`
+                : `${score > 0 ? "+" : ""}${(score / 100).toFixed(1)}`;
+            setEngineLine(`${scoreStr} ${ev.bestMove.slice(0, 2)}-${ev.bestMove.slice(2, 4)}`);
+          } else {
+            setEngineLine(null);
+          }
         } else {
           setThreatArrows([]);
           setSuggestionArrow(null);
@@ -386,14 +368,30 @@ export default function PlayBotPage() {
       setThreatArrows([]);
       setSuggestionArrow(null);
       setEngineLine(null);
-      if (activeSettings.moveFeedback) {
-        setFeedback(classifyMoveFast(fenBefore, chess.fen(), newSans));
-      } else {
-        setFeedback(null);
-      }
-      if (activeSettings.evalBar) {
-        const ev = await stockfish.evaluate(chess.fen());
-        setEvalScore(ev.score);
+      setFeedback(null);
+      // Evaluate position before bot responds for move feedback and eval bar
+      if (activeSettings.moveFeedback || activeSettings.evalBar) {
+        const evBefore = await stockfish.evaluate(fenBefore);
+        const evAfter = await stockfish.evaluate(chess.fen());
+        if (activeSettings.evalBar) setEvalScore(evAfter.score);
+        if (activeSettings.moveFeedback) {
+          const opening = lookupOpeningClient(newSans);
+          if (opening) {
+            setFeedback("BOOK");
+          } else {
+            const isWhiteMove = fenBefore.split(" ")[1] === "w";
+            const cpLoss = isWhiteMove
+              ? evBefore.score - evAfter.score
+              : evAfter.score - evBefore.score;
+            if (cpLoss <= 0) setFeedback("BEST");
+            else if (cpLoss <= 10) setFeedback("EXCELLENT");
+            else if (cpLoss <= 25) setFeedback("GOOD");
+            else if (cpLoss <= 50) setFeedback("GOOD");
+            else if (cpLoss <= 100) setFeedback("INACCURACY");
+            else if (cpLoss <= 200) setFeedback("MISTAKE");
+            else setFeedback("BLUNDER");
+          }
+        }
       }
       if (gameId && isOnline) {
         try {

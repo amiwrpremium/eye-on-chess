@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Chess } from "chess.js";
@@ -517,6 +517,13 @@ export default function PlayBotPage() {
         ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         : game.fen()
       : moves.find((m) => m.ply === currentPly)?.fen || game.fen();
+  const isInCheck = useMemo(() => {
+    try {
+      return new Chess(displayFen).inCheck();
+    } catch {
+      return false;
+    }
+  }, [displayFen]);
 
   const arrows: { from: string; to: string; color: string }[] = [];
   if (hintStep === 2 && hintSource && hintDest)
@@ -760,7 +767,7 @@ export default function PlayBotPage() {
                   orientation={orientation}
                   movable={isMyTurn && isViewingLatest && !gameOver}
                   lastMove={lastMove}
-                  check={new Chess(displayFen).inCheck()}
+                  check={isInCheck}
                   onMove={handleMove}
                   arrows={arrows.length > 0 ? arrows : undefined}
                   highlightedSquares={

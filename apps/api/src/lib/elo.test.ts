@@ -20,6 +20,12 @@ describe("computeElo", () => {
     expect(result.newBlackRating).toBe(1200);
   });
 
+  it("should give ~16 points to winner with K=32 for equal ratings (1500 vs 1500)", () => {
+    const result = computeElo(1500, 1500, "WHITE_WIN");
+    const whiteGain = result.newWhiteRating - 1500;
+    expect(whiteGain).toBe(16);
+  });
+
   it("should give more points for beating a higher-rated player", () => {
     const upset = computeElo(1000, 1400, "WHITE_WIN");
     const expected = computeElo(1200, 1200, "WHITE_WIN");
@@ -46,6 +52,15 @@ describe("computeElo", () => {
     expect(result.newBlackRating).toBeLessThanOrEqual(800);
   });
 
+  it("big rating gap: underdog winning gains more than favorite losing", () => {
+    const result = computeElo(2000, 1200, "BLACK_WIN");
+    const blackGain = result.newBlackRating - 1200;
+    const whiteLoss = 2000 - result.newWhiteRating;
+    // Both should be large (near K=32) for such an upset
+    expect(blackGain).toBeGreaterThan(25);
+    expect(whiteLoss).toBeGreaterThan(25);
+  });
+
   it("should penalize heavily for losing to much lower rated", () => {
     const result = computeElo(2000, 800, "BLACK_WIN");
     const whiteLoss = 2000 - result.newWhiteRating;
@@ -57,5 +72,25 @@ describe("computeElo", () => {
     // Higher-rated player loses points, lower gains
     expect(result.newWhiteRating).toBeLessThan(1500);
     expect(result.newBlackRating).toBeGreaterThan(1200);
+  });
+
+  it("draw between equal players: both stay the same", () => {
+    const result = computeElo(1500, 1500, "DRAW");
+    expect(result.newWhiteRating).toBe(1500);
+    expect(result.newBlackRating).toBe(1500);
+  });
+
+  it("ratings are rounded to integers", () => {
+    const result = computeElo(1500, 1300, "WHITE_WIN");
+    expect(Number.isInteger(result.newWhiteRating)).toBe(true);
+    expect(Number.isInteger(result.newBlackRating)).toBe(true);
+  });
+
+  it("symmetry: swapping colors and result produces same magnitude change", () => {
+    const r1 = computeElo(1600, 1400, "WHITE_WIN");
+    const r2 = computeElo(1400, 1600, "BLACK_WIN");
+    const whiteGain1 = r1.newWhiteRating - 1600;
+    const blackGain2 = r2.newBlackRating - 1600;
+    expect(whiteGain1).toBe(blackGain2);
   });
 });

@@ -22,6 +22,7 @@ import {
   generateOfflineGameId,
   getPendingCount,
 } from "../../../lib/offlineSync";
+import { useSound } from "../../../lib/useSound";
 import ChessBoard from "../../../components/ChessBoard";
 import EvaluationBar from "../../../components/EvaluationBar";
 import MoveList from "../../../components/MoveList";
@@ -77,6 +78,7 @@ export default function PlayBotPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
   const stockfish = useStockfish();
+  const sound = useSound();
   const isOnline = useOnlineStatus();
 
   // Selection
@@ -279,6 +281,7 @@ export default function PlayBotPage() {
       setAllUciMoves((prev) => [...prev, moveUci]);
       setCurrentPly(ply);
       setLastMove([from, to]);
+      sound.playForMove(move);
       if (activeSettings.evalBar) {
         const ev = await stockfish.evaluate(chess.fen());
         setEvalScore(ev.score);
@@ -291,6 +294,7 @@ export default function PlayBotPage() {
           : "Draw";
         setGameOver(result);
         setPhase("ended");
+        sound.playGameOver();
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, moveUci], result);
       }
     } finally {
@@ -315,6 +319,7 @@ export default function PlayBotPage() {
       setAllUciMoves((prev) => [...prev, playerUci]);
       setCurrentPly(ply);
       setLastMove([from, to]);
+      sound.playForMove(move);
       setHintStep(0);
       setHintSource(null);
       setHintDest(null);
@@ -340,6 +345,7 @@ export default function PlayBotPage() {
           : "Draw";
         setGameOver(result);
         setPhase("ended");
+        sound.playGameOver();
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, playerUci], result);
         return;
       }

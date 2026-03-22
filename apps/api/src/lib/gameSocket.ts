@@ -2,6 +2,8 @@ import { Server as SocketServer, Socket } from "socket.io";
 import { Chess } from "chess.js";
 import { prisma } from "./prisma.js";
 import { computeElo } from "./elo.js";
+import { checkReactionRateLimit } from "./redis.js";
+import { VALID_REACTIONS } from "@eyeonchess/chess";
 import {
   initClocks,
   getClocksRealtime,
@@ -225,6 +227,28 @@ export function setupGameSocket(io: SocketServer) {
     socket.on("game:draw:decline", async (gameId: string) => {
       drawOffers.delete(gameId);
       socket.to(`game:${gameId}`).emit("game:draw:declined");
+    });
+
+    // Emoji reaction
+    socket.on("game:reaction", async (data: { gameId: string; reaction: string }) => {
+      const { gameId, reaction } = data;
+
+      if (!VALID_REACTIONS.includes(reaction as (typeof VALID_REACTIONS)[number])) return;
+
+      const game = await prisma.game.findUnique({
+        where: { id: gameId },
+        select: { whiteId: true, blackId: true, status: true },
+      });
+      if (!game || game.status !== "ACTIVE") return;
+      if (game.whiteId !== userId && game.blackId !== userId) return;
+
+      const allowed = await checkReactionRateLimit(gameId, userId);
+      if (!allowed) return;
+
+      socket.to(`game:${gameId}`).emit("game:reaction", {
+        userId,
+        reaction,
+      });
     });
 
     // Rematch offer

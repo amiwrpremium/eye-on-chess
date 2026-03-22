@@ -21,6 +21,15 @@ export async function isOnline(userId: string): Promise<boolean> {
   return (await redis.exists(onlineKey(userId))) === 1;
 }
 
+export async function checkReactionRateLimit(gameId: string, userId: string): Promise<boolean> {
+  const key = `reaction:limit:${gameId}:${userId}`;
+  const count = await redis.incr(key);
+  if (count === 1) {
+    await redis.expire(key, 10);
+  }
+  return count <= 5;
+}
+
 export async function bulkIsOnline(userIds: string[]): Promise<Record<string, boolean>> {
   if (userIds.length === 0) return {};
 

@@ -87,6 +87,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    volumes:
+      - ./config/rate-limits.yml:/app/config/rate-limits.yml:ro
     depends_on:
       postgres:
         condition: service_healthy

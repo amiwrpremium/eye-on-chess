@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
+import rateLimit from "@fastify/rate-limit";
 import metricsPlugin from "fastify-metrics";
 import { authRoutes } from "./routes/auth.js";
 import { userRoutes } from "./routes/users.js";
@@ -15,6 +16,7 @@ import { getSiteSettings } from "./lib/settings.js";
 import { prisma } from "./lib/prisma.js";
 import { redis } from "./lib/redis.js";
 import { registerRequestLogger } from "./middleware/requestLogger.js";
+import { initRateLimitConfig, getRouteLimit } from "./lib/rateLimit.js";
 
 async function main() {
   const fastify = Fastify({
@@ -30,6 +32,32 @@ async function main() {
   });
 
   await fastify.register(cookie);
+
+  // Rate limiting (YAML config with hot-reload)
+  const rateLimitCfg = initRateLimitConfig();
+  await fastify.register(rateLimit, {
+    max: rateLimitCfg.global.max,
+    timeWindow: rateLimitCfg.global.timeWindow,
+    keyGenerator: (request) => request.ip,
+    addHeadersOnExceeding: { "x-ratelimit-limit": true, "x-ratelimit-remaining": true },
+    addHeaders: { "x-ratelimit-limit": true, "x-ratelimit-remaining": true, "retry-after": true },
+  });
+
+  // Per-route rate limit override hook
+  fastify.addHook("onRoute", (routeOptions) => {
+    const url = routeOptions.url;
+
+    routeOptions.config = {
+      ...((routeOptions.config as Record<string, unknown>) || {}),
+      rateLimit: (() => {
+        const limit = getRouteLimit(url);
+        if (limit !== rateLimitCfg.global) {
+          return { max: limit.max, timeWindow: limit.timeWindow };
+        }
+        return undefined;
+      })(),
+    };
+  });
 
   // Request logging (redacts sensitive fields)
   registerRequestLogger(fastify);

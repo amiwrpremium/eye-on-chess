@@ -68,4 +68,35 @@ describe("useSettingsStore", () => {
       expect(useSettingsStore.getState().pieceSet).toBe(set);
     }
   });
+
+  it("should have soundEnabled true by default", () => {
+    useSettingsStore.setState({ soundEnabled: true });
+    expect(useSettingsStore.getState().soundEnabled).toBe(true);
+  });
+
+  it("should set soundEnabled", () => {
+    useSettingsStore.getState().setSoundEnabled(false);
+    expect(useSettingsStore.getState().soundEnabled).toBe(false);
+    useSettingsStore.getState().setSoundEnabled(true);
+    expect(useSettingsStore.getState().soundEnabled).toBe(true);
+  });
+
+  it("should load soundEnabled from user preferences", () => {
+    useSettingsStore.getState().loadFromUser({
+      darkMode: true,
+      boardTheme: "classic",
+      pieceSet: "classic",
+      soundEnabled: false,
+    });
+    expect(useSettingsStore.getState().soundEnabled).toBe(false);
+  });
+
+  it("should default soundEnabled to true when not provided in user prefs", () => {
+    useSettingsStore.getState().loadFromUser({
+      darkMode: true,
+      boardTheme: "classic",
+      pieceSet: "classic",
+    });
+    expect(useSettingsStore.getState().soundEnabled).toBe(true);
+  });
 });

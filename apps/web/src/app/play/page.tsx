@@ -7,6 +7,7 @@ import { useAuthStore } from "../../stores/auth";
 import { connectSocket, disconnectSocket } from "../../lib/socket";
 import { useOnlineStatus } from "../../lib/useOnlineStatus";
 import { useInstallPrompt } from "../../lib/useInstallPrompt";
+import ActivityFeed from "../../components/ActivityFeed";
 import ChallengePopup from "../../components/ChallengePopup";
 
 export default function PlayPage() {
@@ -121,6 +122,9 @@ export default function PlayPage() {
         >
           Log Out
         </button>
+
+        {/* Activity feed */}
+        <ActivityFeed />
 
         {/* Online indicator */}
         <div className="flex items-center justify-center gap-2 mt-4">

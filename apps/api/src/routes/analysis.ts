@@ -54,7 +54,7 @@ export async function analysisRoutes(app: FastifyInstance) {
   });
 
   // Get analysis results
-  app.get<{ Params: { id: string } }>("/api/games/:id/analysis", async (request, reply) => {
+  app.get<{ Params: { id: string } }>("/api/games/:id/analysis", async (request, _reply) => {
     const { id: gameId } = request.params;
 
     // Check job status

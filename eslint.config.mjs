@@ -10,6 +10,7 @@ export default tseslint.config(
       ".turbo/**",
       "backups/**",
       "**/prisma/migrations/**",
+      "**/coverage/**",
     ],
   },
 

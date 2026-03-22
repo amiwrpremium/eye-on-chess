@@ -15,7 +15,7 @@ describe("REACTIONS", () => {
   });
 
   it("each reaction has emoji, label, and color properties", () => {
-    for (const [key, reaction] of Object.entries(REACTIONS)) {
+    for (const [_key, reaction] of Object.entries(REACTIONS)) {
       expect(reaction).toHaveProperty("emoji");
       expect(reaction).toHaveProperty("label");
       expect(reaction).toHaveProperty("color");

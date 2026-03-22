@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import GameNoteEditor from "../../../../components/GameNoteEditor";
 import ExportPGN from "../../../../components/ExportPGN";
@@ -35,7 +35,6 @@ interface Analysis {
 
 export default function AnalysisPage() {
   const params = useParams();
-  const router = useRouter();
   const gameId = params.id as string;
   const { fetchMe } = useAuthStore();
 

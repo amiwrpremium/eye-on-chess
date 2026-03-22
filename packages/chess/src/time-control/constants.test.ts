@@ -84,7 +84,7 @@ describe("TIME_CONTROL_PRESETS", () => {
   });
 
   it("each preset has label, timeControl, initialTime, and increment", () => {
-    for (const [key, preset] of Object.entries(TIME_CONTROL_PRESETS)) {
+    for (const [_key, preset] of Object.entries(TIME_CONTROL_PRESETS)) {
       expect(preset).toHaveProperty("label");
       expect(preset).toHaveProperty("timeControl");
       expect(preset).toHaveProperty("initialTime");
@@ -97,7 +97,7 @@ describe("TIME_CONTROL_PRESETS", () => {
   });
 
   it("each preset timeControl matches categorizeTimeControl result", () => {
-    for (const [key, preset] of Object.entries(TIME_CONTROL_PRESETS)) {
+    for (const [_key, preset] of Object.entries(TIME_CONTROL_PRESETS)) {
       const computed = categorizeTimeControl(preset.initialTime, preset.increment);
       expect(computed).toBe(preset.timeControl);
     }

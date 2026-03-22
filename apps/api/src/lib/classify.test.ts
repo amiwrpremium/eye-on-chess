@@ -8,9 +8,7 @@ describe("classifyMove", () => {
     // King in check with only one escape
     const fen = "8/8/8/8/8/5k2/4q3/7K w - - 0 1"; // Kh1, only move is Kg1 or similar
     const result = classifyMove(fen, "h1g1", 0, 0, "h1g1", null);
-    // Only one legal move scenario — let's use a real forced position
-    const forcedFen = "K7/P7/8/8/8/8/6k1/8 b - - 0 1"; // Black has limited moves but maybe not 1
-    // Use a simpler approach: test classification thresholds
+    // Test classification thresholds
     expect(result.classification).toBeDefined();
   });
 

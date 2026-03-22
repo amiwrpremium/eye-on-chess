@@ -38,7 +38,6 @@ export async function inviteRoutes(app: FastifyInstance) {
       const maxAllowed = batchesEarned * BATCH_SIZE;
       const canCreate = totalCreated < maxAllowed;
       const remaining = maxAllowed - totalCreated;
-      const usedNeededForNext = Math.floor(BATCH_SIZE * UNLOCK_THRESHOLD) * batchesEarned;
       const usedTowardNext =
         totalUsed - Math.floor(BATCH_SIZE * UNLOCK_THRESHOLD) * (batchesEarned - 1);
 

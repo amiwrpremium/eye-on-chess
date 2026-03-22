@@ -50,10 +50,7 @@ describe("detectGameEnd", () => {
   it("returns DRAW and AGREEMENT for stalemate", () => {
     // A known stalemate position: white king on a1, white queen on b6, black king on a8
     // We load a FEN that produces stalemate after one move
-    const chess = new Chess("k7/8/1K6/8/8/8/8/7Q w - - 0 1");
-    // Qa8 would be checkmate, but Qb8 would also be check. Let's use a known stalemate:
-    // White to move, can stalemate black with Qb6 -> then black has no legal moves
-    // Actually, let's use a simpler setup
+    // Known stalemate position: black king trapped, no legal moves, not in check
     const stalemateChess = new Chess("k7/8/1Q1K4/8/8/8/8/8 b - - 0 1");
     // Black king on a8, white queen on b6, white king on d6. Black to move - no legal moves, not in check = stalemate.
     expect(stalemateChess.isStalemate()).toBe(true);

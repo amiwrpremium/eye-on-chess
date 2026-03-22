@@ -111,6 +111,9 @@
 - Progressive Web App — installable on mobile and desktop
 - Offline bot play with Stockfish WASM (same behavior as online)
 - Offline games sync to server when connection resumes
+- Offline fallback page when navigating without network
+- Online-only features (friends, history, stats, etc.) grayed out when offline
+- Smart caching: pages, WASM, sounds, fonts, images all cached for offline use
 
 **Customization**
 

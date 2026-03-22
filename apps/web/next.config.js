@@ -3,7 +3,19 @@ const withPWA = require("next-pwa")({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  fallbacks: {
+    document: "/offline",
+  },
   runtimeCaching: [
+    {
+      urlPattern: /^https?:\/\/[^/]+\/(?!api\/|_next\/|stockfish\/).*$/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "pages",
+        networkTimeoutSeconds: 5,
+        expiration: { maxEntries: 50, maxAgeSeconds: 24 * 60 * 60 },
+      },
+    },
     {
       urlPattern: /^https?.*\.(png|jpg|jpeg|svg|gif|webp|ico)$/,
       handler: "CacheFirst",
@@ -13,11 +25,19 @@ const withPWA = require("next-pwa")({
       },
     },
     {
-      urlPattern: /^https?.*\.wasm$/,
+      urlPattern: /^https?.*\.(wasm)$/,
       handler: "CacheFirst",
       options: {
         cacheName: "wasm",
         expiration: { maxEntries: 5, maxAgeSeconds: 90 * 24 * 60 * 60 },
+      },
+    },
+    {
+      urlPattern: /^https?.*\.(mp3|wav|ogg)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "sounds",
+        expiration: { maxEntries: 20, maxAgeSeconds: 90 * 24 * 60 * 60 },
       },
     },
     {
@@ -26,6 +46,14 @@ const withPWA = require("next-pwa")({
       options: {
         cacheName: "static-resources",
         expiration: { maxEntries: 100, maxAgeSeconds: 7 * 24 * 60 * 60 },
+      },
+    },
+    {
+      urlPattern: /^https?.*\.(woff2?|ttf|eot)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "fonts",
+        expiration: { maxEntries: 20, maxAgeSeconds: 365 * 24 * 60 * 60 },
       },
     },
     {

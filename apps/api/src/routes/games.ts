@@ -571,4 +571,68 @@ export async function gameRoutes(app: FastifyInstance) {
 
     return { result, termination: "RESIGNATION" };
   });
+
+  // Sync an offline bot game
+  app.post<{
+    Body: {
+      botElo: number;
+      playerIsWhite: boolean;
+      moves: { ply: number; san: string; uci: string; fen: string }[];
+      result: string | null;
+      termination: string | null;
+      startedAt: string;
+      endedAt: string | null;
+    };
+  }>("/api/games/sync", async (request, reply) => {
+    const userId = request.user.userId;
+    const { botElo, playerIsWhite, moves, result, termination, startedAt, endedAt } = request.body;
+
+    if (!moves || moves.length === 0) {
+      return reply.status(400).send({ error: "No moves to sync" });
+    }
+
+    // Validate moves by replaying
+    const chess = new Chess();
+    for (const m of moves) {
+      const move = chess.move(m.san);
+      if (!move) {
+        return reply.status(400).send({ error: `Invalid move at ply ${m.ply}: ${m.san}` });
+      }
+    }
+
+    // Create game record
+    const game = await prisma.game.create({
+      data: {
+        whiteId: playerIsWhite ? userId : null,
+        blackId: playerIsWhite ? null : userId,
+        status: result ? "COMPLETED" : "ABORTED",
+        result: result as "WHITE_WIN" | "BLACK_WIN" | "DRAW" | null,
+        termination: termination as "CHECKMATE" | "RESIGNATION" | "TIMEOUT" | "AGREEMENT" | null,
+        fen: chess.fen(),
+        pgn: chess.pgn(),
+        timeControl: "UNLIMITED",
+        initialTime: 0,
+        increment: 0,
+        isVsBot: true,
+        botElo,
+        startedAt: new Date(startedAt),
+        endedAt: endedAt ? new Date(endedAt) : null,
+      },
+    });
+
+    // Create move records
+    for (const m of moves) {
+      await prisma.move.create({
+        data: {
+          gameId: game.id,
+          ply: m.ply,
+          san: m.san,
+          uci: m.uci,
+          fen: m.fen,
+        },
+      });
+    }
+
+    return { success: true, gameId: game.id };
+  });
 }

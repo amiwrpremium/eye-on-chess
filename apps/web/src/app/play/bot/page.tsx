@@ -8,6 +8,12 @@ import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
 import { useStockfish } from "../../../lib/useStockfish";
 import { useOnlineStatus } from "../../../lib/useOnlineStatus";
+import {
+  saveOfflineGame,
+  syncOfflineGames,
+  generateOfflineGameId,
+  getPendingCount,
+} from "../../../lib/offlineSync";
 import { lookupOpeningClient } from "../../../lib/openings";
 import ChessBoard from "../../../components/ChessBoard";
 import EvaluationBar from "../../../components/EvaluationBar";
@@ -109,6 +115,10 @@ export default function PlayBotPage() {
     botElo: number | null;
   } | null>(null);
   const [showActivePrompt, setShowActivePrompt] = useState(false);
+  const [offlineGameId, setOfflineGameId] = useState<string | null>(null);
+  const [allUciMoves, setAllUciMoves] = useState<string[]>([]); // track uci for sync
+  const [gameStartTime, setGameStartTime] = useState<string | null>(null);
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
   useEffect(() => {
     if (!user) fetchMe();
@@ -116,6 +126,15 @@ export default function PlayBotPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
   }, [isLoading, user, router]);
+
+  // Sync offline games when connection returns
+  useEffect(() => {
+    setPendingSyncCount(getPendingCount());
+    if (!isOnline) return;
+    syncOfflineGames().then((synced) => {
+      if (synced > 0) setPendingSyncCount(getPendingCount());
+    });
+  }, [isOnline]);
 
   // Check for active game on mount (only when online)
   useEffect(() => {
@@ -193,6 +212,9 @@ export default function PlayBotPage() {
     setFeedback(null);
     setHintStep(0);
     setGameId(null);
+    setAllUciMoves([]);
+    setGameStartTime(new Date().toISOString());
+    setOfflineGameId(generateOfflineGameId());
 
     // Create server record if online
     if (isOnline) {
@@ -245,6 +267,7 @@ export default function PlayBotPage() {
       setGame(new Chess(chess.fen()));
       setMoves(newMoves);
       setAllSans(newSans);
+      setAllUciMoves((prev) => [...prev, moveUci]);
       setCurrentPly(ply);
       setLastMove([from, to]);
 
@@ -268,6 +291,9 @@ export default function PlayBotPage() {
           : "Draw";
         setGameOver(result);
         setPhase("ended");
+        if (!gameId) {
+          saveGameOffline(newMoves, [...allUciMoves, moveUci], result, null);
+        }
       }
     } finally {
       setThinking(false);
@@ -286,9 +312,11 @@ export default function PlayBotPage() {
       const ply = moves.length + 1;
       const newMoves = [...moves, { ply, san: move.san, fen: chess.fen() }];
       const newSans = [...allSans, move.san];
+      const playerUciMove = `${from}${to}${promotion || ""}`;
       setGame(new Chess(chess.fen()));
       setMoves(newMoves);
       setAllSans(newSans);
+      setAllUciMoves((prev) => [...prev, playerUciMove]);
       setCurrentPly(ply);
       setLastMove([from, to]);
       setHintStep(0);
@@ -318,6 +346,8 @@ export default function PlayBotPage() {
         }
       }
 
+      const playerUci = `${from}${to}${promotion || ""}`;
+
       if (chess.isGameOver()) {
         const result = chess.isCheckmate()
           ? chess.turn() === "w"
@@ -326,6 +356,9 @@ export default function PlayBotPage() {
           : "Draw";
         setGameOver(result);
         setPhase("ended");
+        if (!gameId) {
+          saveGameOffline(newMoves, [...allUciMoves, playerUci], result, null);
+        }
         return;
       }
 
@@ -367,6 +400,42 @@ export default function PlayBotPage() {
     });
   }
 
+  function saveGameOffline(
+    gameMoves: MoveRecord[],
+    uciMoves: string[],
+    result: string | null,
+    termination: string | null
+  ) {
+    if (!offlineGameId || !gameStartTime) return;
+    // Map result text to enum
+    let dbResult: string | null = null;
+    if (result?.includes("White wins")) dbResult = "WHITE_WIN";
+    else if (result?.includes("Black wins")) dbResult = "BLACK_WIN";
+    else if (result === "Draw") dbResult = "DRAW";
+
+    let dbTerm: string | null = null;
+    if (result?.includes("checkmate")) dbTerm = "CHECKMATE";
+    else if (result?.includes("resignation")) dbTerm = "RESIGNATION";
+    else if (result === "Draw") dbTerm = "AGREEMENT";
+
+    saveOfflineGame({
+      id: offlineGameId,
+      botElo,
+      playerIsWhite,
+      moves: gameMoves.map((m, i) => ({
+        ply: m.ply,
+        san: m.san,
+        uci: uciMoves[i] || "",
+        fen: m.fen,
+      })),
+      result: dbResult,
+      termination: dbTerm,
+      startedAt: gameStartTime,
+      endedAt: new Date().toISOString(),
+    });
+    setPendingSyncCount(getPendingCount());
+  }
+
   async function resign() {
     const result = playerIsWhite ? "Black wins by resignation" : "White wins by resignation";
     setGameOver(result);
@@ -378,6 +447,9 @@ export default function PlayBotPage() {
       } catch {
         // ignore
       }
+    }
+    if (!gameId) {
+      saveGameOffline(moves, allUciMoves, result, "RESIGNATION");
     }
   }
 
@@ -432,7 +504,12 @@ export default function PlayBotPage() {
           <h1 className="text-2xl font-bold text-center">Play vs Bot</h1>
           {!isOnline && (
             <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-2 text-center text-xs text-yellow-300">
-              Offline mode — game won&apos;t be saved to server
+              Offline mode — games will sync when you reconnect
+            </div>
+          )}
+          {pendingSyncCount > 0 && isOnline && (
+            <div className="bg-green-900/30 border border-green-700 rounded-lg p-2 text-center text-xs text-green-300">
+              Syncing {pendingSyncCount} offline game{pendingSyncCount > 1 ? "s" : ""}...
             </div>
           )}
           {!stockfish.ready && (

@@ -311,6 +311,7 @@ Full documentation is in the [`docs/`](docs/index.md) directory:
 - [Architecture Overview](docs/architecture/overview.md)
 - [API Reference](docs/api/index.md)
 - [Frontend Guide](docs/frontend/index.md)
+- [Bot Personalities](docs/frontend/bots.md)
 - [Admin Panel](docs/admin/overview.md)
 - [Database Schema](docs/database/schema.md)
 - [Deployment Guide](docs/deployment/index.md)

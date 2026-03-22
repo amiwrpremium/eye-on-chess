@@ -151,3 +151,4 @@ services:
 
 volumes:
   pgdata:
+    name: eyeonchess-dev-pgdata

@@ -231,6 +231,10 @@ services:
 
 volumes:
   pgdata:
+    name: eyeonchess-pgdata
   prometheus_data:
+    name: eyeonchess-prometheus-data
   loki_data:
+    name: eyeonchess-loki-data
   grafana_data:
+    name: eyeonchess-grafana-data

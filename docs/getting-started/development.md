@@ -60,7 +60,33 @@ make shell-postgres # Opens psql shell
 make db-migrate    # Run pending migrations
 make db-seed       # Re-run seed script
 make db-reset      # Reset DB (destroys all data)
+make seed-demo     # Populate with demo data (see below)
 ```
+
+## Demo Seed
+
+To populate the database with sample data for development and showcasing:
+
+```bash
+make seed-demo
+```
+
+This creates:
+
+| Data        | Count                  | Details                                            |
+| ----------- | ---------------------- | -------------------------------------------------- |
+| Demo users  | 10                     | Varied ratings (1100-1900), different board themes |
+| Friendships | 5 accepted + 2 pending | With admin account                                 |
+| Bot games   | 6                      | Mix of wins/losses/draws for admin                 |
+| PvP games   | 3                      | Between demo users and admin                       |
+| Collections | 1                      | "Best Games" with 3 games for admin                |
+| Game notes  | 2                      | On admin's games                                   |
+
+All demo users use password: **`demo123456`**
+
+Demo users: `magnus_fan`, `knight_rider`, `queen_gambit`, `pawn_star`, `bishop_pair`, `rook_n_roll`, `checkmate_charlie`, `en_passant`, `castle_king`, `blitz_master`
+
+The script is idempotent — safe to run multiple times.
 
 ## Useful Commands
 

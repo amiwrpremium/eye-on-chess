@@ -161,6 +161,12 @@ All traffic goes through Nginx on **http://localhost** (port 80). No other ports
 
 Source files are volume-mounted — changes hot-reload automatically.
 
+To populate the database with demo data (10 users, friendships, games, collections):
+
+```bash
+make seed-demo     # All demo users use password: demo123456
+```
+
 ## Configuration
 
 All configuration is done via environment variables in `.env`. See [`.env.example`](.env.example) for a fully documented template.

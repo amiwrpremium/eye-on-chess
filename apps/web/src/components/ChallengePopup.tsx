@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSocket } from "../lib/socket";
+import { useSound } from "../lib/useSound";
 import api from "../lib/api";
 
 interface Challenge {
@@ -28,12 +29,15 @@ export default function ChallengePopup() {
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const sound = useSound();
+
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
     function onChallenge(data: Challenge) {
       setChallenge(data);
+      sound.playNotify();
     }
 
     socket.on("challenge:incoming", onChallenge);

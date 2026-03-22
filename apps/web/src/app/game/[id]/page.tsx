@@ -9,6 +9,7 @@ import ChessBoard from "../../../components/ChessBoard";
 import MoveList from "../../../components/MoveList";
 import PlayerClock from "../../../components/PlayerClock";
 import ConfirmModal from "../../../components/ConfirmModal";
+import { useSound, detectMoveSound } from "../../../lib/useSound";
 
 interface Player {
   id: string;
@@ -61,6 +62,7 @@ export default function GamePage() {
   const [rematchOffered, setRematchOffered] = useState(false);
   const [rematchIncoming, setRematchIncoming] = useState(false);
 
+  const sound = useSound();
   const joinedRef = useRef(false);
 
   const isWhite = user?.id === white?.id;
@@ -146,15 +148,21 @@ export default function GamePage() {
       if (data.clocks) setClocks(data.clocks);
       setDrawIncoming(false);
       setDrawOffered(false);
+      // Play sound
+      sound.play(
+        detectMoveSound({ san: data.san, captured: data.san.includes("x") ? "x" : undefined })
+      );
     });
 
     socket.on("game:over", (data: GameOver) => {
       setGameOver(data);
       setStatus("COMPLETED");
+      sound.playGameOver();
     });
 
     socket.on("game:draw:offered", () => {
       setDrawIncoming(true);
+      sound.playNotify();
     });
 
     socket.on("game:draw:declined", () => {
@@ -163,6 +171,7 @@ export default function GamePage() {
 
     socket.on("game:rematch:offered", () => {
       setRematchIncoming(true);
+      sound.playNotify();
     });
 
     socket.on("game:rematch:started", (data: { newGameId: string }) => {

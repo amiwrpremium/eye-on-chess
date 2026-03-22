@@ -8,13 +8,20 @@ import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
 import { useStockfish } from "../../../lib/useStockfish";
 import { useOnlineStatus } from "../../../lib/useOnlineStatus";
+import { lookupOpeningClient } from "../../../lib/openings";
+import {
+  type GameModeSettings,
+  type GameModePreset,
+  GAME_MODE_PRESETS,
+  GAME_MODE_LABELS,
+  DEFAULT_CUSTOM,
+} from "../../../lib/gameModes";
 import {
   saveOfflineGame,
   syncOfflineGames,
   generateOfflineGameId,
   getPendingCount,
 } from "../../../lib/offlineSync";
-import { lookupOpeningClient } from "../../../lib/openings";
 import ChessBoard from "../../../components/ChessBoard";
 import EvaluationBar from "../../../components/EvaluationBar";
 import MoveList from "../../../components/MoveList";
@@ -28,7 +35,7 @@ interface MoveRecord {
   fen: string;
 }
 
-const PRESETS = [
+const TIME_PRESETS = [
   { label: "1+0", key: "bullet_1_0" },
   { label: "3+2", key: "blitz_3_2" },
   { label: "5+0", key: "blitz_5_0" },
@@ -58,10 +65,8 @@ function classifyMoveFast(fenBefore: string, fenAfter: string, moveSans: string[
       for (const sq of row) if (sq) s += (sq.color === "w" ? 1 : -1) * (pv[sq.type] || 0);
     return s;
   }
-  const before = ev(fenBefore);
-  const after = ev(fenAfter);
-  const isWhite = fenBefore.split(" ")[1] === "w";
-  const cpLoss = isWhite ? before - after : after - before;
+  const cpLoss =
+    fenBefore.split(" ")[1] === "w" ? ev(fenBefore) - ev(fenAfter) : ev(fenAfter) - ev(fenBefore);
   if (cpLoss <= 50) return null;
   if (cpLoss <= 100) return "INACCURACY";
   if (cpLoss <= 200) return "MISTAKE";
@@ -78,26 +83,27 @@ export default function PlayBotPage() {
   const [phase, setPhase] = useState<"select" | "game" | "ended">("select");
   const [botElo, setBotElo] = useState(800);
   const [colorChoice, setColorChoice] = useState<"white" | "black" | "random">("white");
-  const [selectedPreset, setSelectedPreset] = useState("unlimited");
-  const [showCustom, setShowCustom] = useState(false);
+  const [selectedTime, setSelectedTime] = useState("unlimited");
+  const [showCustomTime, setShowCustomTime] = useState(false);
   const [customMinutes, setCustomMinutes] = useState(10);
   const [customIncrement, setCustomIncrement] = useState(0);
 
-  // Overlays
-  const [showEvalBar, setShowEvalBar] = useState(true);
-  const [showMoveFeedback, setShowMoveFeedback] = useState(true);
-  const [showOverlayMenu, setShowOverlayMenu] = useState(false);
+  // Game mode
+  const [modePreset, setModePreset] = useState<GameModePreset>("friendly");
+  const [customSettings, setCustomSettings] = useState<GameModeSettings>({ ...DEFAULT_CUSTOM });
+  const [activeSettings, setActiveSettings] = useState<GameModeSettings>({ ...DEFAULT_CUSTOM });
 
   // Hint
   const [hintStep, setHintStep] = useState<0 | 1 | 2>(0);
   const [hintSource, setHintSource] = useState<string | null>(null);
   const [hintDest, setHintDest] = useState<string | null>(null);
 
-  // Game state (all client-side via chess.js + stockfish wasm)
-  const [gameId, setGameId] = useState<string | null>(null); // server game id (if online)
+  // Game state
+  const [gameId, setGameId] = useState<string | null>(null);
   const [game, setGame] = useState(() => new Chess());
   const [moves, setMoves] = useState<MoveRecord[]>([]);
   const [allSans, setAllSans] = useState<string[]>([]);
+  const [allUciMoves, setAllUciMoves] = useState<string[]>([]);
   const [currentPly, setCurrentPly] = useState(0);
   const [lastMove, setLastMove] = useState<[string, string] | undefined>();
   const [playerIsWhite, setPlayerIsWhite] = useState(true);
@@ -108,17 +114,11 @@ export default function PlayBotPage() {
   const [error, setError] = useState("");
   const [confirmResign, setConfirmResign] = useState(false);
   const [confirmStart, setConfirmStart] = useState(false);
-
-  // Active game check
-  const [activeGame, setActiveGame] = useState<{
-    id: string;
-    botElo: number | null;
-  } | null>(null);
-  const [showActivePrompt, setShowActivePrompt] = useState(false);
   const [offlineGameId, setOfflineGameId] = useState<string | null>(null);
-  const [allUciMoves, setAllUciMoves] = useState<string[]>([]); // track uci for sync
   const [gameStartTime, setGameStartTime] = useState<string | null>(null);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
+  const [activeGame, setActiveGame] = useState<{ id: string; botElo: number | null } | null>(null);
+  const [showActivePrompt, setShowActivePrompt] = useState(false);
 
   useEffect(() => {
     if (!user) fetchMe();
@@ -126,44 +126,40 @@ export default function PlayBotPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
   }, [isLoading, user, router]);
-
-  // Sync offline games when connection returns
   useEffect(() => {
     setPendingSyncCount(getPendingCount());
-    if (!isOnline) return;
-    syncOfflineGames().then((synced) => {
-      if (synced > 0) setPendingSyncCount(getPendingCount());
-    });
+    if (isOnline)
+      syncOfflineGames().then((s) => {
+        if (s > 0) setPendingSyncCount(getPendingCount());
+      });
   }, [isOnline]);
-
-  // Check for active game on mount (only when online)
   useEffect(() => {
     if (!user || phase !== "select" || !isOnline) return;
-    async function checkActive() {
-      try {
-        const { data } = await api.get("/api/games/active");
-        if (data.game && data.game.isVsBot) {
+    api
+      .get("/api/games/active")
+      .then(({ data }) => {
+        if (data.game?.isVsBot) {
           setActiveGame(data.game);
           setShowActivePrompt(true);
         }
-      } catch {
-        // offline or error — ignore
-      }
-    }
-    checkActive();
+      })
+      .catch(() => {});
   }, [user, phase, isOnline]);
+
+  function getActiveMode(): GameModeSettings {
+    return modePreset === "custom" ? customSettings : GAME_MODE_PRESETS[modePreset];
+  }
 
   async function resumeGame() {
     if (!activeGame) return;
     try {
       const { data } = await api.get(`/api/games/${activeGame.id}`);
       const g = data.game;
-      const chess = new Chess(g.fen);
-      setGame(chess);
+      setGame(new Chess(g.fen));
       setGameId(g.id);
       setPlayerIsWhite(g.whiteId === user?.id);
       setBotElo(g.botElo || 800);
-      if (g.moves && g.moves.length > 0) {
+      if (g.moves?.length > 0) {
         const records = g.moves.map((m: { ply: number; san: string; fen: string }) => ({
           ply: m.ply,
           san: m.san,
@@ -173,9 +169,9 @@ export default function PlayBotPage() {
         setAllSans(g.moves.map((m: { san: string }) => m.san));
         setCurrentPly(records.length);
         const last = g.moves[g.moves.length - 1];
-        if (last.uci && last.uci.length >= 4)
-          setLastMove([last.uci.slice(0, 2), last.uci.slice(2, 4)]);
+        if (last.uci?.length >= 4) setLastMove([last.uci.slice(0, 2), last.uci.slice(2, 4)]);
       }
+      setActiveSettings(getActiveMode());
       setPhase("game");
       setShowActivePrompt(false);
     } catch {
@@ -184,240 +180,25 @@ export default function PlayBotPage() {
   }
 
   async function resignActiveAndContinue() {
-    if (!activeGame) return;
-    try {
-      await api.post(`/api/games/${activeGame.id}/resign`);
-    } catch {
-      // ignore
+    if (activeGame) {
+      try {
+        await api.post(`/api/games/${activeGame.id}/resign`);
+      } catch {}
     }
     setActiveGame(null);
     setShowActivePrompt(false);
   }
 
-  async function startGame() {
-    setError("");
-    setConfirmStart(false);
-
-    const isWhite =
-      colorChoice === "white" ? true : colorChoice === "black" ? false : Math.random() < 0.5;
-    const chess = new Chess();
-
-    setGame(chess);
-    setPlayerIsWhite(isWhite);
-    setMoves([]);
-    setAllSans([]);
-    setCurrentPly(0);
-    setLastMove(undefined);
-    setGameOver(null);
-    setFeedback(null);
-    setHintStep(0);
-    setGameId(null);
-    setAllUciMoves([]);
-    setGameStartTime(new Date().toISOString());
-    setOfflineGameId(generateOfflineGameId());
-
-    // Create server record if online
-    if (isOnline) {
-      try {
-        const body: Record<string, unknown> = {
-          botElo,
-          color: isWhite ? "white" : "black",
-        };
-        if (showCustom) {
-          body.initialTime = customMinutes * 60;
-          body.increment = customIncrement;
-        } else {
-          body.preset = selectedPreset;
-        }
-        const { data } = await api.post("/api/games/bot", body);
-        setGameId(data.game.id);
-      } catch {
-        // Failed to create server game — play without persistence
-      }
-    }
-
-    setPhase("game");
-
-    // Bot plays first if player is black
-    if (!isWhite) {
-      makeBotMove(chess, []);
-    }
-  }
-
-  async function makeBotMove(chess: Chess, currentMoves: MoveRecord[]) {
-    setThinking(true);
-    try {
-      const moveUci = await stockfish.getBotMove(chess.fen(), botElo);
-      if (!moveUci) {
-        setThinking(false);
-        return;
-      }
-      const from = moveUci.slice(0, 2);
-      const to = moveUci.slice(2, 4);
-      const promotion = moveUci[4] || undefined;
-      const move = chess.move({ from, to, promotion });
-      if (!move) {
-        setThinking(false);
-        return;
-      }
-
-      const ply = currentMoves.length + 1;
-      const newMoves = [...currentMoves, { ply, san: move.san, fen: chess.fen() }];
-      const newSans = [...currentMoves.map((m) => m.san), move.san];
-      setGame(new Chess(chess.fen()));
-      setMoves(newMoves);
-      setAllSans(newSans);
-      setAllUciMoves((prev) => [...prev, moveUci]);
-      setCurrentPly(ply);
-      setLastMove([from, to]);
-
-      // Update eval
-      if (showEvalBar) {
-        const ev = await stockfish.evaluate(chess.fen());
-        setEvalScore(ev.score);
-      }
-
-      // Persist bot move to server if online
-      if (gameId && isOnline) {
-        // Server already knows about the move if we used the move endpoint
-        // But since we're doing client-side bot, we just record it
-      }
-
-      if (chess.isGameOver()) {
-        const result = chess.isCheckmate()
-          ? chess.turn() === "w"
-            ? "Black wins by checkmate"
-            : "White wins by checkmate"
-          : "Draw";
-        setGameOver(result);
-        setPhase("ended");
-        if (!gameId) {
-          saveGameOffline(newMoves, [...allUciMoves, moveUci], result, null);
-        }
-      }
-    } finally {
-      setThinking(false);
-    }
-  }
-
-  const handleMove = useCallback(
-    async (from: string, to: string, promotion?: string) => {
-      if (thinking || gameOver || !stockfish.ready) return;
-
-      const fenBefore = game.fen();
-      const chess = new Chess(game.fen());
-      const move = chess.move({ from, to, promotion: promotion || undefined });
-      if (!move) return;
-
-      const ply = moves.length + 1;
-      const newMoves = [...moves, { ply, san: move.san, fen: chess.fen() }];
-      const newSans = [...allSans, move.san];
-      const playerUciMove = `${from}${to}${promotion || ""}`;
-      setGame(new Chess(chess.fen()));
-      setMoves(newMoves);
-      setAllSans(newSans);
-      setAllUciMoves((prev) => [...prev, playerUciMove]);
-      setCurrentPly(ply);
-      setLastMove([from, to]);
-      setHintStep(0);
-      setHintSource(null);
-      setHintDest(null);
-
-      // Move feedback
-      if (showMoveFeedback) {
-        const cls = classifyMoveFast(fenBefore, chess.fen(), newSans);
-        setFeedback(cls);
-      } else {
-        setFeedback(null);
-      }
-
-      // Update eval
-      if (showEvalBar) {
-        const ev = await stockfish.evaluate(chess.fen());
-        setEvalScore(ev.score);
-      }
-
-      // Persist to server if online
-      if (gameId && isOnline) {
-        try {
-          await api.post(`/api/games/${gameId}/move`, { from, to, promotion });
-        } catch {
-          // Server save failed — game continues locally
-        }
-      }
-
-      const playerUci = `${from}${to}${promotion || ""}`;
-
-      if (chess.isGameOver()) {
-        const result = chess.isCheckmate()
-          ? chess.turn() === "w"
-            ? "Black wins by checkmate"
-            : "White wins by checkmate"
-          : "Draw";
-        setGameOver(result);
-        setPhase("ended");
-        if (!gameId) {
-          saveGameOffline(newMoves, [...allUciMoves, playerUci], result, null);
-        }
-        return;
-      }
-
-      // Bot responds
-      makeBotMove(chess, newMoves);
-    },
-    [
-      game,
-      moves,
-      allSans,
-      thinking,
-      gameOver,
-      stockfish,
-      showMoveFeedback,
-      showEvalBar,
-      gameId,
-      isOnline,
-      botElo,
-    ]
-  );
-
-  function handleHint() {
-    if (!stockfish.ready) return;
-    // Use eval's bestMove
-    stockfish.evaluate(game.fen()).then((ev) => {
-      if (!ev.bestMove) return;
-      if (hintStep === 0) {
-        setHintSource(ev.bestMove.slice(0, 2));
-        setHintDest(null);
-        setHintStep(1);
-      } else if (hintStep === 1) {
-        setHintDest(ev.bestMove.slice(2, 4));
-        setHintStep(2);
-      } else {
-        setHintStep(0);
-        setHintSource(null);
-        setHintDest(null);
-      }
-    });
-  }
-
-  function saveGameOffline(
-    gameMoves: MoveRecord[],
-    uciMoves: string[],
-    result: string | null,
-    termination: string | null
-  ) {
+  function saveGameOffline(gameMoves: MoveRecord[], uciMoves: string[], result: string | null) {
     if (!offlineGameId || !gameStartTime) return;
-    // Map result text to enum
     let dbResult: string | null = null;
     if (result?.includes("White wins")) dbResult = "WHITE_WIN";
     else if (result?.includes("Black wins")) dbResult = "BLACK_WIN";
     else if (result === "Draw") dbResult = "DRAW";
-
     let dbTerm: string | null = null;
     if (result?.includes("checkmate")) dbTerm = "CHECKMATE";
     else if (result?.includes("resignation")) dbTerm = "RESIGNATION";
     else if (result === "Draw") dbTerm = "AGREEMENT";
-
     saveOfflineGame({
       id: offlineGameId,
       botElo,
@@ -436,6 +217,184 @@ export default function PlayBotPage() {
     setPendingSyncCount(getPendingCount());
   }
 
+  async function startGame() {
+    setError("");
+    setConfirmStart(false);
+    const isWhite =
+      colorChoice === "white" ? true : colorChoice === "black" ? false : Math.random() < 0.5;
+    const chess = new Chess();
+    const settings = getActiveMode();
+    setActiveSettings(settings);
+    setGame(chess);
+    setPlayerIsWhite(isWhite);
+    setMoves([]);
+    setAllSans([]);
+    setAllUciMoves([]);
+    setCurrentPly(0);
+    setLastMove(undefined);
+    setGameOver(null);
+    setFeedback(null);
+    setHintStep(0);
+    setGameId(null);
+    setEvalScore(0);
+    setOfflineGameId(generateOfflineGameId());
+    setGameStartTime(new Date().toISOString());
+
+    if (isOnline) {
+      try {
+        const body: Record<string, unknown> = {
+          botElo,
+          color: isWhite ? "white" : "black",
+        };
+        if (showCustomTime) {
+          body.initialTime = customMinutes * 60;
+          body.increment = customIncrement;
+        } else {
+          body.preset = selectedTime;
+        }
+        const { data } = await api.post("/api/games/bot", body);
+        setGameId(data.game.id);
+      } catch {}
+    }
+
+    setPhase("game");
+    if (!isWhite) makeBotMove(chess, []);
+  }
+
+  async function makeBotMove(chess: Chess, currentMoves: MoveRecord[]) {
+    setThinking(true);
+    try {
+      const moveUci = await stockfish.getBotMove(chess.fen(), botElo);
+      if (!moveUci) return;
+      const from = moveUci.slice(0, 2);
+      const to = moveUci.slice(2, 4);
+      const promotion = moveUci[4] || undefined;
+      const move = chess.move({ from, to, promotion });
+      if (!move) return;
+      const ply = currentMoves.length + 1;
+      const newMoves = [...currentMoves, { ply, san: move.san, fen: chess.fen() }];
+      setGame(new Chess(chess.fen()));
+      setMoves(newMoves);
+      setAllSans((prev) => [...prev, move.san]);
+      setAllUciMoves((prev) => [...prev, moveUci]);
+      setCurrentPly(ply);
+      setLastMove([from, to]);
+      if (activeSettings.evalBar) {
+        const ev = await stockfish.evaluate(chess.fen());
+        setEvalScore(ev.score);
+      }
+      if (chess.isGameOver()) {
+        const result = chess.isCheckmate()
+          ? chess.turn() === "w"
+            ? "Black wins by checkmate"
+            : "White wins by checkmate"
+          : "Draw";
+        setGameOver(result);
+        setPhase("ended");
+        if (!gameId) saveGameOffline(newMoves, [...allUciMoves, moveUci], result);
+      }
+    } finally {
+      setThinking(false);
+    }
+  }
+
+  const handleMove = useCallback(
+    async (from: string, to: string, promotion?: string) => {
+      if (thinking || gameOver || !stockfish.ready) return;
+      const fenBefore = game.fen();
+      const chess = new Chess(game.fen());
+      const move = chess.move({ from, to, promotion: promotion || undefined });
+      if (!move) return;
+      const playerUci = `${from}${to}${promotion || ""}`;
+      const ply = moves.length + 1;
+      const newMoves = [...moves, { ply, san: move.san, fen: chess.fen() }];
+      const newSans = [...allSans, move.san];
+      setGame(new Chess(chess.fen()));
+      setMoves(newMoves);
+      setAllSans(newSans);
+      setAllUciMoves((prev) => [...prev, playerUci]);
+      setCurrentPly(ply);
+      setLastMove([from, to]);
+      setHintStep(0);
+      setHintSource(null);
+      setHintDest(null);
+      if (activeSettings.moveFeedback) {
+        setFeedback(classifyMoveFast(fenBefore, chess.fen(), newSans));
+      } else {
+        setFeedback(null);
+      }
+      if (activeSettings.evalBar) {
+        const ev = await stockfish.evaluate(chess.fen());
+        setEvalScore(ev.score);
+      }
+      if (gameId && isOnline) {
+        try {
+          await api.post(`/api/games/${gameId}/move`, { from, to, promotion });
+        } catch {}
+      }
+      if (chess.isGameOver()) {
+        const result = chess.isCheckmate()
+          ? chess.turn() === "w"
+            ? "Black wins by checkmate"
+            : "White wins by checkmate"
+          : "Draw";
+        setGameOver(result);
+        setPhase("ended");
+        if (!gameId) saveGameOffline(newMoves, [...allUciMoves, playerUci], result);
+        return;
+      }
+      makeBotMove(chess, newMoves);
+    },
+    [
+      game,
+      moves,
+      allSans,
+      allUciMoves,
+      thinking,
+      gameOver,
+      stockfish,
+      activeSettings,
+      gameId,
+      isOnline,
+      botElo,
+    ]
+  );
+
+  function handleHint() {
+    if (!stockfish.ready || !activeSettings.hints) return;
+    stockfish.evaluate(game.fen()).then((ev) => {
+      if (!ev.bestMove) return;
+      if (hintStep === 0) {
+        setHintSource(ev.bestMove.slice(0, 2));
+        setHintDest(null);
+        setHintStep(1);
+      } else if (hintStep === 1) {
+        setHintDest(ev.bestMove.slice(2, 4));
+        setHintStep(2);
+      } else {
+        setHintStep(0);
+        setHintSource(null);
+        setHintDest(null);
+      }
+    });
+  }
+
+  function handleTakeback() {
+    if (!activeSettings.takeback || moves.length < 2) return;
+    const newMoves = moves.slice(0, -2);
+    const newFen =
+      newMoves.length > 0
+        ? newMoves[newMoves.length - 1].fen
+        : "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    setGame(new Chess(newFen));
+    setMoves(newMoves);
+    setAllSans(newMoves.map((m) => m.san));
+    setAllUciMoves((prev) => prev.slice(0, -2));
+    setCurrentPly(newMoves.length);
+    setLastMove(undefined);
+    setFeedback(null);
+  }
+
   async function resign() {
     const result = playerIsWhite ? "Black wins by resignation" : "White wins by resignation";
     setGameOver(result);
@@ -444,13 +403,9 @@ export default function PlayBotPage() {
     if (gameId && isOnline) {
       try {
         await api.post(`/api/games/${gameId}/resign`);
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
-    if (!gameId) {
-      saveGameOffline(moves, allUciMoves, result, "RESIGNATION");
-    }
+    if (!gameId) saveGameOffline(moves, allUciMoves, result);
   }
 
   function playAgain() {
@@ -459,6 +414,7 @@ export default function PlayBotPage() {
     setGameId(null);
     setMoves([]);
     setAllSans([]);
+    setAllUciMoves([]);
     setCurrentPly(0);
     setLastMove(undefined);
     setGameOver(null);
@@ -496,15 +452,16 @@ export default function PlayBotPage() {
   const highlightedSquares: { square: string; color: string }[] = [];
   if (hintStep >= 1 && hintSource) highlightedSquares.push({ square: hintSource, color: "green" });
 
-  // ── Selection Screen ─────────────────────────────────
+  // ── SELECTION SCREEN ─────────────────────────────────
   if (phase === "select") {
+    const modes: GameModePreset[] = ["challenge", "friendly", "assisted", "custom"];
     return (
       <main className="flex flex-col items-center min-h-screen p-4 pt-12">
-        <div className="max-w-lg w-full space-y-6">
+        <div className="max-w-lg w-full space-y-5">
           <h1 className="text-2xl font-bold text-center">Play vs Bot</h1>
           {!isOnline && (
             <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-2 text-center text-xs text-yellow-300">
-              Offline mode — games will sync when you reconnect
+              Offline — games sync when you reconnect
             </div>
           )}
           {pendingSyncCount > 0 && isOnline && (
@@ -515,33 +472,74 @@ export default function PlayBotPage() {
           {!stockfish.ready && (
             <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 text-center">
               <p className="text-sm text-blue-300">Loading Stockfish engine...</p>
-              <p className="text-xs text-blue-400 mt-1">First load downloads ~7MB (cached after)</p>
+              <p className="text-xs text-blue-400 mt-1">~7MB download (cached after first load)</p>
             </div>
           )}
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-
           {showActivePrompt && activeGame && (
             <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 text-center">
               <p className="text-sm text-yellow-300 mb-3">
-                You have an active game vs Bot ({activeGame.botElo})
+                Active game vs Bot ({activeGame.botElo})
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={resumeGame}
-                  className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium transition-colors"
+                  className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium"
                 >
-                  Continue Game
+                  Continue
                 </button>
                 <button
                   onClick={resignActiveAndContinue}
-                  className="flex-1 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition-colors"
+                  className="flex-1 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
                 >
-                  Resign &amp; New Game
+                  Resign &amp; New
                 </button>
               </div>
             </div>
           )}
 
+          {/* Game Mode */}
+          <div className="bg-gray-900 rounded-lg p-4">
+            <h2 className="text-sm font-semibold text-gray-400 mb-3">Game Mode</h2>
+            <div className="grid grid-cols-2 gap-2">
+              {modes.map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setModePreset(m)}
+                  className={`p-3 rounded text-left transition-colors ${modePreset === m ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"}`}
+                >
+                  <span className="block text-sm font-medium">{GAME_MODE_LABELS[m].name}</span>
+                  <span className="block text-xs text-gray-400">{GAME_MODE_LABELS[m].desc}</span>
+                </button>
+              ))}
+            </div>
+            {modePreset === "custom" && (
+              <div className="mt-3 space-y-2 border-t border-gray-700 pt-3">
+                {(Object.keys(customSettings) as (keyof GameModeSettings)[]).map((key) => (
+                  <label
+                    key={key}
+                    className="flex items-center justify-between text-sm cursor-pointer"
+                  >
+                    <span>
+                      {key === "evalBar"
+                        ? "Evaluation Bar"
+                        : key === "moveFeedback"
+                          ? "Move Feedback"
+                          : key.charAt(0).toUpperCase() + key.slice(1)}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={customSettings[key]}
+                      onChange={() => setCustomSettings((prev) => ({ ...prev, [key]: !prev[key] }))}
+                      className="rounded"
+                    />
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Elo */}
           <div className="bg-gray-900 rounded-lg p-4">
             <h2 className="text-sm font-semibold text-gray-400 mb-2">Bot Difficulty</h2>
             <div className="text-center mb-2">
@@ -557,12 +555,9 @@ export default function PlayBotPage() {
               onChange={(e) => setBotElo(parseInt(e.target.value))}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>200</span>
-              <span>3200</span>
-            </div>
           </div>
 
+          {/* Color */}
           <div className="bg-gray-900 rounded-lg p-4">
             <h2 className="text-sm font-semibold text-gray-400 mb-3">Play As</h2>
             <div className="grid grid-cols-3 gap-2">
@@ -578,32 +573,33 @@ export default function PlayBotPage() {
             </div>
           </div>
 
+          {/* Time */}
           <div className="bg-gray-900 rounded-lg p-4">
             <h2 className="text-sm font-semibold text-gray-400 mb-3">Time Control</h2>
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              {PRESETS.map((p) => (
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              {TIME_PRESETS.map((p) => (
                 <button
                   key={p.key}
                   onClick={() => {
-                    setSelectedPreset(p.key);
-                    setShowCustom(false);
+                    setSelectedTime(p.key);
+                    setShowCustomTime(false);
                   }}
-                  className={`px-3 py-2 rounded text-sm font-medium transition-colors ${!showCustom && selectedPreset === p.key ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"}`}
+                  className={`px-3 py-2 rounded text-sm font-medium transition-colors ${!showCustomTime && selectedTime === p.key ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"}`}
                 >
                   {p.label}
                 </button>
               ))}
             </div>
             <button
-              onClick={() => setShowCustom(!showCustom)}
+              onClick={() => setShowCustomTime(!showCustomTime)}
               className="text-sm text-blue-400 hover:underline"
             >
-              {showCustom ? "Use preset" : "Custom time"}
+              {showCustomTime ? "Use preset" : "Custom"}
             </button>
-            {showCustom && (
+            {showCustomTime && (
               <div className="flex gap-4 mt-2">
                 <div className="flex-1">
-                  <label className="text-xs text-gray-400">Minutes</label>
+                  <label className="text-xs text-gray-400">Min</label>
                   <input
                     type="number"
                     min={0}
@@ -614,7 +610,7 @@ export default function PlayBotPage() {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-gray-400">Increment (sec)</label>
+                  <label className="text-xs text-gray-400">Inc (s)</label>
                   <input
                     type="number"
                     min={0}
@@ -638,14 +634,14 @@ export default function PlayBotPage() {
 
           <div className="text-center">
             <Link href="/play" className="text-gray-400 hover:text-white text-sm">
-              &larr; Back to Play
+              &larr; Back
             </Link>
           </div>
 
           <ConfirmModal
             open={confirmStart}
             title="Start Game?"
-            message={`Bot: ${botElo} Elo (${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustom ? `${customMinutes}+${customIncrement}` : PRESETS.find((p) => p.key === selectedPreset)?.label || selectedPreset}${!isOnline ? "\n\nOffline — game won't be saved" : ""}`}
+            message={`Mode: ${GAME_MODE_LABELS[modePreset].name}\nBot: ${botElo} (${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustomTime ? `${customMinutes}+${customIncrement}` : TIME_PRESETS.find((p) => p.key === selectedTime)?.label || selectedTime}${!isOnline ? "\n\nOffline — will sync later" : ""}`}
             confirmLabel="Start"
             confirmVariant="primary"
             onConfirm={startGame}
@@ -656,13 +652,13 @@ export default function PlayBotPage() {
     );
   }
 
-  // ── Game / Ended Screen ──────────────────────────────
+  // ── GAME SCREEN ──────────────────────────────────────
   return (
     <main className="flex flex-col items-center min-h-screen p-4 pt-4">
       <div className="w-full max-w-6xl">
         <div className="flex flex-col lg:flex-row gap-4 items-start">
           <div className="flex gap-2 flex-1 min-w-0">
-            {showEvalBar && (
+            {activeSettings.evalBar && (
               <div className="h-auto flex">
                 <EvaluationBar evalCP={evalScore} mate={null} />
               </div>
@@ -680,6 +676,9 @@ export default function PlayBotPage() {
                     OFFLINE
                   </span>
                 )}
+                <span className="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded">
+                  {GAME_MODE_LABELS[modePreset].name}
+                </span>
               </div>
               <CapturedPieces fen={displayFen} color={playerIsWhite ? "white" : "black"} />
 
@@ -696,7 +695,7 @@ export default function PlayBotPage() {
                     highlightedSquares.length > 0 ? highlightedSquares : undefined
                   }
                 />
-                {showMoveFeedback && <MoveFeedbackPopup classification={feedback} />}
+                {activeSettings.moveFeedback && <MoveFeedbackPopup classification={feedback} />}
                 {thinking && (
                   <div className="absolute bottom-2 right-2 bg-gray-900/80 px-2 py-1 rounded text-xs text-gray-400">
                     Thinking...
@@ -744,52 +743,35 @@ export default function PlayBotPage() {
             </div>
 
             {phase === "game" && !gameOver && (
-              <div className="flex gap-2">
-                <button
-                  onClick={handleHint}
-                  disabled={!isMyTurn || !stockfish.ready}
-                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded text-sm font-medium transition-colors"
-                >
-                  {hintStep === 0 ? "Hint" : hintStep === 1 ? "Show Move" : "Hide Hint"}
-                </button>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  {activeSettings.hints && (
+                    <button
+                      onClick={handleHint}
+                      disabled={!isMyTurn || !stockfish.ready}
+                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded text-sm font-medium transition-colors"
+                    >
+                      {hintStep === 0 ? "Hint" : hintStep === 1 ? "Show Move" : "Hide"}
+                    </button>
+                  )}
+                  {activeSettings.takeback && moves.length >= 2 && (
+                    <button
+                      onClick={handleTakeback}
+                      disabled={thinking}
+                      className="flex-1 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 rounded text-sm font-medium transition-colors"
+                    >
+                      Takeback
+                    </button>
+                  )}
+                </div>
                 <button
                   onClick={() => setConfirmResign(true)}
-                  className="flex-1 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition-colors"
+                  className="w-full py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition-colors"
                 >
                   Resign
                 </button>
               </div>
             )}
-
-            <div className="relative">
-              <button
-                onClick={() => setShowOverlayMenu(!showOverlayMenu)}
-                className="w-full py-1.5 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-400 transition-colors"
-              >
-                Settings
-              </button>
-              {showOverlayMenu && (
-                <div className="absolute bottom-full mb-1 left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg p-3 z-10 space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm">
-                    <input
-                      type="checkbox"
-                      checked={showEvalBar}
-                      onChange={() => setShowEvalBar(!showEvalBar)}
-                    />
-                    Evaluation Bar
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm">
-                    <input
-                      type="checkbox"
-                      checked={showMoveFeedback}
-                      onChange={() => setShowMoveFeedback(!showMoveFeedback)}
-                    />
-                    Move Feedback
-                  </label>
-                </div>
-              )}
-            </div>
-
             {error && <p className="text-red-400 text-xs text-center">{error}</p>}
           </div>
         </div>

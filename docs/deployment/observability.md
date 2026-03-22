@@ -98,7 +98,7 @@ deployment/
 
 - **Prometheus:** 30 days (`--storage.tsdb.retention.time=30d`)
 - **Loki:** Default retention (uses local storage)
-- **Grafana:** Persisted in `grafana_data` Docker volume
+- **Grafana:** Persisted in `eyeonchess-grafana-data` Docker volume
 
 ## Adding Custom Dashboards
 

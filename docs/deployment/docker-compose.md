@@ -68,7 +68,16 @@ Both compose files read from `../.env` (project root). See [Configuration](../ge
 
 ## Volumes
 
-A named volume `pgdata` persists PostgreSQL data across restarts. To destroy it:
+Named volumes persist data across restarts:
+
+| Volume            | Name (prod)                  | Name (dev)              | Purpose                         |
+| ----------------- | ---------------------------- | ----------------------- | ------------------------------- |
+| `pgdata`          | `eyeonchess-pgdata`          | `eyeonchess-dev-pgdata` | PostgreSQL data                 |
+| `prometheus_data` | `eyeonchess-prometheus-data` | —                       | Prometheus metrics              |
+| `loki_data`       | `eyeonchess-loki-data`       | —                       | Loki log data                   |
+| `grafana_data`    | `eyeonchess-grafana-data`    | —                       | Grafana dashboards and settings |
+
+To destroy all volumes:
 
 ```bash
 make clean-volumes   # WARNING: destroys all data

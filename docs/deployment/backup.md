@@ -47,7 +47,7 @@ The backup includes all PostgreSQL data:
 ## What's NOT Backed Up
 
 - Redis data (online presence, game clocks, analysis queue) — ephemeral by design
-- Docker volumes are not included — back up `pgdata` volume separately if needed
+- Docker volumes are not included — back up `eyeonchess-pgdata` volume separately if needed
 
 ## Automated Backups
 

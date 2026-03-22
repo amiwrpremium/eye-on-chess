@@ -97,104 +97,7 @@ export function setupGameSocket(io: SocketServer) {
     });
 
     // Make a move
-    socket.on(
-      "game:move",
-      async (data: { gameId: string; from: string; to: string; promotion?: string }) => {
-        const { gameId, from, to, promotion } = data;
-
-        const game = await prisma.game.findUnique({
-          where: { id: gameId },
-          include: {
-            white: { select: { id: true } },
-            black: { select: { id: true } },
-          },
-        });
-
-        if (!game || game.status !== "ACTIVE") {
-          socket.emit("game:error", { message: "Game not active" });
-          return;
-        }
-
-        // Check it's this player's turn
-        const chess = new Chess(game.fen);
-        const isWhiteTurn = chess.turn() === "w";
-        const isPlayerWhite = game.whiteId === userId;
-        const isPlayerBlack = game.blackId === userId;
-
-        if ((isWhiteTurn && !isPlayerWhite) || (!isWhiteTurn && !isPlayerBlack)) {
-          socket.emit("game:error", { message: "Not your turn" });
-          return;
-        }
-
-        // Check for timeout before processing move
-        const timedOut = await isTimeout(gameId);
-        if (timedOut) {
-          const result = timedOut === "white" ? "BLACK_WIN" : "WHITE_WIN";
-          await endGame(io, gameId, result, "TIMEOUT");
-          return;
-        }
-
-        // Validate and apply move
-        const move = chess.move({ from, to, promotion: promotion || undefined });
-        if (!move) {
-          socket.emit("game:error", { message: "Invalid move" });
-          return;
-        }
-
-        const ply = (await prisma.move.count({ where: { gameId } })) + 1;
-
-        // Persist move
-        await prisma.move.create({
-          data: {
-            gameId,
-            ply,
-            san: move.san,
-            uci: `${from}${to}${promotion || ""}`,
-            fen: chess.fen(),
-          },
-        });
-
-        // Update game state
-        await prisma.game.update({
-          where: { id: gameId },
-          data: {
-            fen: chess.fen(),
-            pgn: chess.pgn(),
-          },
-        });
-
-        // Update clocks
-        const isUnlimited = game.timeControl === "UNLIMITED";
-        const clocks = await clockOnMove(gameId, isUnlimited);
-
-        // Clear any draw offers
-        drawOffers.delete(gameId);
-
-        // Broadcast move to room
-        io.to(`game:${gameId}`).emit("game:moved", {
-          from,
-          to,
-          promotion,
-          san: move.san,
-          fen: chess.fen(),
-          ply,
-          clocks,
-        });
-
-        // Check for game end conditions
-        if (chess.isCheckmate()) {
-          const result = chess.turn() === "w" ? "BLACK_WIN" : "WHITE_WIN";
-          await endGame(io, gameId, result, "CHECKMATE");
-        } else if (
-          chess.isDraw() ||
-          chess.isStalemate() ||
-          chess.isThreefoldRepetition() ||
-          chess.isInsufficientMaterial()
-        ) {
-          await endGame(io, gameId, "DRAW", "AGREEMENT");
-        }
-      }
-    );
+    socket.on("game:move", (data) => processMove(io, socket, userId, drawOffers, data));
 
     // Resign
     socket.on("game:resign", async (gameId: string) => {
@@ -312,7 +215,121 @@ export function setupGameSocket(io: SocketServer) {
     });
   });
 
-  // Timeout check loop — every 1 second
+  startTimeoutChecker(io);
+}
+
+/**
+ * Process an incoming move from a player over the socket connection.
+ * Validates the move, persists it, updates clocks, broadcasts to the room,
+ * and checks for game-ending conditions.
+ */
+async function processMove(
+  io: SocketServer,
+  socket: Socket,
+  userId: string,
+  drawOffers: Map<string, string>,
+  data: { gameId: string; from: string; to: string; promotion?: string }
+) {
+  const { gameId, from, to, promotion } = data;
+
+  const game = await prisma.game.findUnique({
+    where: { id: gameId },
+    include: {
+      white: { select: { id: true } },
+      black: { select: { id: true } },
+    },
+  });
+
+  if (!game || game.status !== "ACTIVE") {
+    socket.emit("game:error", { message: "Game not active" });
+    return;
+  }
+
+  // Check it's this player's turn
+  const chess = new Chess(game.fen);
+  const isWhiteTurn = chess.turn() === "w";
+  const isPlayerWhite = game.whiteId === userId;
+  const isPlayerBlack = game.blackId === userId;
+
+  if ((isWhiteTurn && !isPlayerWhite) || (!isWhiteTurn && !isPlayerBlack)) {
+    socket.emit("game:error", { message: "Not your turn" });
+    return;
+  }
+
+  // Check for timeout before processing move
+  const timedOut = await isTimeout(gameId);
+  if (timedOut) {
+    const result = timedOut === "white" ? "BLACK_WIN" : "WHITE_WIN";
+    await endGame(io, gameId, result, "TIMEOUT");
+    return;
+  }
+
+  // Validate and apply move
+  const move = chess.move({ from, to, promotion: promotion || undefined });
+  if (!move) {
+    socket.emit("game:error", { message: "Invalid move" });
+    return;
+  }
+
+  const ply = (await prisma.move.count({ where: { gameId } })) + 1;
+
+  // Persist move
+  await prisma.move.create({
+    data: {
+      gameId,
+      ply,
+      san: move.san,
+      uci: `${from}${to}${promotion || ""}`,
+      fen: chess.fen(),
+    },
+  });
+
+  // Update game state
+  await prisma.game.update({
+    where: { id: gameId },
+    data: {
+      fen: chess.fen(),
+      pgn: chess.pgn(),
+    },
+  });
+
+  // Update clocks
+  const isUnlimited = game.timeControl === "UNLIMITED";
+  const clocks = await clockOnMove(gameId, isUnlimited);
+
+  // Clear any draw offers
+  drawOffers.delete(gameId);
+
+  // Broadcast move to room
+  io.to(`game:${gameId}`).emit("game:moved", {
+    from,
+    to,
+    promotion,
+    san: move.san,
+    fen: chess.fen(),
+    ply,
+    clocks,
+  });
+
+  // Check for game end conditions
+  if (chess.isCheckmate()) {
+    const result = chess.turn() === "w" ? "BLACK_WIN" : "WHITE_WIN";
+    await endGame(io, gameId, result, "CHECKMATE");
+  } else if (
+    chess.isDraw() ||
+    chess.isStalemate() ||
+    chess.isThreefoldRepetition() ||
+    chess.isInsufficientMaterial()
+  ) {
+    await endGame(io, gameId, "DRAW", "AGREEMENT");
+  }
+}
+
+/**
+ * Start a periodic interval that checks all active games for clock timeouts
+ * and ends any games where a player has run out of time.
+ */
+function startTimeoutChecker(io: SocketServer) {
   setInterval(async () => {
     try {
       const activeIds = await getActiveGameIds();

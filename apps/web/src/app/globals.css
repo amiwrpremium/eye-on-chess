@@ -38,3 +38,21 @@ html.light .text-gray-500 {
 html.light .border-gray-700 {
   border-color: #d1d5db;
 }
+
+@keyframes reaction-float {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+.animate-reaction-float {
+  animation: reaction-float 2.5s ease-out forwards;
+}

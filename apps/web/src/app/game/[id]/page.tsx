@@ -10,8 +10,11 @@ import MoveList from "../../../components/MoveList";
 import PlayerClock from "../../../components/PlayerClock";
 import ConfirmModal from "../../../components/ConfirmModal";
 import KeyboardShortcutsHelp from "../../../components/KeyboardShortcutsHelp";
+import ReactionPicker from "../../../components/ReactionPicker";
+import ReactionOverlay, { type ActiveReaction } from "../../../components/ReactionOverlay";
 import { useSound, detectMoveSound } from "../../../lib/useSound";
 import { useKeyboardShortcuts } from "../../../lib/useKeyboardShortcuts";
+import type { ReactionType } from "@eyeonchess/chess";
 
 interface Player {
   id: string;
@@ -63,6 +66,8 @@ export default function GamePage() {
   const [confirmAcceptDraw, setConfirmAcceptDraw] = useState(false);
   const [rematchOffered, setRematchOffered] = useState(false);
   const [rematchIncoming, setRematchIncoming] = useState(false);
+  const [activeReactions, setActiveReactions] = useState<ActiveReaction[]>([]);
+  const lastReactionTime = useRef(0);
 
   const sound = useSound();
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -198,6 +203,20 @@ export default function GamePage() {
       router.push(`/game/${data.newGameId}`);
     });
 
+    socket.on("game:reaction", (data: { userId: string; reaction: ReactionType }) => {
+      setActiveReactions((prev) => [
+        ...prev.slice(-4),
+        {
+          id: crypto.randomUUID(),
+          reaction: data.reaction,
+          fromOpponent: true,
+          timestamp: Date.now(),
+          xOffset: 15 + Math.random() * 70,
+        },
+      ]);
+      sound.playNotify();
+    });
+
     socket.on("game:error", (data: { message: string }) => {
       console.error("Game error:", data.message);
     });
@@ -221,6 +240,7 @@ export default function GamePage() {
       socket.off("game:draw:declined");
       socket.off("game:rematch:offered");
       socket.off("game:rematch:started");
+      socket.off("game:reaction");
       socket.off("game:error");
     };
   }, [gameId, user]);
@@ -258,6 +278,29 @@ export default function GamePage() {
     if (!socket) return;
     socket.emit("game:draw:decline", gameId);
     setDrawIncoming(false);
+  }
+
+  function sendReaction(reaction: ReactionType) {
+    const socket = getSocket();
+    if (!socket) return;
+    const now = Date.now();
+    if (now - lastReactionTime.current < 2000) return;
+    lastReactionTime.current = now;
+    socket.emit("game:reaction", { gameId, reaction });
+    setActiveReactions((prev) => [
+      ...prev.slice(-4),
+      {
+        id: crypto.randomUUID(),
+        reaction,
+        fromOpponent: false,
+        timestamp: now,
+        xOffset: 15 + Math.random() * 70,
+      },
+    ]);
+  }
+
+  function removeReaction(id: string) {
+    setActiveReactions((prev) => prev.filter((r) => r.id !== id));
   }
 
   function goToPly(ply: number) {
@@ -320,7 +363,7 @@ export default function GamePage() {
             </div>
 
             {/* Board */}
-            <div className="w-[min(100%,480px)]">
+            <div className="w-[min(100%,480px)] relative">
               <ChessBoard
                 fen={displayFen}
                 orientation={orientation}
@@ -329,7 +372,13 @@ export default function GamePage() {
                 check={false}
                 onMove={handleMove}
               />
+              <ReactionOverlay reactions={activeReactions} onExpired={removeReaction} />
             </div>
+
+            {/* Reaction picker */}
+            {isActive && !gameOver && (
+              <ReactionPicker onReact={sendReaction} disabled={!isActive} />
+            )}
 
             {/* Bottom player */}
             <div className="flex items-center justify-between">

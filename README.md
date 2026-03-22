@@ -6,6 +6,8 @@
 
 <p align="center">
   <a href="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/ci.yml"><img src="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/security.yml"><img src="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/security.yml/badge.svg" alt="Security"></a>
+  <a href="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/release.yml"><img src="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/release.yml/badge.svg" alt="Release"></a>
   <a href="https://app.codacy.com/gh/amiwrpremium/eye-on-chess/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/bec76f3311ba4634bb6456cbf9cc36b6" alt="Codacy Badge"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
   <a href="https://github.com/amiwrpremium/eye-on-chess/stargazers"><img src="https://img.shields.io/github/stars/amiwrpremium/eye-on-chess?style=social" alt="Stars"></a>

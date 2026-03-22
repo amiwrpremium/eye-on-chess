@@ -7,6 +7,7 @@ import { authRoutes } from "./routes/auth.js";
 import { userRoutes } from "./routes/users.js";
 import { friendRoutes } from "./routes/friends.js";
 import { gameRoutes } from "./routes/games.js";
+import { botRoutes } from "./routes/bots.js";
 import { analysisRoutes } from "./routes/analysis.js";
 import { adminRoutes } from "./routes/admin.js";
 import { collectionRoutes } from "./routes/collections.js";
@@ -73,6 +74,7 @@ async function main() {
     routeMetrics: { enabled: true },
   });
 
+  await fastify.register(botRoutes);
   await fastify.register(authRoutes);
   await fastify.register(userRoutes);
   await fastify.register(friendRoutes);

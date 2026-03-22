@@ -51,6 +51,12 @@
 
 ---
 
+## Screenshots
+
+See the full step-by-step walkthrough in the [`screenshots/`](screenshots/README.md) directory.
+
+---
+
 ## Features
 
 **Game Play**

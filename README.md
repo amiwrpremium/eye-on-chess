@@ -47,9 +47,17 @@
 
 - Real-time multiplayer via Socket.io
 - Challenge friends directly
+- Play vs Bot with adjustable Elo (200-3200) using Stockfish WASM
+- Game mode presets: Challenge (no help), Friendly (hints + takebacks), Assisted (all tools), Custom
 - Time controls: Bullet, Blitz, Rapid, Classical, Unlimited, or custom
 - Elo rating system (K=32) with automatic updates
 - Draw offers, resignation, timeout detection
+- Rematch system after game ends
+- Emoji reactions during live games (6 chess-themed reactions)
+- Move feedback and classification during bot games
+- PGN export (copy to clipboard + .pgn file download)
+- Game notes (per-game annotations, auto-saved)
+- Sound effects on moves, captures, check, and game events
 
 **Post-Game Analysis**
 
@@ -60,17 +68,47 @@
 - Best move arrows for mistakes
 - Opening recognition (ECO codes)
 
+**Personal Stats**
+
+- Rating history chart
+- Win/loss/draw record (overall, vs humans, vs bots)
+- Top openings with win rates
+- Accuracy tracking (average, best, worst game)
+- Win/loss streaks
+- 30-day activity chart
+
 **Social**
 
 - Friend system with online presence indicators
 - User profiles with game statistics (wins/losses/draws)
 - User search
+- Activity feed showing recent games, analyses, and new friends
+- Keyboard shortcuts throughout the app
+
+**Collections**
+
+- Organize games into named collections
+- Add/remove games from collections
+- Browse collection contents
+
+**Invite System**
+
+- Invite-only registration with invite codes
+- Quota system: 10 invites per batch, 75% usage unlocks next batch
+- Admin can generate invites
+
+**PWA & Offline**
+
+- Progressive Web App — installable on mobile and desktop
+- Offline bot play with Stockfish WASM (same behavior as online)
+- Offline games sync to server when connection resumes
 
 **Customization**
 
 - Dark / light mode
 - 6 board themes: Classic, Wood, Green, Blue, Purple, Dark
 - 3 piece styles: Classic, Modern, Minimal
+- Sound toggle
 - Settings saved to your profile (synced across devices)
 - White-label support (custom site name and URL)
 
@@ -83,6 +121,10 @@
 - Automatic database migrations on startup
 - Database backup script with rotation
 - Configurable registration (open/closed, user limits)
+- YAML-configurable rate limiting with hot-reload (no restart needed)
+- Request logging with sensitive field redaction
+- Terms of Service / Privacy Policy gate (users must accept)
+- Conventional commits enforced via git hooks
 
 ## Quick Start
 
@@ -163,7 +205,7 @@ All configuration is done via environment variables in `.env`. See [`.env.exampl
 ```
 apps/web        → Next.js 14 frontend (TypeScript, Tailwind CSS)
 apps/api        → Fastify backend (TypeScript, Prisma, Socket.io)
-packages/chess  → Shared chess types
+packages/chess  → Shared types, constants, helpers (game, time control, openings, etc.)
 deployment/     → Dockerfiles, Docker Compose files, Nginx config
 scripts/        → Backup utilities
 ```
@@ -224,6 +266,16 @@ Full documentation is in the [`docs/`](docs/index.md) directory:
 - [Admin Panel](docs/admin/overview.md)
 - [Database Schema](docs/database/schema.md)
 - [Deployment Guide](docs/deployment/index.md)
+
+### Testing
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests for a specific package
+pnpm --filter api test
+```
 
 ## Contributing
 

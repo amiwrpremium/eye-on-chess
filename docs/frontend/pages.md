@@ -13,6 +13,7 @@ All pages use the Next.js 14 App Router under `apps/web/src/app/`.
 | `/board-test`        | `board-test/page.tsx`         | Component demo — interactive board, eval bar slider, move list, sample positions    |
 | `/legal/terms`       | `legal/terms/page.tsx`        | Terms of Service                                                                    |
 | `/legal/privacy`     | `legal/privacy/page.tsx`      | Privacy Policy                                                                      |
+| `/offline`           | `offline/page.tsx`            | Offline fallback — shown by service worker when no cached page is available         |
 
 ## Protected Pages (require auth)
 

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Chess } from "chess.js";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
-import { useStockfish } from "../../../lib/useStockfish";
+import { useBotEngine } from "../../../lib/useBotEngine";
 import { useOnlineStatus } from "../../../lib/useOnlineStatus";
 import { lookupOpeningClient } from "../../../lib/openings";
 import {
@@ -32,7 +32,9 @@ import MoveList from "../../../components/MoveList";
 import CapturedPieces from "../../../components/CapturedPieces";
 import MoveFeedbackPopup from "../../../components/MoveFeedbackPopup";
 import ConfirmModal from "../../../components/ConfirmModal";
+import { BOT_PERSONALITIES, type BotPersonality } from "@eyeonchess/chess";
 import type { MoveRecord } from "@eyeonchess/chess";
+import BotSelector from "../../../components/BotSelector";
 
 const TIME_PRESETS = [
   { label: "1+0", key: "bullet_1_0" },
@@ -56,12 +58,14 @@ function eloLabel(elo: number): string {
 export default function PlayBotPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
-  const stockfish = useStockfish();
+  const botEngine = useBotEngine();
   const sound = useSound();
   const isOnline = useOnlineStatus();
 
   // Selection
   const [phase, setPhase] = useState<"select" | "game" | "ended">("select");
+  const [selectedBot, setSelectedBot] = useState<BotPersonality | null>(null);
+  const [useCustomElo, setUseCustomElo] = useState(false);
   const [botElo, setBotElo] = useState(800);
   const [colorChoice, setColorChoice] = useState<"white" | "black" | "random">("white");
   const [selectedTime, setSelectedTime] = useState("unlimited");
@@ -273,10 +277,30 @@ export default function PlayBotPage() {
     if (!isWhite) makeBotMove(chess, []);
   }
 
+  /** Build a fallback BotPersonality from the raw Elo slider value (custom elo mode). */
+  function buildFallbackPersonality(elo: number): BotPersonality {
+    return {
+      id: "custom",
+      name: `Custom (${elo})`,
+      elo,
+      description: "Custom Elo bot",
+      avatar: "\u{1F916}",
+      tier: elo >= 2000 ? "engine" : elo >= 1300 ? "hybrid" : "custom",
+      randomMoveChance: elo < 600 ? 0.3 : elo < 1200 ? 0.1 : 0.02,
+      blunderChance: elo < 600 ? 0.25 : elo < 1200 ? 0.12 : 0.05,
+      captureGreed: 0.4,
+      aggressionBias: 0,
+      maxDepth: Math.min(18, Math.max(1, Math.floor(elo / 200))),
+      queenEarly: false,
+      pawnPusher: false,
+    };
+  }
+
   async function makeBotMove(chess: Chess, currentMoves: MoveRecord[]) {
     setThinking(true);
     try {
-      const moveUci = await stockfish.getBotMove(chess.fen(), botElo);
+      const personality = selectedBot || buildFallbackPersonality(botElo);
+      const moveUci = await botEngine.getPersonalityMove(chess.fen(), personality);
       if (!moveUci) return;
       const from = moveUci.slice(0, 2);
       const to = moveUci.slice(2, 4);
@@ -311,7 +335,7 @@ export default function PlayBotPage() {
           activeSettings.suggestions ||
           activeSettings.engine;
         if (needsEval) {
-          const ev = await stockfish.evaluate(chess.fen());
+          const ev = await botEngine.evaluate(chess.fen());
           if (activeSettings.evalBar) setEvalScore(ev.score);
           if (activeSettings.threats && ev.bestMove) {
             setThreatArrows([{ from: ev.bestMove.slice(0, 2), to: ev.bestMove.slice(2, 4) }]);
@@ -346,7 +370,7 @@ export default function PlayBotPage() {
 
   const handleMove = useCallback(
     async (from: string, to: string, promotion?: string) => {
-      if (thinking || gameOver || !stockfish.ready) return;
+      if (thinking || gameOver || !botEngine.ready) return;
       const fenBefore = game.fen();
       const chess = new Chess(game.fen());
       const move = chess.move({ from, to, promotion: promotion || undefined });
@@ -371,8 +395,8 @@ export default function PlayBotPage() {
       setFeedback(null);
       // Evaluate position before bot responds for move feedback and eval bar
       if (activeSettings.moveFeedback || activeSettings.evalBar) {
-        const evBefore = await stockfish.evaluate(fenBefore);
-        const evAfter = await stockfish.evaluate(chess.fen());
+        const evBefore = await botEngine.evaluate(fenBefore);
+        const evAfter = await botEngine.evaluate(chess.fen());
         if (activeSettings.evalBar) setEvalScore(evAfter.score);
         if (activeSettings.moveFeedback) {
           const opening = lookupOpeningClient(newSans);
@@ -419,17 +443,18 @@ export default function PlayBotPage() {
       allUciMoves,
       thinking,
       gameOver,
-      stockfish,
+      botEngine,
       activeSettings,
       gameId,
       isOnline,
       botElo,
+      selectedBot,
     ]
   );
 
   function handleHint() {
-    if (!stockfish.ready || !activeSettings.hints) return;
-    stockfish.evaluate(game.fen()).then((ev) => {
+    if (!botEngine.ready || !activeSettings.hints) return;
+    botEngine.evaluate(game.fen()).then((ev) => {
       if (!ev.bestMove) return;
       if (hintStep === 0) {
         setHintSource(ev.bestMove.slice(0, 2));
@@ -592,7 +617,7 @@ export default function PlayBotPage() {
               Syncing {pendingSyncCount} offline game{pendingSyncCount > 1 ? "s" : ""}...
             </div>
           )}
-          {!stockfish.ready && (
+          {!botEngine.ready && (
             <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 text-center">
               <p className="text-sm text-blue-300">Loading Stockfish engine...</p>
               <p className="text-xs text-blue-400 mt-1">~7MB download (cached after first load)</p>
@@ -662,22 +687,49 @@ export default function PlayBotPage() {
             )}
           </div>
 
-          {/* Elo */}
+          {/* Bot Difficulty */}
           <div className="bg-gray-900 rounded-lg p-4">
-            <h2 className="text-sm font-semibold text-gray-400 mb-2">Bot Difficulty</h2>
-            <div className="text-center mb-2">
-              <span className="text-3xl font-bold">{botElo}</span>
-              <span className="text-gray-400 ml-2">{eloLabel(botElo)}</span>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-400">Bot Difficulty</h2>
+              <button
+                onClick={() => {
+                  setUseCustomElo(!useCustomElo);
+                  if (!useCustomElo) setSelectedBot(null);
+                }}
+                className="text-xs text-blue-400 hover:underline"
+              >
+                {useCustomElo ? "Choose a personality" : "Custom Elo"}
+              </button>
             </div>
-            <input
-              type="range"
-              min={200}
-              max={3200}
-              step={50}
-              value={botElo}
-              onChange={(e) => setBotElo(parseInt(e.target.value))}
-              className="w-full"
-            />
+            {useCustomElo ? (
+              <>
+                <div className="text-center mb-2">
+                  <span className="text-3xl font-bold">{botElo}</span>
+                  <span className="text-gray-400 ml-2">{eloLabel(botElo)}</span>
+                </div>
+                <input
+                  type="range"
+                  min={200}
+                  max={3200}
+                  step={50}
+                  value={botElo}
+                  onChange={(e) => {
+                    setBotElo(parseInt(e.target.value));
+                    setSelectedBot(null);
+                  }}
+                  className="w-full"
+                />
+              </>
+            ) : (
+              <BotSelector
+                bots={BOT_PERSONALITIES}
+                selected={selectedBot}
+                onSelect={(bot) => {
+                  setSelectedBot(bot);
+                  setBotElo(bot.elo);
+                }}
+              />
+            )}
           </div>
 
           {/* Color */}
@@ -749,10 +801,10 @@ export default function PlayBotPage() {
 
           <button
             onClick={() => setConfirmStart(true)}
-            disabled={!stockfish.ready}
+            disabled={!botEngine.ready}
             className="w-full py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-wait rounded-lg text-lg font-bold transition-colors"
           >
-            {stockfish.ready ? "Start Game" : "Loading Engine..."}
+            {botEngine.ready ? "Start Game" : "Loading Engine..."}
           </button>
 
           <div className="text-center">
@@ -764,7 +816,7 @@ export default function PlayBotPage() {
           <ConfirmModal
             open={confirmStart}
             title="Start Game?"
-            message={`Mode: ${GAME_MODE_LABELS[modePreset].name}\nBot: ${botElo} (${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustomTime ? `${customMinutes}+${customIncrement}` : TIME_PRESETS.find((p) => p.key === selectedTime)?.label || selectedTime}${!isOnline ? "\n\nOffline — will sync later" : ""}`}
+            message={`Mode: ${GAME_MODE_LABELS[modePreset].name}\nBot: ${selectedBot ? `${selectedBot.avatar} ${selectedBot.name}` : "Custom"} (${botElo} - ${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustomTime ? `${customMinutes}+${customIncrement}` : TIME_PRESETS.find((p) => p.key === selectedTime)?.label || selectedTime}${!isOnline ? "\n\nOffline — will sync later" : ""}`}
             confirmLabel="Start"
             confirmVariant="primary"
             onConfirm={startGame}
@@ -788,11 +840,12 @@ export default function PlayBotPage() {
             )}
             <div className="flex flex-col gap-1 flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold">
-                  B
+                <div className="w-7 h-7 bg-gray-700 rounded-full flex items-center justify-center text-base">
+                  {selectedBot ? selectedBot.avatar : "\u{1F916}"}
                 </div>
                 <span className="text-sm font-medium">
-                  Bot ({botElo}) <span className="text-gray-500">{eloLabel(botElo)}</span>
+                  {selectedBot ? selectedBot.name : "Bot"} ({botElo}){" "}
+                  <span className="text-gray-500">{eloLabel(botElo)}</span>
                 </span>
                 {!isOnline && (
                   <span className="text-xs text-yellow-500 bg-yellow-900/30 px-2 py-0.5 rounded">
@@ -876,7 +929,7 @@ export default function PlayBotPage() {
                   {activeSettings.hints && (
                     <button
                       onClick={handleHint}
-                      disabled={!isMyTurn || !stockfish.ready}
+                      disabled={!isMyTurn || !botEngine.ready}
                       className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded text-sm font-medium transition-colors"
                     >
                       {hintStep === 0 ? "Hint" : hintStep === 1 ? "Show Move" : "Hide"}
@@ -940,7 +993,10 @@ export default function PlayBotPage() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
             <h2 className="text-xl font-bold mb-2">Game Over</h2>
-            <p className="text-gray-300 mb-4">{gameOver}</p>
+            <p className="text-gray-300 mb-1">{gameOver}</p>
+            <p className="text-gray-500 text-sm mb-4">
+              vs {selectedBot ? `${selectedBot.avatar} ${selectedBot.name}` : "Bot"} ({botElo})
+            </p>
             <div className="flex gap-3">
               <button
                 onClick={rematch}

@@ -12,6 +12,7 @@ import ConfirmModal from "../../../components/ConfirmModal";
 import KeyboardShortcutsHelp from "../../../components/KeyboardShortcutsHelp";
 import ReactionPicker from "../../../components/ReactionPicker";
 import ReactionOverlay, { type ActiveReaction } from "../../../components/ReactionOverlay";
+import GameOverModal from "../../../components/GameOverModal";
 import { useSound, detectMoveSound } from "../../../lib/useSound";
 import { useKeyboardShortcuts } from "../../../lib/useKeyboardShortcuts";
 import type { Player, MoveRecord, ClockState, ReactionType } from "@eyeonchess/chess";
@@ -469,83 +470,31 @@ export default function GamePage() {
 
       {/* Game over modal */}
       {gameOver && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
-            <h2 className="text-xl font-bold mb-2">Game Over</h2>
-            <p className="text-gray-300 mb-4">{resultLabel(gameOver)}</p>
-            {gameOver.ratingChange && (
-              <div className="flex justify-center gap-6 mb-4 text-sm">
-                <div>
-                  <span className="text-gray-400">White: </span>
-                  <span
-                    className={gameOver.ratingChange.white >= 0 ? "text-green-400" : "text-red-400"}
-                  >
-                    {gameOver.ratingChange.white >= 0 ? "+" : ""}
-                    {gameOver.ratingChange.white}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-400">Black: </span>
-                  <span
-                    className={gameOver.ratingChange.black >= 0 ? "text-green-400" : "text-red-400"}
-                  >
-                    {gameOver.ratingChange.black >= 0 ? "+" : ""}
-                    {gameOver.ratingChange.black}
-                  </span>
-                </div>
-              </div>
-            )}
-            <div className="flex gap-3">
-              {rematchIncoming ? (
-                <>
-                  <button
-                    onClick={() => {
-                      const socket = getSocket();
-                      if (socket) socket.emit("game:rematch:accept", gameId);
-                    }}
-                    className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded font-medium transition-colors"
-                  >
-                    Accept Rematch
-                  </button>
-                  <button
-                    onClick={() => {
-                      setRematchIncoming(false);
-                      router.push("/play");
-                    }}
-                    className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
-                  >
-                    Decline
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      const socket = getSocket();
-                      if (socket) {
-                        socket.emit("game:rematch:offer", gameId);
-                        setRematchOffered(true);
-                      }
-                    }}
-                    disabled={rematchOffered}
-                    className="flex-1 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded font-medium transition-colors"
-                  >
-                    {rematchOffered ? "Offered..." : "Rematch"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setGameOver(null);
-                      router.push("/play");
-                    }}
-                    className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
-                  >
-                    Back
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <GameOverModal
+          gameOver={gameOver}
+          rematchIncoming={rematchIncoming}
+          rematchOffered={rematchOffered}
+          onRematchOffer={() => {
+            const socket = getSocket();
+            if (socket) {
+              socket.emit("game:rematch:offer", gameId);
+              setRematchOffered(true);
+            }
+          }}
+          onRematchAccept={() => {
+            const socket = getSocket();
+            if (socket) socket.emit("game:rematch:accept", gameId);
+          }}
+          onRematchDecline={() => {
+            setRematchIncoming(false);
+            router.push("/play");
+          }}
+          onClose={() => {
+            setGameOver(null);
+            router.push("/play");
+          }}
+          resultLabel={resultLabel(gameOver)}
+        />
       )}
 
       <KeyboardShortcutsHelp

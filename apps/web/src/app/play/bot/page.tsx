@@ -23,7 +23,9 @@ import {
   getPendingCount,
 } from "../../../lib/offlineSync";
 import { useSound } from "../../../lib/useSound";
+import { useKeyboardShortcuts } from "../../../lib/useKeyboardShortcuts";
 import ChessBoard from "../../../components/ChessBoard";
+import KeyboardShortcutsHelp from "../../../components/KeyboardShortcutsHelp";
 import EvaluationBar from "../../../components/EvaluationBar";
 import MoveList from "../../../components/MoveList";
 import CapturedPieces from "../../../components/CapturedPieces";
@@ -121,6 +123,29 @@ export default function PlayBotPage() {
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
   const [activeGame, setActiveGame] = useState<{ id: string; botElo: number | null } | null>(null);
   const [showActivePrompt, setShowActivePrompt] = useState(false);
+
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [flipDisplay, setFlipDisplay] = useState(false);
+
+  useKeyboardShortcuts({
+    ArrowLeft: () => setCurrentPly((p) => Math.max(0, p - 1)),
+    ArrowRight: () => setCurrentPly((p) => Math.min(moves.length, p + 1)),
+    Home: () => setCurrentPly(0),
+    End: () => setCurrentPly(moves.length),
+    f: () => phase === "game" && setFlipDisplay((f) => !f),
+    F: () => phase === "game" && setFlipDisplay((f) => !f),
+    h: () => phase === "game" && activeSettings.hints && handleHint(),
+    H: () => phase === "game" && activeSettings.hints && handleHint(),
+    r: () => phase === "game" && !gameOver && setConfirmResign(true),
+    R: () => phase === "game" && !gameOver && setConfirmResign(true),
+    Escape: () => {
+      setConfirmResign(false);
+      setConfirmStart(false);
+      setShowShortcuts(false);
+      setShowOverlayMenu(false);
+    },
+    "?": () => setShowShortcuts((s) => !s),
+  });
 
   useEffect(() => {
     if (!user) fetchMe();
@@ -479,7 +504,12 @@ export default function PlayBotPage() {
     );
   }
 
-  const orientation = playerIsWhite ? "white" : "black";
+  const baseOrientation = playerIsWhite ? "white" : "black";
+  const orientation = flipDisplay
+    ? baseOrientation === "white"
+      ? "black"
+      : "white"
+    : baseOrientation;
   const isMyTurn =
     phase === "game" &&
     !thinking &&
@@ -820,9 +850,30 @@ export default function PlayBotPage() {
               </div>
             )}
             {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+
+            <button
+              onClick={() => setShowShortcuts(true)}
+              className="w-full py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              Keyboard shortcuts (?)
+            </button>
           </div>
         </div>
       </div>
+
+      <KeyboardShortcutsHelp
+        open={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
+        shortcuts={[
+          { key: "←/→", description: "Previous/next move" },
+          { key: "Home/End", description: "First/last move" },
+          { key: "F", description: "Flip board" },
+          ...(activeSettings.hints ? [{ key: "H", description: "Hint" }] : []),
+          { key: "R", description: "Resign" },
+          { key: "Esc", description: "Close modal" },
+          { key: "?", description: "This help" },
+        ]}
+      />
 
       <ConfirmModal
         open={confirmResign}

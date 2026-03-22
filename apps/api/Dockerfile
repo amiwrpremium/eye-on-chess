@@ -1,10 +1,10 @@
-FROM node:22-bookworm-slim
+FROM eyeonchess-base AS base
 
-RUN apt-get update && apt-get install -y --no-install-recommends stockfish openssl && rm -rf /var/lib/apt/lists/*
+# API needs stockfish for bot games
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends stockfish && \
+    rm -rf /var/lib/apt/lists/*
 ENV PATH="/usr/games:${PATH}"
-RUN npm install -g pnpm@10.32.1
-
-WORKDIR /app
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY apps/api/package.json ./apps/api/

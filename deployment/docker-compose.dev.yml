@@ -1,6 +1,18 @@
+name: eyeonchess-dev
+
 services:
+  # ── Base image (build-only, not a running service) ───
+  base:
+    image: eyeonchess-base
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.base
+    profiles: [build]
+
+  # ── Data stores ──────────────────────────────────────
   postgres:
-    image: postgres:alpine
+    image: postgres:16-alpine
+    container_name: eyeonchess-dev-postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -15,14 +27,32 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
+    container_name: eyeonchess-dev-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          memory: 32M
 
+  # ── Application ──────────────────────────────────────
   api:
+    image: eyeonchess-api
+    container_name: eyeonchess-dev-api
     build:
       context: ..
       dockerfile: apps/api/Dockerfile
@@ -40,8 +70,17 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          memory: 256M
 
   worker:
+    image: eyeonchess-worker
+    container_name: eyeonchess-dev-worker
     build:
       context: ..
       dockerfile: apps/api/Dockerfile.worker
@@ -57,8 +96,17 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          memory: 256M
 
   web:
+    image: eyeonchess-web
+    container_name: eyeonchess-dev-web
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
@@ -72,6 +120,13 @@ services:
       - ../packages/chess/src:/app/packages/chess/src
     depends_on:
       - api
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
 
 volumes:
   pgdata:

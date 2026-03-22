@@ -1,8 +1,4 @@
-FROM node:22-alpine
-
-RUN npm install -g pnpm@10.32.1
-
-WORKDIR /app
+FROM eyeonchess-base AS base
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY apps/web/package.json ./apps/web/

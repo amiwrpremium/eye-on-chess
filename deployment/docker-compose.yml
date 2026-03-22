@@ -1,6 +1,18 @@
+name: eyeonchess
+
 services:
+  # ── Base image (build-only) ──────────────────────────
+  base:
+    image: eyeonchess-base
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.base
+    profiles: [build]
+
+  # ── Reverse proxy ────────────────────────────────────
   nginx:
     image: nginx:alpine
+    container_name: eyeonchess-nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -16,9 +28,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          memory: 32M
 
+  # ── Data stores ──────────────────────────────────────
   postgres:
-    image: postgres:alpine
+    image: postgres:16-alpine
+    container_name: eyeonchess-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -31,17 +52,35 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          memory: 256M
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
+    container_name: eyeonchess-redis
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          memory: 64M
 
+  # ── Application ──────────────────────────────────────
   api:
+    image: eyeonchess-api
+    container_name: eyeonchess-api
     build:
       context: ..
       dockerfile: apps/api/Dockerfile.prod
@@ -58,8 +97,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          memory: 256M
 
   web:
+    image: eyeonchess-web
+    container_name: eyeonchess-web
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
@@ -73,8 +121,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
 
   worker:
+    image: eyeonchess-worker
+    container_name: eyeonchess-worker
     build:
       context: ..
       dockerfile: apps/api/Dockerfile.worker
@@ -86,11 +143,18 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          memory: 256M
 
   # ── Observability ────────────────────────────────────
-
   prometheus:
     image: prom/prometheus:v3.4.1
+    container_name: eyeonchess-prometheus
     restart: unless-stopped
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -98,16 +162,32 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.retention.time=30d"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          memory: 128M
 
   loki:
     image: grafana/loki:3.5.0
+    container_name: eyeonchess-loki
     restart: unless-stopped
     volumes:
       - loki_data:/loki
     command: -config.expand-env=true
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          memory: 128M
 
   promtail:
     image: grafana/promtail:3.5.0
+    container_name: eyeonchess-promtail
     restart: unless-stopped
     volumes:
       - ./promtail/promtail.yml:/etc/promtail/config.yml:ro
@@ -115,9 +195,17 @@ services:
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          memory: 32M
 
   grafana:
     image: grafana/grafana:11.6.0
+    container_name: eyeonchess-grafana
     restart: unless-stopped
     ports:
       - "${GRAFANA_PORT:-3003}:3000"
@@ -132,6 +220,13 @@ services:
     depends_on:
       - prometheus
       - loki
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
 
 volumes:
   pgdata:

@@ -32,13 +32,16 @@ help: ## Show this help
 	@echo ""
 
 # ── Production ───────────────────────────────────────────
-up: ## Start production (Nginx on port 80)
+up: build-base ## Start production (Nginx on port 80)
 	$(PROD_COMPOSE) up -d
 
 down: ## Stop production
 	$(PROD_COMPOSE) down
 
-build: ## Build production images
+build-base: ## Build the shared base Docker image
+	docker build -f deployment/Dockerfile.base -t eyeonchess-base ..
+
+build: build-base ## Build all production images
 	$(PROD_COMPOSE) build
 
 logs: ## Tail all production logs
@@ -66,10 +69,10 @@ logs-redis: ## Tail production Redis logs
 	$(PROD_COMPOSE) logs -f redis
 
 # ── Development ──────────────────────────────────────────
-dev: ## Start development (hot reload, ports 3000/3001)
+dev: build-base ## Start development (hot reload, ports 3000/3001)
 	$(DEV_COMPOSE) up --build
 
-dev-up: ## Start development in background
+dev-up: build-base ## Start development in background
 	$(DEV_COMPOSE) up --build -d
 
 dev-down: ## Stop development

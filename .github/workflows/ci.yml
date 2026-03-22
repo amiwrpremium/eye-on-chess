@@ -71,6 +71,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+
       - name: Build API Docker image
         run: docker build -f apps/api/Dockerfile -t eyeonchess-api .
 
@@ -81,6 +84,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+
       - name: Build Web Docker image
         run: docker build -f apps/web/Dockerfile -t eyeonchess-web .
 
@@ -90,6 +96,9 @@ jobs:
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v4
+
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
 
       - name: Build Worker Docker image
         run: docker build -f apps/api/Dockerfile.worker -t eyeonchess-worker .
@@ -103,6 +112,9 @@ jobs:
 
       - name: Copy env
         run: cp .env.example .env
+
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
 
       - name: Start services
         run: docker compose -f deployment/docker-compose.dev.yml up --build -d

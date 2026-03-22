@@ -53,27 +53,19 @@ const nextConfig = {
     return [
       {
         source: "/sounds/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=2592000, immutable" },
-        ],
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000, immutable" }],
       },
       {
         source: "/icons/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=2592000, immutable" },
-        ],
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000, immutable" }],
       },
       {
         source: "/logo.png",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=2592000" },
-        ],
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000" }],
       },
       {
         source: "/manifest.json",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=86400" },
-        ],
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
       },
     ];
   },

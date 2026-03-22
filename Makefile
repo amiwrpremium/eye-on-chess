@@ -2,7 +2,7 @@
        dev dev-up dev-down dev-build dev-logs dev-restart dev-ps \
        logs-api logs-web logs-worker logs-postgres logs-redis \
        dev-logs-api dev-logs-web dev-logs-worker dev-logs-postgres dev-logs-redis \
-       db-migrate db-seed db-studio db-reset \
+       db-migrate db-seed seed-demo db-studio db-reset \
        backup restore \
        clean clean-volumes clean-all \
        test test-api test-web test-chess test-coverage test-watch \
@@ -117,6 +117,9 @@ db-migrate: ## Run Prisma migrations (dev compose)
 
 db-seed: ## Run database seed (dev compose)
 	$(DEV_COMPOSE) exec api pnpm --filter @eyeonchess/api run db:seed
+
+seed-demo: ## Populate DB with demo data (10 users, friendships, games, collection)
+	$(DEV_COMPOSE) exec api pnpm --filter @eyeonchess/api run db:seed-demo
 
 db-studio: ## Open Prisma Studio (requires: make dev-up)
 	DATABASE_URL=postgresql://postgres:postgres@localhost:5432/eyeonchess pnpm --filter @eyeonchess/api exec prisma studio

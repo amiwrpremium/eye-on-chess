@@ -1,15 +1,13 @@
 // Stockfish Web Worker
 // Loads the WASM engine and communicates via postMessage
+// Note: worker.wasm must exist alongside this file (copy of stockfish.wasm)
+// because Emscripten resolves the WASM filename from the script name.
 
 let engine = null;
 
 importScripts("/stockfish/stockfish.js");
 
-Stockfish({
-  locateFile: function (path) {
-    return "/stockfish/" + path;
-  },
-}).then((sf) => {
+Stockfish().then((sf) => {
   engine = sf;
 
   engine.addMessageListener((line) => {

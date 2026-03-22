@@ -5,3 +5,4 @@ dist/
 pnpm-lock.yaml
 backups/
 *.sql
+apps/web/public/stockfish/

@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import GameNoteEditor from "../../../../components/GameNoteEditor";
+import KeyboardShortcutsHelp from "../../../../components/KeyboardShortcutsHelp";
+import { useKeyboardShortcuts } from "../../../../lib/useKeyboardShortcuts";
 import api from "../../../../lib/api";
 import { useAuthStore } from "../../../../stores/auth";
 import ChessBoard from "../../../../components/ChessBoard";
@@ -70,6 +72,17 @@ export default function AnalysisPage() {
   const [black, setBlack] = useState<Player | null>(null);
   const [currentPly, setCurrentPly] = useState(0);
   const [startingFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
+  const totalMoves = analysis?.feedback.length || 0;
+  useKeyboardShortcuts({
+    ArrowLeft: () => setCurrentPly((p) => Math.max(0, p - 1)),
+    ArrowRight: () => setCurrentPly((p) => Math.min(totalMoves, p + 1)),
+    Home: () => setCurrentPly(0),
+    End: () => setCurrentPly(totalMoves),
+    Escape: () => setShowShortcuts(false),
+    "?": () => setShowShortcuts((s) => !s),
+  });
 
   useEffect(() => {
     fetchMe();
@@ -400,6 +413,17 @@ export default function AnalysisPage() {
           </div>
         </div>
       </div>
+
+      <KeyboardShortcutsHelp
+        open={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
+        shortcuts={[
+          { key: "←/→", description: "Previous/next move" },
+          { key: "Home/End", description: "First/last move" },
+          { key: "Esc", description: "Close modal" },
+          { key: "?", description: "This help" },
+        ]}
+      />
     </main>
   );
 }

@@ -9,7 +9,9 @@ import ChessBoard from "../../../components/ChessBoard";
 import MoveList from "../../../components/MoveList";
 import PlayerClock from "../../../components/PlayerClock";
 import ConfirmModal from "../../../components/ConfirmModal";
+import KeyboardShortcutsHelp from "../../../components/KeyboardShortcutsHelp";
 import { useSound, detectMoveSound } from "../../../lib/useSound";
+import { useKeyboardShortcuts } from "../../../lib/useKeyboardShortcuts";
 
 interface Player {
   id: string;
@@ -63,6 +65,24 @@ export default function GamePage() {
   const [rematchIncoming, setRematchIncoming] = useState(false);
 
   const sound = useSound();
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
+  useKeyboardShortcuts({
+    ArrowLeft: () => setCurrentPly((p) => Math.max(0, p - 1)),
+    ArrowRight: () => setCurrentPly((p) => Math.min(moves.length, p + 1)),
+    Home: () => setCurrentPly(0),
+    End: () => setCurrentPly(moves.length),
+    r: () => status === "ACTIVE" && !gameOver && setConfirmResign(true),
+    R: () => status === "ACTIVE" && !gameOver && setConfirmResign(true),
+    Escape: () => {
+      setConfirmResign(false);
+      setConfirmDraw(false);
+      setConfirmAcceptDraw(false);
+      setShowShortcuts(false);
+    },
+    "?": () => setShowShortcuts((s) => !s),
+  });
+
   const joinedRef = useRef(false);
 
   const isWhite = user?.id === white?.id;
@@ -509,6 +529,18 @@ export default function GamePage() {
           </div>
         </div>
       )}
+
+      <KeyboardShortcutsHelp
+        open={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
+        shortcuts={[
+          { key: "←/→", description: "Previous/next move" },
+          { key: "Home/End", description: "First/last move" },
+          { key: "R", description: "Resign" },
+          { key: "Esc", description: "Close modal" },
+          { key: "?", description: "This help" },
+        ]}
+      />
 
       {/* Confirmation modals */}
       <ConfirmModal

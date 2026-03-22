@@ -1,5 +1,6 @@
 import { redis } from "./redis.js";
 import type { ClockState } from "@eyeonchess/chess";
+/** Re-exported clock state representing each player's remaining time and turn info. */
 export type { ClockState } from "@eyeonchess/chess";
 
 function clockKey(gameId: string) {
@@ -8,6 +9,12 @@ function clockKey(gameId: string) {
 
 const ACTIVE_GAMES_KEY = "active_games";
 
+/**
+ * Initialize clocks for a new game and register it as active.
+ * @param gameId - The game identifier.
+ * @param initialTimeMs - Starting time for each player in milliseconds.
+ * @param incrementMs - Increment added per move in milliseconds.
+ */
 export async function initClocks(gameId: string, initialTimeMs: number, incrementMs: number) {
   const state: ClockState = {
     whiteTimeLeft: initialTimeMs,
@@ -20,12 +27,22 @@ export async function initClocks(gameId: string, initialTimeMs: number, incremen
   await redis.sadd(ACTIVE_GAMES_KEY, gameId);
 }
 
+/**
+ * Retrieve the stored clock state for a game without adjusting for elapsed time.
+ * @param gameId - The game identifier.
+ * @returns The clock state, or null if not found.
+ */
 export async function getClocks(gameId: string): Promise<ClockState | null> {
   const raw = await redis.get(clockKey(gameId));
   if (!raw) return null;
   return JSON.parse(raw);
 }
 
+/**
+ * Retrieve the clock state with elapsed time deducted for the active player.
+ * @param gameId - The game identifier.
+ * @returns The real-time adjusted clock state, or null if not found.
+ */
 export async function getClocksRealtime(gameId: string): Promise<ClockState | null> {
   const state = await getClocks(gameId);
   if (!state) return null;
@@ -40,6 +57,12 @@ export async function getClocksRealtime(gameId: string): Promise<ClockState | nu
   return state;
 }
 
+/**
+ * Update clocks after a move: deduct elapsed time, add increment, and switch turns.
+ * @param gameId - The game identifier.
+ * @param isUnlimited - If true, skip time deduction and increment.
+ * @returns The updated clock state, or null if not found.
+ */
 export async function onMove(gameId: string, isUnlimited: boolean): Promise<ClockState | null> {
   const state = await getClocks(gameId);
   if (!state) return null;
@@ -60,6 +83,11 @@ export async function onMove(gameId: string, isUnlimited: boolean): Promise<Cloc
   return state;
 }
 
+/**
+ * Check whether either player has run out of time.
+ * @param gameId - The game identifier.
+ * @returns The color that timed out, or null if neither has.
+ */
 export async function isTimeout(gameId: string): Promise<"white" | "black" | null> {
   const state = await getClocksRealtime(gameId);
   if (!state) return null;
@@ -68,11 +96,19 @@ export async function isTimeout(gameId: string): Promise<"white" | "black" | nul
   return null;
 }
 
+/**
+ * Remove a game from the active set and delete its clock data from Redis.
+ * @param gameId - The game identifier.
+ */
 export async function removeActiveGame(gameId: string) {
   await redis.srem(ACTIVE_GAMES_KEY, gameId);
   await redis.del(clockKey(gameId));
 }
 
+/**
+ * Return the IDs of all games currently tracked as active.
+ * @returns An array of active game IDs.
+ */
 export async function getActiveGameIds(): Promise<string[]> {
   return redis.smembers(ACTIVE_GAMES_KEY);
 }

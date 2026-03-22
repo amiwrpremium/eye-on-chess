@@ -12,6 +12,7 @@ import {
   sanitizeString,
 } from "../middleware/admin.js";
 
+/** Register admin routes (user management, site settings, CSRF tokens). */
 export async function adminRoutes(app: FastifyInstance) {
   // All admin routes require auth + admin role + rate limiting
   app.addHook("preHandler", authMiddleware);

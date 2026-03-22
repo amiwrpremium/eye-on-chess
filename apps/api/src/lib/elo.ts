@@ -6,6 +6,13 @@ function expectedScore(ratingA: number, ratingB: number): number {
   return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
 }
 
+/**
+ * Compute new Elo ratings for both players after a game.
+ * @param whiteRating - Current rating of the white player.
+ * @param blackRating - Current rating of the black player.
+ * @param result - The outcome of the game.
+ * @returns Updated ratings for both players.
+ */
 export function computeElo(
   whiteRating: number,
   blackRating: number,

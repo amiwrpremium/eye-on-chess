@@ -1,6 +1,7 @@
 import { Chess } from "chess.js";
 import type { MoveClassification } from "@eyeonchess/chess";
 
+/** Result of classifying a single chess move with its evaluation data. */
 export interface ClassifiedMove {
   classification: MoveClassification;
   cpLoss: number;
@@ -50,6 +51,16 @@ function isSacrifice(fen: string, moveUCI: string): boolean {
   }
 }
 
+/**
+ * Classify a played move by comparing engine evaluations before and after.
+ * @param fen - Board position before the move.
+ * @param playedMoveUCI - The move that was played in UCI format.
+ * @param evalBefore - Centipawn evaluation before the move (white's perspective).
+ * @param evalAfter - Centipawn evaluation after the move (white's perspective).
+ * @param bestMoveUCI - The engine's best move in UCI format.
+ * @param nextBestEval - Evaluation of the second-best move, or null if unavailable.
+ * @returns The classified move with its category and centipawn loss.
+ */
 export function classifyMove(
   fen: string,
   playedMoveUCI: string,
@@ -123,6 +134,11 @@ export function classifyMove(
   };
 }
 
+/**
+ * Compute overall accuracy percentage from an array of centipawn losses.
+ * @param cpLosses - Array of centipawn loss values for each move.
+ * @returns Accuracy as a percentage (0-100), rounded to one decimal.
+ */
 export function computeAccuracy(cpLosses: number[]): number {
   if (cpLosses.length === 0) return 100;
   const sum = cpLosses.reduce((acc, loss) => {

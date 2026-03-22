@@ -10,6 +10,7 @@ function statusKey(gameId: string) {
   return `analysis:status:${gameId}`;
 }
 
+/** Register analysis routes (request analysis, check status, get results). */
 export async function analysisRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authMiddleware);
 

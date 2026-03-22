@@ -66,6 +66,10 @@ function loadConfig(): RateLimitConfig {
   }
 }
 
+/**
+ * Load rate-limit configuration from YAML and start watching for hot-reloads.
+ * @returns The loaded rate-limit configuration.
+ */
 export function initRateLimitConfig(): RateLimitConfig {
   currentConfig = loadConfig();
 
@@ -85,12 +89,19 @@ export function initRateLimitConfig(): RateLimitConfig {
   return currentConfig;
 }
 
+/**
+ * Return the current in-memory rate-limit configuration.
+ * @returns The active rate-limit configuration.
+ */
 export function getRateLimitConfig(): RateLimitConfig {
   return currentConfig;
 }
 
-// Match a request URL against configured route patterns.
-// Supports wildcard patterns.
+/**
+ * Match a request URL against configured route patterns (exact or wildcard).
+ * @param url - The request URL path to match.
+ * @returns The matching route limit, or the global default.
+ */
 export function getRouteLimit(url: string): RouteLimit {
   const routes = currentConfig.routes;
 

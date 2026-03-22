@@ -2,18 +2,21 @@ import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 
 const STOCKFISH_PATH = process.env.STOCKFISH_PATH || "stockfish";
 
+/** Engine evaluation result for a single position. */
 export interface EvalResult {
   score: number; // centipawns (from white's perspective)
   mate: number | null; // mate in N (positive = white mates, negative = black mates)
   bestMove: string; // UCI format e.g. "e2e4"
 }
 
+/** Wrapper around the Stockfish UCI chess engine for position evaluation. */
 export class StockfishEngine {
   private process: ChildProcessWithoutNullStreams | null = null;
   private buffer = "";
   private resolveCallback: ((value: string[]) => void) | null = null;
   private lines: string[] = [];
 
+  /** Spawn the Stockfish process and wait for UCI initialization. */
   async init(): Promise<void> {
     this.process = spawn(STOCKFISH_PATH);
     this.process.stdout.on("data", (data: Buffer) => {
@@ -37,6 +40,12 @@ export class StockfishEngine {
     await this.send("isready", "readyok");
   }
 
+  /**
+   * Send a UCI command and wait for a specific response keyword.
+   * @param command - The UCI command string.
+   * @param waitFor - The keyword to wait for in the engine output.
+   * @returns All output lines received until the keyword was found.
+   */
   send(command: string, waitFor: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
       if (!this.process) {
@@ -57,6 +66,12 @@ export class StockfishEngine {
     });
   }
 
+  /**
+   * Evaluate a position and return the best move with score.
+   * @param fen - The position in FEN notation.
+   * @param depth - Search depth (default 18).
+   * @returns The evaluation result with score from white's perspective.
+   */
   async evaluatePosition(fen: string, depth: number = 18): Promise<EvalResult> {
     if (!this.process) throw new Error("Stockfish not initialized");
 
@@ -109,6 +124,13 @@ export class StockfishEngine {
     return { score, mate, bestMove };
   }
 
+  /**
+   * Evaluate a position with multiple principal variations.
+   * @param fen - The position in FEN notation.
+   * @param depth - Search depth (default 18).
+   * @param multiPV - Number of principal variations to return (default 2).
+   * @returns Array of evaluation results, one per PV line.
+   */
   async evaluatePositionMultiPV(
     fen: string,
     depth: number = 18,
@@ -180,6 +202,7 @@ export class StockfishEngine {
     return results;
   }
 
+  /** Quit the Stockfish process and release resources. */
   destroy(): void {
     if (this.process) {
       this.process.stdin.write("quit\n");

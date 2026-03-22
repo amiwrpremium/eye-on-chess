@@ -1,5 +1,6 @@
 import { prisma } from "./prisma.js";
 
+/** Configuration data for site-wide settings. */
 export interface SiteSettingsData {
   siteName: string;
   registrationOpen: boolean;
@@ -7,6 +8,10 @@ export interface SiteSettingsData {
   requireEmailVerification: boolean;
 }
 
+/**
+ * Load site settings from the database, falling back to environment variables.
+ * @returns The resolved site settings.
+ */
 export async function getSiteSettings(): Promise<SiteSettingsData> {
   const settings = await prisma.siteSettings.findUnique({
     where: { id: "singleton" },

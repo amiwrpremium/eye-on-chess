@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
 
+/** Register user routes (profile, search, update, avatar). */
 export async function userRoutes(app: FastifyInstance) {
   // Search users by partial username
   app.get<{ Querystring: { q?: string } }>(

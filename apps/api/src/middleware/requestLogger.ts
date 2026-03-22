@@ -53,6 +53,10 @@ function redactHeaders(
   return safe;
 }
 
+/**
+ * Register request/response logging hooks that redact sensitive fields.
+ * @param app - The Fastify application instance.
+ */
 export function registerRequestLogger(app: FastifyInstance) {
   app.addHook("onRequest", async (request) => {
     request.log.info(

@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
 
+/** Register collection routes (create, update, delete, manage game collections). */
 export async function collectionRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authMiddleware);
 

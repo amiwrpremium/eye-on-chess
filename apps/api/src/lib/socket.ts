@@ -5,6 +5,11 @@ import { setOnline, setOffline } from "./redis.js";
 
 let io: SocketServer;
 
+/**
+ * Initialize the Socket.IO server with JWT authentication and online-status tracking.
+ * @param httpServer - The HTTP server to attach Socket.IO to.
+ * @returns The configured Socket.IO server instance.
+ */
 export function setupSocket(httpServer: HttpServer) {
   io = new SocketServer(httpServer, {
     cors: {
@@ -44,6 +49,10 @@ export function setupSocket(httpServer: HttpServer) {
   return io;
 }
 
+/**
+ * Return the shared Socket.IO server instance.
+ * @returns The Socket.IO server.
+ */
 export function getIO(): SocketServer {
   return io;
 }

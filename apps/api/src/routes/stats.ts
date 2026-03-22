@@ -10,6 +10,7 @@ import {
   computeActivity,
 } from "../lib/statsCompute.js";
 
+/** Register stats routes (record, rating history, openings, streaks, activity). */
 export async function statsRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authMiddleware);
 

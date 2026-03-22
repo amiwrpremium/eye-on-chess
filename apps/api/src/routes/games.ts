@@ -15,6 +15,7 @@ import {
 } from "@eyeonchess/chess";
 import { detectGameEnd } from "../lib/gameHelpers.js";
 
+/** Register game routes (create, challenge, join, move, bot games). */
 export async function gameRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authMiddleware);
 

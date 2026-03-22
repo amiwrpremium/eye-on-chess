@@ -15,6 +15,13 @@ async function getEngine(): Promise<StockfishEngine> {
   return engine;
 }
 
+/**
+ * Get the best move from the bot engine at a given Elo strength.
+ * @param fen - The current board position in FEN notation.
+ * @param elo - Target Elo strength for the bot (clamped to 200-3200).
+ * @param maxTimeMs - Maximum thinking time in milliseconds.
+ * @returns The best move in UCI format (e.g. "e2e4").
+ */
 export async function getBotMove(
   fen: string,
   elo: number,

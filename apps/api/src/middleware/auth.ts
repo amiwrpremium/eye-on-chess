@@ -7,6 +7,11 @@ declare module "fastify" {
   }
 }
 
+/**
+ * Fastify preHandler that verifies the Bearer JWT and attaches the user payload to the request.
+ * @param request - The incoming Fastify request.
+ * @param reply - The Fastify reply used to send 401 on failure.
+ */
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
   const header = request.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {

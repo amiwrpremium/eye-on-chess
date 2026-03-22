@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { bulkIsOnline } from "../lib/redis.js";
 
+/** Register friend routes (send request, accept, remove, list friends). */
 export async function friendRoutes(app: FastifyInstance) {
   // All friend routes require auth
   app.addHook("preHandler", authMiddleware);

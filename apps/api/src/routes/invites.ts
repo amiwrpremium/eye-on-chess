@@ -6,6 +6,7 @@ import { authMiddleware } from "../middleware/auth.js";
 const BATCH_SIZE = 10;
 const UNLOCK_THRESHOLD = 0.75;
 
+/** Register invite routes (create, accept, decline, list invites). */
 export async function inviteRoutes(app: FastifyInstance) {
   // Validate invite (public — no auth needed)
   app.get<{ Params: { code: string } }>("/api/invites/validate/:code", async (request, reply) => {

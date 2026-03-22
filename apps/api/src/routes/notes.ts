@@ -5,6 +5,7 @@ import { sanitizeString } from "../middleware/admin.js";
 
 const MAX_NOTE_LENGTH = 2000;
 
+/** Register note routes (create, update, delete game notes). */
 export async function noteRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authMiddleware);
 

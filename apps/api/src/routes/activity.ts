@@ -4,6 +4,7 @@ import { redis } from "../lib/redis.js";
 import { authMiddleware } from "../middleware/auth.js";
 import type { ActivityEvent } from "@eyeonchess/chess";
 
+/** Register activity feed routes (list recent activity events). */
 export async function activityRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authMiddleware);
 

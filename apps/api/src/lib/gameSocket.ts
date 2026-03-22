@@ -79,6 +79,10 @@ async function endGame(
   });
 }
 
+/**
+ * Register all game-related socket event handlers (moves, resign, draw, rematch, reactions).
+ * @param io - The Socket.IO server instance.
+ */
 export function setupGameSocket(io: SocketServer) {
   // Track draw offers: gameId -> offeringUserId
   const drawOffers = new Map<string, string>();

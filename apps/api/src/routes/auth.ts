@@ -41,6 +41,7 @@ async function createTokens(user: { id: string; email: string; username: string;
   return { accessToken, rawRefreshToken };
 }
 
+/** Register authentication routes (register, login, refresh, logout). */
 export async function authRoutes(app: FastifyInstance) {
   // ── Register ──────────────────────────────────────
   app.post<{

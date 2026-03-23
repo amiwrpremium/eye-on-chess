@@ -21,6 +21,7 @@ import { getSiteSettings } from "./lib/settings.js";
 import { prisma } from "./lib/prisma.js";
 import { redis } from "./lib/redis.js";
 import { registerRequestLogger } from "./middleware/requestLogger.js";
+import { registerEtag } from "./middleware/etag.js";
 import { initRateLimitConfig, getRouteLimit } from "./lib/rateLimit.js";
 
 async function main() {
@@ -66,6 +67,9 @@ async function main() {
 
   // Request logging (redacts sensitive fields)
   registerRequestLogger(fastify);
+
+  // ETag headers for conditional GET requests
+  registerEtag(fastify);
 
   // Prometheus metrics at /metrics
   await fastify.register(metricsPlugin, {

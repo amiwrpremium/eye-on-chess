@@ -7,6 +7,18 @@ import {
   friendActionBodySchema,
   friendshipIdParamSchema,
 } from "../lib/schemas.js";
+import {
+  apiError,
+  FRIEND_USER_NOT_FOUND,
+  FRIEND_SELF_REQUEST,
+  FRIEND_ALREADY_FRIENDS,
+  FRIEND_ALREADY_PENDING,
+  FRIEND_REQUEST_NOT_FOUND,
+  FRIEND_NOT_RECIPIENT,
+  FRIEND_NOT_PENDING,
+  FRIEND_NOT_FOUND,
+  FRIEND_NOT_PARTICIPANT,
+} from "../lib/errorCodes.js";
 
 /** Register friend routes (send request, accept, remove, list friends). */
 export async function friendRoutes(app: FastifyInstance) {
@@ -85,11 +97,11 @@ export async function friendRoutes(app: FastifyInstance) {
 
       const target = await prisma.user.findUnique({ where: { username } });
       if (!target) {
-        return reply.status(404).send({ error: "User not found" });
+        return apiError(reply, 404, FRIEND_USER_NOT_FOUND, "User not found");
       }
 
       if (target.id === userId) {
-        return reply.status(400).send({ error: "Cannot send friend request to yourself" });
+        return apiError(reply, 400, FRIEND_SELF_REQUEST, "Cannot send friend request to yourself");
       }
 
       // Check for existing friendship in either direction
@@ -104,10 +116,10 @@ export async function friendRoutes(app: FastifyInstance) {
 
       if (existing) {
         if (existing.status === "ACCEPTED") {
-          return reply.status(409).send({ error: "Already friends" });
+          return apiError(reply, 409, FRIEND_ALREADY_FRIENDS, "Already friends");
         }
         if (existing.status === "PENDING") {
-          return reply.status(409).send({ error: "Friend request already pending" });
+          return apiError(reply, 409, FRIEND_ALREADY_PENDING, "Friend request already pending");
         }
         if (existing.status === "DECLINED") {
           // Allow re-requesting after decline
@@ -147,15 +159,15 @@ export async function friendRoutes(app: FastifyInstance) {
       });
 
       if (!friendship) {
-        return reply.status(404).send({ error: "Request not found" });
+        return apiError(reply, 404, FRIEND_REQUEST_NOT_FOUND, "Request not found");
       }
 
       if (friendship.addresseeId !== userId) {
-        return reply.status(403).send({ error: "Only the recipient can accept" });
+        return apiError(reply, 403, FRIEND_NOT_RECIPIENT, "Only the recipient can accept");
       }
 
       if (friendship.status !== "PENDING") {
-        return reply.status(400).send({ error: "Request is not pending" });
+        return apiError(reply, 400, FRIEND_NOT_PENDING, "Request is not pending");
       }
 
       await prisma.friendship.update({
@@ -180,15 +192,15 @@ export async function friendRoutes(app: FastifyInstance) {
       });
 
       if (!friendship) {
-        return reply.status(404).send({ error: "Request not found" });
+        return apiError(reply, 404, FRIEND_REQUEST_NOT_FOUND, "Request not found");
       }
 
       if (friendship.addresseeId !== userId) {
-        return reply.status(403).send({ error: "Only the recipient can decline" });
+        return apiError(reply, 403, FRIEND_NOT_RECIPIENT, "Only the recipient can decline");
       }
 
       if (friendship.status !== "PENDING") {
-        return reply.status(400).send({ error: "Request is not pending" });
+        return apiError(reply, 400, FRIEND_NOT_PENDING, "Request is not pending");
       }
 
       await prisma.friendship.update({
@@ -212,11 +224,11 @@ export async function friendRoutes(app: FastifyInstance) {
       });
 
       if (!friendship) {
-        return reply.status(404).send({ error: "Friendship not found" });
+        return apiError(reply, 404, FRIEND_NOT_FOUND, "Friendship not found");
       }
 
       if (friendship.requesterId !== userId && friendship.addresseeId !== userId) {
-        return reply.status(403).send({ error: "Not part of this friendship" });
+        return apiError(reply, 403, FRIEND_NOT_PARTICIPANT, "Not part of this friendship");
       }
 
       await prisma.friendship.delete({ where: { id: friendshipId } });

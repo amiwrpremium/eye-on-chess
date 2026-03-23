@@ -3,6 +3,13 @@ import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { parsePagination, paginationMeta } from "../lib/pagination.js";
 import { createCollectionBodySchema, addGameToCollectionBodySchema } from "../lib/schemas.js";
+import {
+  apiError,
+  COLLECTION_NOT_FOUND,
+  COLLECTION_FORBIDDEN,
+  COLLECTION_FAVORITES_PROTECTED,
+  COLLECTION_NAME_EXISTS,
+} from "../lib/errorCodes.js";
 
 /** Register collection routes (create, update, delete, manage game collections). */
 export async function collectionRoutes(app: FastifyInstance) {
@@ -40,7 +47,12 @@ export async function collectionRoutes(app: FastifyInstance) {
         where: { userId_name: { userId, name: trimmed } },
       });
       if (existing) {
-        return reply.status(409).send({ error: "Collection with this name already exists" });
+        return apiError(
+          reply,
+          409,
+          COLLECTION_NAME_EXISTS,
+          "Collection with this name already exists"
+        );
       }
 
       const collection = await prisma.collection.create({
@@ -57,11 +69,16 @@ export async function collectionRoutes(app: FastifyInstance) {
     const { id } = request.params;
 
     const collection = await prisma.collection.findUnique({ where: { id } });
-    if (!collection) return reply.status(404).send({ error: "Collection not found" });
+    if (!collection) return apiError(reply, 404, COLLECTION_NOT_FOUND, "Collection not found");
     if (collection.userId !== userId)
-      return reply.status(403).send({ error: "Not your collection" });
+      return apiError(reply, 403, COLLECTION_FORBIDDEN, "Not your collection");
     if (collection.name === "Favorites") {
-      return reply.status(400).send({ error: "Cannot delete Favorites collection" });
+      return apiError(
+        reply,
+        400,
+        COLLECTION_FAVORITES_PROTECTED,
+        "Cannot delete Favorites collection"
+      );
     }
 
     await prisma.collection.delete({ where: { id } });
@@ -77,9 +94,9 @@ export async function collectionRoutes(app: FastifyInstance) {
       const { page, limit, skip, take } = parsePagination(request.query);
 
       const collection = await prisma.collection.findUnique({ where: { id } });
-      if (!collection) return reply.status(404).send({ error: "Collection not found" });
+      if (!collection) return apiError(reply, 404, COLLECTION_NOT_FOUND, "Collection not found");
       if (collection.userId !== userId)
-        return reply.status(403).send({ error: "Not your collection" });
+        return apiError(reply, 403, COLLECTION_FORBIDDEN, "Not your collection");
 
       const [items, total] = await Promise.all([
         prisma.gameCollection.findMany({
@@ -126,9 +143,9 @@ export async function collectionRoutes(app: FastifyInstance) {
       const { gameId } = request.body;
 
       const collection = await prisma.collection.findUnique({ where: { id } });
-      if (!collection) return reply.status(404).send({ error: "Collection not found" });
+      if (!collection) return apiError(reply, 404, COLLECTION_NOT_FOUND, "Collection not found");
       if (collection.userId !== userId)
-        return reply.status(403).send({ error: "Not your collection" });
+        return apiError(reply, 403, COLLECTION_FORBIDDEN, "Not your collection");
 
       const existing = await prisma.gameCollection.findUnique({
         where: { gameId_collectionId: { gameId, collectionId: id } },
@@ -148,9 +165,9 @@ export async function collectionRoutes(app: FastifyInstance) {
       const { id, gameId } = request.params;
 
       const collection = await prisma.collection.findUnique({ where: { id } });
-      if (!collection) return reply.status(404).send({ error: "Collection not found" });
+      if (!collection) return apiError(reply, 404, COLLECTION_NOT_FOUND, "Collection not found");
       if (collection.userId !== userId)
-        return reply.status(403).send({ error: "Not your collection" });
+        return apiError(reply, 403, COLLECTION_FORBIDDEN, "Not your collection");
 
       await prisma.gameCollection
         .delete({ where: { gameId_collectionId: { gameId, collectionId: id } } })

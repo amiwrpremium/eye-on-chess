@@ -12,6 +12,17 @@ import {
   sanitizeString,
 } from "../middleware/admin.js";
 import { adminCreateUserBodySchema } from "../lib/schemas.js";
+import {
+  apiError,
+  ADMIN_SELF_DEMOTE,
+  ADMIN_SELF_DEACTIVATE,
+  ADMIN_LAST_ADMIN,
+  ADMIN_SELF_DELETE,
+  ADMIN_USER_NOT_FOUND,
+  ADMIN_EMAIL_EXISTS,
+  ADMIN_USERNAME_EXISTS,
+  ADMIN_GAME_NOT_FOUND,
+} from "../lib/errorCodes.js";
 
 /** Register admin routes (user management, site settings, CSRF tokens). */
 export async function adminRoutes(app: FastifyInstance) {
@@ -144,11 +155,11 @@ export async function adminRoutes(app: FastifyInstance) {
     const adminId = request.user.userId;
 
     if (id === adminId && role && role !== "ADMIN") {
-      return reply.status(400).send({ error: "Cannot demote yourself" });
+      return apiError(reply, 400, ADMIN_SELF_DEMOTE, "Cannot demote yourself");
     }
 
     if (id === adminId && active === false) {
-      return reply.status(400).send({ error: "Cannot deactivate yourself" });
+      return apiError(reply, 400, ADMIN_SELF_DEACTIVATE, "Cannot deactivate yourself");
     }
 
     // Prevent removing last admin
@@ -156,7 +167,7 @@ export async function adminRoutes(app: FastifyInstance) {
       const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
       const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
       if (target?.role === "ADMIN" && adminCount <= 1) {
-        return reply.status(400).send({ error: "Cannot remove the last admin" });
+        return apiError(reply, 400, ADMIN_LAST_ADMIN, "Cannot remove the last admin");
       }
     }
 
@@ -188,7 +199,7 @@ export async function adminRoutes(app: FastifyInstance) {
     const adminId = request.user.userId;
 
     if (id === adminId) {
-      return reply.status(400).send({ error: "Cannot delete yourself" });
+      return apiError(reply, 400, ADMIN_SELF_DELETE, "Cannot delete yourself");
     }
 
     const target = await prisma.user.findUnique({
@@ -197,13 +208,13 @@ export async function adminRoutes(app: FastifyInstance) {
     });
 
     if (!target) {
-      return reply.status(404).send({ error: "User not found" });
+      return apiError(reply, 404, ADMIN_USER_NOT_FOUND, "User not found");
     }
 
     if (target.role === "ADMIN") {
       const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
       if (adminCount <= 1) {
-        return reply.status(400).send({ error: "Cannot delete the last admin" });
+        return apiError(reply, 400, ADMIN_LAST_ADMIN, "Cannot delete the last admin");
       }
     }
 
@@ -229,12 +240,12 @@ export async function adminRoutes(app: FastifyInstance) {
 
     const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail) {
-      return reply.status(409).send({ error: "Email already in use" });
+      return apiError(reply, 409, ADMIN_EMAIL_EXISTS, "Email already in use");
     }
 
     const existingUsername = await prisma.user.findUnique({ where: { username } });
     if (existingUsername) {
-      return reply.status(409).send({ error: "Username already taken" });
+      return apiError(reply, 409, ADMIN_USERNAME_EXISTS, "Username already taken");
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
@@ -336,7 +347,7 @@ export async function adminRoutes(app: FastifyInstance) {
     });
 
     if (!game) {
-      return reply.status(404).send({ error: "Game not found" });
+      return apiError(reply, 404, ADMIN_GAME_NOT_FOUND, "Game not found");
     }
 
     await prisma.game.delete({ where: { id } });

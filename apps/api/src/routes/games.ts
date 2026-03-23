@@ -16,6 +16,20 @@ import {
 } from "@eyeonchess/chess";
 import { detectGameEnd } from "../lib/gameHelpers.js";
 import {
+  apiError,
+  GAME_SELF_CHALLENGE,
+  GAME_NOT_FRIENDS,
+  GAME_NOT_FOUND,
+  GAME_ALREADY_RESOLVED,
+  GAME_NOT_PARTICIPANT,
+  GAME_NOT_ACTIVE,
+  GAME_NOT_BOT,
+  GAME_NOT_YOUR_TURN,
+  GAME_INVALID_MOVE,
+  GAME_INVALID_PRESET,
+  GAME_BOT_ERROR,
+} from "../lib/errorCodes.js";
+import {
   createFriendGameBodySchema,
   gameActionBodySchema,
   createBotGameBodySchema,
@@ -42,7 +56,7 @@ export async function gameRoutes(app: FastifyInstance) {
     const { friendId, preset, initialTime: customTime, increment: customIncrement } = request.body;
 
     if (friendId === userId) {
-      return reply.status(400).send({ error: "Cannot challenge yourself" });
+      return apiError(reply, 400, GAME_SELF_CHALLENGE, "Cannot challenge yourself");
     }
 
     // Verify friendship
@@ -57,7 +71,7 @@ export async function gameRoutes(app: FastifyInstance) {
     });
 
     if (!friendship) {
-      return reply.status(403).send({ error: "Must be friends to challenge" });
+      return apiError(reply, 403, GAME_NOT_FRIENDS, "Must be friends to challenge");
     }
 
     // Resolve time control
@@ -75,7 +89,7 @@ export async function gameRoutes(app: FastifyInstance) {
       increment = customIncrement ?? 0;
       timeControl = categorizeTimeControl(initialTime, increment);
     } else {
-      return reply.status(400).send({ error: "Must provide preset or custom time" });
+      return apiError(reply, 400, GAME_INVALID_PRESET, "Must provide preset or custom time");
     }
 
     // Randomly assign colors
@@ -124,15 +138,15 @@ export async function gameRoutes(app: FastifyInstance) {
 
       const game = await prisma.game.findUnique({ where: { id: gameId } });
       if (!game) {
-        return reply.status(404).send({ error: "Game not found" });
+        return apiError(reply, 404, GAME_NOT_FOUND, "Game not found");
       }
 
       if (game.status !== "WAITING") {
-        return reply.status(400).send({ error: "Challenge already resolved" });
+        return apiError(reply, 400, GAME_ALREADY_RESOLVED, "Challenge already resolved");
       }
 
       if (game.whiteId !== userId && game.blackId !== userId) {
-        return reply.status(403).send({ error: "Not part of this challenge" });
+        return apiError(reply, 403, GAME_NOT_PARTICIPANT, "Not part of this challenge");
       }
 
       await prisma.game.update({
@@ -164,15 +178,15 @@ export async function gameRoutes(app: FastifyInstance) {
 
       const game = await prisma.game.findUnique({ where: { id: gameId } });
       if (!game) {
-        return reply.status(404).send({ error: "Game not found" });
+        return apiError(reply, 404, GAME_NOT_FOUND, "Game not found");
       }
 
       if (game.status !== "WAITING") {
-        return reply.status(400).send({ error: "Challenge already resolved" });
+        return apiError(reply, 400, GAME_ALREADY_RESOLVED, "Challenge already resolved");
       }
 
       if (game.whiteId !== userId && game.blackId !== userId) {
-        return reply.status(403).send({ error: "Not part of this challenge" });
+        return apiError(reply, 403, GAME_NOT_PARTICIPANT, "Not part of this challenge");
       }
 
       await prisma.game.delete({ where: { id: gameId } });
@@ -200,7 +214,7 @@ export async function gameRoutes(app: FastifyInstance) {
     });
 
     if (!game) {
-      return reply.status(404).send({ error: "Game not found" });
+      return apiError(reply, 404, GAME_NOT_FOUND, "Game not found");
     }
 
     return { game };
@@ -220,7 +234,7 @@ export async function gameRoutes(app: FastifyInstance) {
     });
 
     if (!game) {
-      return reply.status(404).send({ error: "Game not found" });
+      return apiError(reply, 404, GAME_NOT_FOUND, "Game not found");
     }
 
     const date = game.createdAt.toISOString().split("T")[0].replace(/-/g, ".");
@@ -451,11 +465,11 @@ export async function gameRoutes(app: FastifyInstance) {
         include: { moves: { orderBy: { ply: "desc" }, take: 1 } },
       });
 
-      if (!game) return reply.status(404).send({ error: "Game not found" });
-      if (game.status !== "ACTIVE") return reply.status(400).send({ error: "Game not active" });
-      if (!game.isVsBot) return reply.status(400).send({ error: "Not a bot game" });
+      if (!game) return apiError(reply, 404, GAME_NOT_FOUND, "Game not found");
+      if (game.status !== "ACTIVE") return apiError(reply, 400, GAME_NOT_ACTIVE, "Game not active");
+      if (!game.isVsBot) return apiError(reply, 400, GAME_NOT_BOT, "Not a bot game");
       if (game.whiteId !== userId && game.blackId !== userId) {
-        return reply.status(403).send({ error: "Not your game" });
+        return apiError(reply, 403, GAME_NOT_PARTICIPANT, "Not your game");
       }
 
       const chess = new Chess(game.fen);
@@ -464,12 +478,12 @@ export async function gameRoutes(app: FastifyInstance) {
       const isWhiteTurn = chess.turn() === "w";
       const playerIsWhite = game.whiteId === userId;
       if (isWhiteTurn !== playerIsWhite) {
-        return reply.status(400).send({ error: "Not your turn" });
+        return apiError(reply, 400, GAME_NOT_YOUR_TURN, "Not your turn");
       }
 
       // Validate and apply player move
       const playerMove = chess.move({ from, to, promotion: promotion || undefined });
-      if (!playerMove) return reply.status(400).send({ error: "Invalid move" });
+      if (!playerMove) return apiError(reply, 400, GAME_INVALID_MOVE, "Invalid move");
 
       const currentPly = (game.moves[0]?.ply ?? 0) + 1;
 
@@ -534,7 +548,7 @@ export async function gameRoutes(app: FastifyInstance) {
       const botMove = chess.move({ from: botFrom, to: botTo, promotion: botPromotion });
 
       if (!botMove) {
-        return reply.status(500).send({ error: "Bot produced invalid move" });
+        return apiError(reply, 500, GAME_BOT_ERROR, "Bot produced invalid move");
       }
 
       const botPly = currentPly + 1;
@@ -608,10 +622,10 @@ export async function gameRoutes(app: FastifyInstance) {
 
     const game = await prisma.game.findUnique({ where: { id: gameId } });
     if (!game || game.status !== "ACTIVE") {
-      return reply.status(400).send({ error: "Game not active" });
+      return apiError(reply, 400, GAME_NOT_ACTIVE, "Game not active");
     }
     if (game.whiteId !== userId && game.blackId !== userId) {
-      return reply.status(403).send({ error: "Not your game" });
+      return apiError(reply, 403, GAME_NOT_PARTICIPANT, "Not your game");
     }
 
     const result = game.whiteId === userId ? "BLACK_WIN" : "WHITE_WIN";
@@ -644,7 +658,7 @@ export async function gameRoutes(app: FastifyInstance) {
     for (const m of moves) {
       const move = chess.move(m.san);
       if (!move) {
-        return reply.status(400).send({ error: `Invalid move at ply ${m.ply}: ${m.san}` });
+        return apiError(reply, 400, GAME_INVALID_MOVE, `Invalid move at ply ${m.ply}: ${m.san}`);
       }
     }
 

@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { apiError, VALIDATION_FAILED, NOT_FOUND } from "../lib/errorCodes.js";
 
 /** Register user routes (profile, search, update, avatar). */
 export async function userRoutes(app: FastifyInstance) {
@@ -11,7 +12,7 @@ export async function userRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const query = request.query.q?.trim();
       if (!query || query.length < 1) {
-        return reply.status(400).send({ error: "Query parameter 'q' is required" });
+        return apiError(reply, 400, VALIDATION_FAILED, "Query parameter 'q' is required");
       }
 
       const users = await prisma.user.findMany({
@@ -51,7 +52,7 @@ export async function userRoutes(app: FastifyInstance) {
       });
 
       if (!user) {
-        return reply.status(404).send({ error: "User not found" });
+        return apiError(reply, 404, NOT_FOUND, "User not found");
       }
 
       // Build filter: global or H2H

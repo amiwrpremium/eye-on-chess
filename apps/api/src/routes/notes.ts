@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { sanitizeString } from "../middleware/admin.js";
 import { updateNoteBodySchema } from "../lib/schemas.js";
+import { apiError, NOTE_GAME_NOT_FOUND } from "../lib/errorCodes.js";
 
 const MAX_NOTE_LENGTH = 2000;
 
@@ -35,7 +36,7 @@ export async function noteRoutes(app: FastifyInstance) {
       // Verify game exists
       const game = await prisma.game.findUnique({ where: { id: gameId }, select: { id: true } });
       if (!game) {
-        return reply.status(404).send({ error: "Game not found" });
+        return apiError(reply, 404, NOTE_GAME_NOT_FOUND, "Game not found");
       }
 
       // Delete if empty

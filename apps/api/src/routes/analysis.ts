@@ -3,6 +3,12 @@ import { prisma } from "../lib/prisma.js";
 import { redis } from "../lib/redis.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { lookupOpening } from "../lib/eco.js";
+import {
+  apiError,
+  ANALYSIS_GAME_NOT_FOUND,
+  ANALYSIS_NOT_COMPLETED,
+  ANALYSIS_NOT_PARTICIPANT,
+} from "../lib/errorCodes.js";
 
 const QUEUE_KEY = "analysis:queue";
 
@@ -29,15 +35,15 @@ export async function analysisRoutes(app: FastifyInstance) {
     });
 
     if (!game) {
-      return reply.status(404).send({ error: "Game not found" });
+      return apiError(reply, 404, ANALYSIS_GAME_NOT_FOUND, "Game not found");
     }
 
     if (game.status !== "COMPLETED") {
-      return reply.status(400).send({ error: "Game must be completed" });
+      return apiError(reply, 400, ANALYSIS_NOT_COMPLETED, "Game must be completed");
     }
 
     if (game.whiteId !== userId && game.blackId !== userId) {
-      return reply.status(403).send({ error: "Must be a player in this game" });
+      return apiError(reply, 403, ANALYSIS_NOT_PARTICIPANT, "Must be a player in this game");
     }
 
     // Check if already queued/processing

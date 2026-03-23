@@ -2,6 +2,12 @@ import { FastifyInstance } from "fastify";
 import { randomUUID } from "crypto";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
+import {
+  apiError,
+  INVITE_NOT_FOUND,
+  INVITE_ALREADY_USED,
+  INVITE_LIMIT_REACHED,
+} from "../lib/errorCodes.js";
 
 const BATCH_SIZE = 10;
 const UNLOCK_THRESHOLD = 0.75;
@@ -15,9 +21,14 @@ export async function inviteRoutes(app: FastifyInstance) {
       where: { code },
       select: { id: true, usedById: true },
     });
-    if (!invite) return reply.status(404).send({ valid: false, error: "Invite not found" });
+    if (!invite)
+      return reply
+        .status(404)
+        .send({ code: INVITE_NOT_FOUND, valid: false, error: "Invite not found" });
     if (invite.usedById)
-      return reply.status(410).send({ valid: false, error: "Invite already used" });
+      return reply
+        .status(410)
+        .send({ code: INVITE_ALREADY_USED, valid: false, error: "Invite already used" });
     return { valid: true };
   });
 
@@ -94,9 +105,12 @@ export async function inviteRoutes(app: FastifyInstance) {
 
       if (totalCreated >= maxAllowed) {
         const needed = Math.floor(BATCH_SIZE * UNLOCK_THRESHOLD) * batchesEarned - totalUsed;
-        return reply.status(403).send({
-          error: `Invite limit reached. Need ${needed} more used invites to unlock next batch.`,
-        });
+        return apiError(
+          reply,
+          403,
+          INVITE_LIMIT_REACHED,
+          `Invite limit reached. Need ${needed} more used invites to unlock next batch.`
+        );
       }
 
       const code = randomUUID();

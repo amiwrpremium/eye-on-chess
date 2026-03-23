@@ -5,6 +5,22 @@ import { signAccessToken, generateRefreshToken, hashToken } from "../lib/jwt.js"
 import { getSiteSettings } from "../lib/settings.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { registerBodySchema, loginBodySchema, preferencesBodySchema } from "../lib/schemas.js";
+import {
+  apiError,
+  AUTH_INVALID_INVITE,
+  AUTH_INVITE_USED,
+  AUTH_REGISTRATION_CLOSED,
+  AUTH_MAX_USERS,
+  AUTH_EMAIL_EXISTS,
+  AUTH_USERNAME_EXISTS,
+  AUTH_INVALID_CREDENTIALS,
+  AUTH_ACCOUNT_DEACTIVATED,
+  AUTH_EMAIL_NOT_VERIFIED,
+  AUTH_NO_REFRESH_TOKEN,
+  AUTH_INVALID_REFRESH_TOKEN,
+  AUTH_TOKEN_USED,
+  AUTH_USER_NOT_FOUND,
+} from "../lib/errorCodes.js";
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 const BCRYPT_ROUNDS = 12;
@@ -53,35 +69,35 @@ export async function authRoutes(app: FastifyInstance) {
     // Validate invite code
     const invite = await prisma.invite.findUnique({ where: { code: inviteCode } });
     if (!invite) {
-      return reply.status(400).send({ error: "Invalid invite code" });
+      return apiError(reply, 400, AUTH_INVALID_INVITE, "Invalid invite code");
     }
     if (invite.usedById) {
-      return reply.status(410).send({ error: "Invite code has already been used" });
+      return apiError(reply, 410, AUTH_INVITE_USED, "Invite code has already been used");
     }
 
     // Check registration flags from DB settings
     const siteSettings = await getSiteSettings();
     if (!siteSettings.registrationOpen) {
-      return reply.status(403).send({ error: "Registration is currently closed" });
+      return apiError(reply, 403, AUTH_REGISTRATION_CLOSED, "Registration is currently closed");
     }
 
     if (siteSettings.maxUsers > 0) {
       const userCount = await prisma.user.count();
       if (userCount >= siteSettings.maxUsers) {
-        return reply.status(403).send({ error: "Maximum user limit reached" });
+        return apiError(reply, 403, AUTH_MAX_USERS, "Maximum user limit reached");
       }
     }
 
     const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail) {
-      return reply.status(409).send({ error: "Email already in use" });
+      return apiError(reply, 409, AUTH_EMAIL_EXISTS, "Email already in use");
     }
 
     const existingUsername = await prisma.user.findUnique({
       where: { username },
     });
     if (existingUsername) {
-      return reply.status(409).send({ error: "Username already taken" });
+      return apiError(reply, 409, AUTH_USERNAME_EXISTS, "Username already taken");
     }
 
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -129,21 +145,21 @@ export async function authRoutes(app: FastifyInstance) {
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return reply.status(401).send({ error: "Invalid credentials" });
+      return apiError(reply, 401, AUTH_INVALID_CREDENTIALS, "Invalid credentials");
     }
 
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
-      return reply.status(401).send({ error: "Invalid credentials" });
+      return apiError(reply, 401, AUTH_INVALID_CREDENTIALS, "Invalid credentials");
     }
 
     if (!user.active) {
-      return reply.status(403).send({ error: "Account is deactivated" });
+      return apiError(reply, 403, AUTH_ACCOUNT_DEACTIVATED, "Account is deactivated");
     }
 
     const loginSettings = await getSiteSettings();
     if (loginSettings.requireEmailVerification && !user.verified) {
-      return reply.status(403).send({ error: "Email not verified" });
+      return apiError(reply, 403, AUTH_EMAIL_NOT_VERIFIED, "Email not verified");
     }
 
     const { accessToken, rawRefreshToken } = await createTokens(user);
@@ -170,7 +186,7 @@ export async function authRoutes(app: FastifyInstance) {
   app.post("/auth/refresh", async (request, reply) => {
     const rawToken = request.cookies[COOKIE_NAME];
     if (!rawToken) {
-      return reply.status(401).send({ error: "No refresh token" });
+      return apiError(reply, 401, AUTH_NO_REFRESH_TOKEN, "No refresh token");
     }
 
     const hashed = hashToken(rawToken);
@@ -184,14 +200,14 @@ export async function authRoutes(app: FastifyInstance) {
         await prisma.refreshToken.delete({ where: { id: stored.id } });
       }
       reply.clearCookie(COOKIE_NAME, { path: "/" });
-      return reply.status(401).send({ error: "Invalid or expired refresh token" });
+      return apiError(reply, 401, AUTH_INVALID_REFRESH_TOKEN, "Invalid or expired refresh token");
     }
 
     // Rotate: delete old, create new (handle concurrent requests gracefully)
     const deleted = await prisma.refreshToken.deleteMany({ where: { id: stored.id } });
     if (deleted.count === 0) {
       // Another concurrent request already rotated this token
-      return reply.status(401).send({ error: "Token already used" });
+      return apiError(reply, 401, AUTH_TOKEN_USED, "Token already used");
     }
 
     const { accessToken, rawRefreshToken } = await createTokens(stored.user);

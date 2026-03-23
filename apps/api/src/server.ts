@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import compress from "@fastify/compress";
+import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import metricsPlugin from "fastify-metrics";
 import { authRoutes } from "./routes/auth.js";
@@ -56,6 +57,7 @@ async function main() {
   });
 
   await fastify.register(cookie);
+  await fastify.register(helmet, { contentSecurityPolicy: false });
   await fastify.register(compress, { global: true });
 
   // Rate limiting (YAML config with hot-reload)

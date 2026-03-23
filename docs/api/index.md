@@ -65,7 +65,7 @@ All error responses include a machine-readable `code` field alongside the human-
 }
 ```
 
-Error codes follow `DOMAIN_SPECIFIC_ERROR` naming in SCREAMING*SNAKE_CASE. Domains: `AUTH*_`, `GAME\__`, `FRIEND*\*`, `ADMIN*_`, `COLLECTION\__`, `INVITE*\*`, `ANALYSIS*_`, `NOTE\__`. Generic codes: `VALIDATION_FAILED`, `NOT_FOUND`, `UNAUTHORIZED`, `INTERNAL_ERROR`.
+Error codes follow `DOMAIN_SPECIFIC_ERROR` naming in SCREAMING*SNAKE_CASE. Domains: `AUTH*\_`, `GAME\__`, `FRIEND*\*`, `ADMIN*_`, `COLLECTION\__`, `INVITE*\*`, `ANALYSIS*_`, `NOTE\_\_`. Generic codes: `VALIDATION_FAILED`, `NOT_FOUND`, `UNAUTHORIZED`, `INTERNAL_ERROR`.
 
 All error code constants are defined in `apps/api/src/lib/errorCodes.ts`. The `apiError(reply, status, code, message)` helper standardizes error responses across all routes.
 

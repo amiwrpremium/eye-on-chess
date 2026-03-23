@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { parsePagination, paginationMeta } from "../lib/pagination.js";
-import { createCollectionBodySchema, addGameToCollectionBodySchema } from "../lib/schemas.js";
+import { createCollectionBodySchema } from "../lib/schemas.js";
 import {
   apiError,
   COLLECTION_NOT_FOUND,

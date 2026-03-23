@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { type FastifyError } from "fastify";
 import { validatorCompiler } from "fastify-type-provider-zod";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
@@ -45,9 +45,9 @@ async function main() {
   fastify.setValidatorCompiler(validatorCompiler);
 
   // Structured error responses with error codes
-  fastify.setErrorHandler((error, request, reply) => {
+  fastify.setErrorHandler((error: FastifyError, request, reply) => {
     if (error.validation) {
-      const messages = error.validation.map((v) => v.message).join("; ");
+      const messages = error.validation.map((v: { message?: string }) => v.message).join("; ");
       return reply
         .status(400)
         .send({ code: "VALIDATION_FAILED", error: messages || "Validation failed" });
@@ -192,7 +192,7 @@ async function main() {
   // ── Backward-compat redirect: /api/* → /api/v1/* ──
   fastify.all("/api/*", async (request, reply) => {
     const rest = (request.params as { "*": string })["*"];
-    reply.redirect(301, `/api/v1/${rest}`);
+    reply.code(301).redirect(`/api/v1/${rest}`);
   });
 
   fastify.get("/health", async (_request, reply) => {

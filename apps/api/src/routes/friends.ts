@@ -2,11 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { bulkIsOnline } from "../lib/redis.js";
-import {
-  sendFriendRequestBodySchema,
-  friendActionBodySchema,
-  friendshipIdParamSchema,
-} from "../lib/schemas.js";
+import { sendFriendRequestBodySchema, friendActionBodySchema } from "../lib/schemas.js";
 import {
   apiError,
   FRIEND_USER_NOT_FOUND,

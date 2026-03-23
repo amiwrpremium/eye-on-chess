@@ -8,7 +8,7 @@ import { vi } from "vitest";
 // Must set env before any imports that read it
 process.env.JWT_SECRET = "test-secret-for-integration-tests";
 
-import Fastify, { type FastifyInstance } from "fastify";
+import Fastify, { type FastifyInstance, type FastifyError } from "fastify";
 import { validatorCompiler } from "fastify-type-provider-zod";
 import cookie from "@fastify/cookie";
 import jwt from "jsonwebtoken";
@@ -259,9 +259,9 @@ async function createApp(
   app.setValidatorCompiler(validatorCompiler);
 
   // Match server.ts validation error format
-  app.setErrorHandler((error, _request, reply) => {
+  app.setErrorHandler((error: FastifyError, _request, reply) => {
     if (error.validation) {
-      const messages = error.validation.map((v) => v.message).join("; ");
+      const messages = error.validation.map((v: { message?: string }) => v.message).join("; ");
       return reply.status(400).send({ error: messages || "Validation failed" });
     }
     if (error.statusCode && error.statusCode < 500) {

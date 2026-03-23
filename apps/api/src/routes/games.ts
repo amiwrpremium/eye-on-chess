@@ -36,7 +36,6 @@ import {
   makeMoveBodySchema,
   syncOfflineGameBodySchema,
   idParamSchema,
-  paginationQuerySchema,
 } from "../lib/schemas.js";
 
 /** Register game routes (create, challenge, join, move, bot games). */
@@ -361,7 +360,7 @@ export async function gameRoutes(app: FastifyInstance) {
       initialTime?: number;
       increment?: number;
     };
-  }>("/games/bot", { schema: { body: createBotGameBodySchema } }, async (request, reply) => {
+  }>("/games/bot", { schema: { body: createBotGameBodySchema } }, async (request, _reply) => {
     const userId = request.user.userId;
     const {
       botElo,

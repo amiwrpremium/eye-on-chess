@@ -19,7 +19,6 @@ import {
   AUTH_NO_REFRESH_TOKEN,
   AUTH_INVALID_REFRESH_TOKEN,
   AUTH_TOKEN_USED,
-  AUTH_USER_NOT_FOUND,
 } from "../lib/errorCodes.js";
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;

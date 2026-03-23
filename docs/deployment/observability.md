@@ -26,7 +26,7 @@ Default credentials:
 
 ## Pre-built Dashboards
 
-Grafana is auto-provisioned with two dashboards:
+Grafana is auto-provisioned with three dashboards:
 
 ### API Performance (`eyeonchess-api-perf`)
 
@@ -59,6 +59,13 @@ Database queries taking longer than 100ms are logged as structured JSON warnings
 ```
 
 These include the request ID for end-to-end tracing. View them in the Grafana logs dashboard by filtering for `slow query`.
+
+### Application (`eyeonchess-app`)
+
+- Stat panels: active games, total users, analysis queue depth, games completed
+- Time series: active games over time, games completed rate (games/min)
+- Time series: analysis queue depth over time, user growth
+- Color-coded thresholds: green/yellow/red for active games and queue depth
 
 ### Logs (`eyeonchess-logs`)
 

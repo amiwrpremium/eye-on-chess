@@ -65,7 +65,7 @@ async function main() {
   await fastify.register(rateLimit, {
     max: rateLimitCfg.global.max,
     timeWindow: rateLimitCfg.global.timeWindow,
-    keyGenerator: (request) => request.ip,
+    keyGenerator: (request) => request.user?.userId || request.ip,
     addHeadersOnExceeding: { "x-ratelimit-limit": true, "x-ratelimit-remaining": true },
     addHeaders: { "x-ratelimit-limit": true, "x-ratelimit-remaining": true, "retry-after": true },
   });

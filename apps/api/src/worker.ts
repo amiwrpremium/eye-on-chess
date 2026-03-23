@@ -8,8 +8,10 @@ import { Chess } from "chess.js";
 const log = createChildLogger("worker");
 
 const QUEUE_KEY = "analysis:queue";
+const DLQ_KEY = "analysis:dlq";
 const POLL_INTERVAL = 2000;
 const DEPTH = 18;
+const MAX_RETRIES = 3;
 
 function statusKey(gameId: string) {
   return `analysis:status:${gameId}`;
@@ -122,12 +124,22 @@ async function analyzeGame(gameId: string, engine: StockfishEngine) {
   log.info({ gameId, whiteAccuracy, blackAccuracy }, "analysis complete");
 }
 
-async function main() {
-  log.info("starting analysis worker");
+function retryKey(gameId: string) {
+  return `analysis:retries:${gameId}`;
+}
 
+async function initEngine(): Promise<StockfishEngine> {
   const engine = new StockfishEngine();
   await engine.init();
   log.info("stockfish initialized");
+  return engine;
+}
+
+async function main() {
+  log.info("starting analysis worker");
+
+  let engine = await initEngine();
+  let consecutiveFailures = 0;
 
   // Poll loop
   while (true) {
@@ -136,9 +148,40 @@ async function main() {
       if (gameId) {
         try {
           await analyzeGame(gameId, engine);
+          consecutiveFailures = 0;
         } catch (err) {
-          log.error({ gameId, err }, "error analyzing game");
-          await redis.set(statusKey(gameId), "error");
+          consecutiveFailures++;
+          log.error({ gameId, err, consecutiveFailures }, "error analyzing game");
+
+          // Track retries per game
+          const retries = await redis.incr(retryKey(gameId));
+          await redis.expire(retryKey(gameId), 3600);
+
+          if (retries >= MAX_RETRIES) {
+            // Move to dead letter queue — stop retrying this game
+            await redis.lpush(DLQ_KEY, gameId);
+            await redis.set(statusKey(gameId), "error");
+            await redis.del(retryKey(gameId));
+            log.warn({ gameId, retries }, "moved to dead letter queue after max retries");
+          } else {
+            // Re-queue for retry
+            await redis.rpush(QUEUE_KEY, gameId);
+            await redis.set(statusKey(gameId), "queued");
+            log.info({ gameId, retries }, "re-queued for retry");
+          }
+
+          // Circuit breaker — if engine keeps failing, restart it
+          if (consecutiveFailures >= 3) {
+            log.warn("circuit breaker: restarting stockfish engine after 3 consecutive failures");
+            try {
+              engine.destroy();
+            } catch {
+              // ignore destroy errors
+            }
+            await new Promise((r) => setTimeout(r, 2000));
+            engine = await initEngine();
+            consecutiveFailures = 0;
+          }
         }
       } else {
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));

@@ -35,8 +35,10 @@ describe("socket", () => {
     expect(io).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
-        auth: { token: "test-token" },
+        auth: expect.any(Function),
         withCredentials: true,
+        reconnection: true,
+        reconnectionAttempts: 10,
       })
     );
   });

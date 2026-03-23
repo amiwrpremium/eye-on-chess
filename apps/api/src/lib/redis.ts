@@ -63,10 +63,11 @@ export async function isOnline(userId: string): Promise<boolean> {
  */
 export async function checkReactionRateLimit(gameId: string, userId: string): Promise<boolean> {
   const key = `reaction:limit:${gameId}:${userId}`;
-  const count = await redis.incr(key);
-  if (count === 1) {
-    await redis.expire(key, 10);
-  }
+  const pipeline = redis.pipeline();
+  pipeline.incr(key);
+  pipeline.expire(key, 10);
+  const results = await pipeline.exec();
+  const count = (results?.[0]?.[1] as number) || 0;
   return count <= 5;
 }
 

@@ -1,5 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+const mockPipeline = {
+  set: vi.fn().mockReturnThis(),
+  get: vi.fn().mockReturnThis(),
+  del: vi.fn().mockReturnThis(),
+  sadd: vi.fn().mockReturnThis(),
+  srem: vi.fn().mockReturnThis(),
+  incr: vi.fn().mockReturnThis(),
+  expire: vi.fn().mockReturnThis(),
+  exists: vi.fn().mockReturnThis(),
+  exec: vi.fn().mockResolvedValue([]),
+};
+
 vi.mock("./redis.js", () => ({
   redis: {
     set: vi.fn(),
@@ -10,7 +22,7 @@ vi.mock("./redis.js", () => ({
     smembers: vi.fn(),
     setex: vi.fn(),
     exists: vi.fn(),
-    pipeline: vi.fn(),
+    pipeline: vi.fn(() => mockPipeline),
     llen: vi.fn(),
   },
 }));
@@ -37,16 +49,17 @@ describe("gameClock", () => {
   describe("initClocks", () => {
     it("should initialize clock state in Redis", async () => {
       await initClocks("game1", 600_000, 5_000);
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockPipeline.set).toHaveBeenCalledWith(
         "clock:game1",
         expect.stringContaining('"whiteTimeLeft":600000')
       );
-      expect(mockRedis.sadd).toHaveBeenCalledWith("active_games", "game1");
+      expect(mockPipeline.sadd).toHaveBeenCalledWith("active_games", "game1");
+      expect(mockPipeline.exec).toHaveBeenCalled();
     });
 
     it("should set correct initial values", async () => {
       await initClocks("game1", 300_000, 3_000);
-      const saved = JSON.parse(mockRedis.set.mock.calls[0][1]) as ClockState;
+      const saved = JSON.parse(mockPipeline.set.mock.calls[0][1]) as ClockState;
       expect(saved.whiteTimeLeft).toBe(300_000);
       expect(saved.blackTimeLeft).toBe(300_000);
       expect(saved.turn).toBe("white");
@@ -169,8 +182,9 @@ describe("gameClock", () => {
   describe("removeActiveGame", () => {
     it("should remove game from active set and delete clock", async () => {
       await removeActiveGame("game1");
-      expect(mockRedis.srem).toHaveBeenCalledWith("active_games", "game1");
-      expect(mockRedis.del).toHaveBeenCalledWith("clock:game1");
+      expect(mockPipeline.srem).toHaveBeenCalledWith("active_games", "game1");
+      expect(mockPipeline.del).toHaveBeenCalledWith("clock:game1");
+      expect(mockPipeline.exec).toHaveBeenCalled();
     });
   });
 

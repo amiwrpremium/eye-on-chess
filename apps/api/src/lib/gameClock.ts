@@ -23,8 +23,10 @@ export async function initClocks(gameId: string, initialTimeMs: number, incremen
     turn: "white",
     increment: incrementMs,
   };
-  await redis.set(clockKey(gameId), JSON.stringify(state));
-  await redis.sadd(ACTIVE_GAMES_KEY, gameId);
+  const pipeline = redis.pipeline();
+  pipeline.set(clockKey(gameId), JSON.stringify(state));
+  pipeline.sadd(ACTIVE_GAMES_KEY, gameId);
+  await pipeline.exec();
 }
 
 /**
@@ -101,8 +103,10 @@ export async function isTimeout(gameId: string): Promise<"white" | "black" | nul
  * @param gameId - The game identifier.
  */
 export async function removeActiveGame(gameId: string) {
-  await redis.srem(ACTIVE_GAMES_KEY, gameId);
-  await redis.del(clockKey(gameId));
+  const pipeline = redis.pipeline();
+  pipeline.srem(ACTIVE_GAMES_KEY, gameId);
+  pipeline.del(clockKey(gameId));
+  await pipeline.exec();
 }
 
 /**

@@ -2,7 +2,7 @@
 
 ## User Endpoints
 
-### `GET /api/users/:username`
+### `GET /api/v1/users/:username`
 
 Public user profile with game statistics.
 
@@ -28,7 +28,7 @@ Public user profile with game statistics.
 
 Stats are computed from completed games only.
 
-### `GET /api/users/search?q=term` (Auth required)
+### `GET /api/v1/users/search?q=term` (Auth required)
 
 Search users by partial username (case-insensitive). Excludes the current user.
 
@@ -46,7 +46,7 @@ Limit: 20 results.
 
 ## Friend Endpoints (All Auth Required)
 
-### `GET /api/friends`
+### `GET /api/v1/friends`
 
 List accepted friends with online status.
 
@@ -69,7 +69,7 @@ List accepted friends with online status.
 
 Online status checked via Redis (30s TTL presence keys).
 
-### `GET /api/friends/requests`
+### `GET /api/v1/friends/requests`
 
 List incoming pending friend requests.
 
@@ -90,7 +90,7 @@ List incoming pending friend requests.
 }
 ```
 
-### `POST /api/friends/request`
+### `POST /api/v1/friends/request`
 
 Send a friend request.
 
@@ -102,7 +102,7 @@ Send a friend request.
 
 **Checks:** cannot self-add, no duplicate requests, allows re-request after decline.
 
-### `POST /api/friends/accept`
+### `POST /api/v1/friends/accept`
 
 Accept a friend request. Must be the addressee.
 
@@ -112,7 +112,7 @@ Accept a friend request. Must be the addressee.
 { "friendshipId": "clx..." }
 ```
 
-### `POST /api/friends/decline`
+### `POST /api/v1/friends/decline`
 
 Decline a friend request. Must be the addressee.
 
@@ -122,6 +122,6 @@ Decline a friend request. Must be the addressee.
 { "friendshipId": "clx..." }
 ```
 
-### `DELETE /api/friends/:friendshipId`
+### `DELETE /api/v1/friends/:friendshipId`
 
 Remove a friend. Either party can remove.

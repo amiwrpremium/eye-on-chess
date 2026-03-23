@@ -4,7 +4,7 @@ Invite-code system for gated registration. New users must register with a valid 
 
 ## REST Endpoints
 
-### `GET /api/invites/validate/:code` (Public)
+### `GET /api/v1/invites/validate/:code` (Public)
 
 Validate an invite code. Does not require authentication.
 
@@ -16,7 +16,7 @@ Validate an invite code. Does not require authentication.
 
 **Errors:** `404` invite not found, `410` invite already used.
 
-### `GET /api/invites/stats` (Auth Required)
+### `GET /api/v1/invites/stats` (Auth Required)
 
 Get the authenticated user's invite quota and usage.
 
@@ -44,7 +44,7 @@ Get the authenticated user's invite quota and usage.
 | `usedTowardNext` | Progress toward unlocking the next batch               |
 | `neededForNext`  | Used invites needed to unlock the next batch (7)       |
 
-### `GET /api/invites` (Auth Required)
+### `GET /api/v1/invites` (Auth Required)
 
 List the authenticated user's invites with usage details. Ordered by creation date descending.
 
@@ -65,7 +65,7 @@ List the authenticated user's invites with usage details. Ordered by creation da
 }
 ```
 
-### `POST /api/invites` (Auth Required)
+### `POST /api/v1/invites` (Auth Required)
 
 Generate a new invite code. Subject to quota enforcement.
 
@@ -85,4 +85,4 @@ Generate a new invite code. Subject to quota enforcement.
 
 ## Registration
 
-`POST /api/auth/register` requires an `inviteCode` field in the request body. The invite must be valid (exists and unused). Upon successful registration the invite is marked as used.
+`POST /api/v1/auth/register` requires an `inviteCode` field in the request body. The invite must be valid (exists and unused). Upon successful registration the invite is marked as used.

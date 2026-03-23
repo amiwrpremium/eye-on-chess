@@ -4,7 +4,7 @@ Custom JWT-based authentication with access token + httpOnly refresh cookie rota
 
 ## Endpoints
 
-### `POST /api/auth/register`
+### `POST /api/v1/auth/register`
 
 Create a new account.
 
@@ -45,7 +45,7 @@ Also sets `refresh_token` httpOnly cookie.
 
 **Errors:** `400` (validation), `403` (registration closed/limit), `409` (duplicate)
 
-### `POST /api/auth/login`
+### `POST /api/v1/auth/login`
 
 **Body:**
 
@@ -62,7 +62,7 @@ Also sets `refresh_token` httpOnly cookie.
 
 **Errors:** `401` (invalid credentials), `403` (deactivated/unverified)
 
-### `POST /api/auth/refresh`
+### `POST /api/v1/auth/refresh`
 
 Uses the `refresh_token` httpOnly cookie. No body required.
 
@@ -78,7 +78,7 @@ Uses the `refresh_token` httpOnly cookie. No body required.
 
 **Errors:** `401` (missing/invalid/expired token)
 
-### `POST /api/auth/logout`
+### `POST /api/v1/auth/logout`
 
 Deletes refresh token from DB and clears cookie.
 
@@ -88,7 +88,7 @@ Deletes refresh token from DB and clears cookie.
 { "success": true }
 ```
 
-### `GET /api/auth/me` (Auth required)
+### `GET /api/v1/auth/me` (Auth required)
 
 Returns current user profile including preferences.
 
@@ -111,7 +111,7 @@ Returns current user profile including preferences.
 }
 ```
 
-### `PUT /api/auth/preferences` (Auth required)
+### `PUT /api/v1/auth/preferences` (Auth required)
 
 Update theme preferences. Saved to DB.
 
@@ -145,7 +145,7 @@ Update theme preferences. Saved to DB.
 The Axios interceptor in `lib/api.ts`:
 
 1. Catches any 401 response
-2. Calls `/api/auth/refresh`
+2. Calls `/api/v1/auth/refresh`
 3. Retries the original request with the new token
 4. Queues concurrent requests during refresh (no thundering herd)
 5. If refresh fails → clears state → redirects to `/login`

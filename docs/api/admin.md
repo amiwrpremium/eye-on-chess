@@ -5,7 +5,7 @@ All admin endpoints require authentication + `ADMIN` role. Protected by CSRF, ra
 ## Security
 
 - **Role check:** DB lookup on every request (not just JWT claim — handles revocation)
-- **CSRF:** Double-submit cookie pattern. GET `/api/admin/csrf` to get a token, include as `X-CSRF-Token` header on mutations
+- **CSRF:** Double-submit cookie pattern. GET `/api/v1/admin/csrf` to get a token, include as `X-CSRF-Token` header on mutations
 - **Rate limit:** 60 requests/minute per IP
 - **Audit log:** Every mutation recorded with admin, action, target, details, IP
 
@@ -13,11 +13,11 @@ See [Admin Security](../admin/security.md) for details.
 
 ## Endpoints
 
-### `GET /api/admin/csrf`
+### `GET /api/v1/admin/csrf`
 
 Get a CSRF token. Sets `csrf_token` cookie and returns the token in the response.
 
-### `GET /api/admin/dashboard`
+### `GET /api/v1/admin/dashboard`
 
 **Response:**
 
@@ -36,13 +36,13 @@ Get a CSRF token. Sets `csrf_token` cookie and returns the token in the response
 }
 ```
 
-### `GET /api/admin/users?page=1&limit=20&search=alice&sort=createdAt&order=desc`
+### `GET /api/v1/admin/users?page=1&limit=20&search=alice&sort=createdAt&order=desc`
 
 Paginated user list with search and sorting.
 
 **Sortable fields:** `createdAt`, `username`, `email`, `rating`, `role`
 
-### `POST /api/admin/users`
+### `POST /api/v1/admin/users`
 
 Create a new user with a server-generated password.
 
@@ -66,7 +66,7 @@ Create a new user with a server-generated password.
 
 The generated password is returned only once in the response. The admin must share it with the user securely. The user is created with `role: USER`, `active: true`, and `verified: true`.
 
-### `PATCH /api/admin/users/:id`
+### `PATCH /api/v1/admin/users/:id`
 
 Update user properties.
 
@@ -86,7 +86,7 @@ Update user properties.
 - Cannot deactivate yourself
 - Cannot remove the last admin
 
-### `DELETE /api/admin/users/:id`
+### `DELETE /api/v1/admin/users/:id`
 
 Delete a user and all their data (cascades).
 
@@ -95,19 +95,19 @@ Delete a user and all their data (cascades).
 - Cannot delete yourself
 - Cannot delete the last admin
 
-### `GET /api/admin/games?page=1&limit=20&status=COMPLETED&search=alice`
+### `GET /api/v1/admin/games?page=1&limit=20&status=COMPLETED&search=alice`
 
 Paginated game list with status filter and player search.
 
-### `DELETE /api/admin/games/:id`
+### `DELETE /api/v1/admin/games/:id`
 
 Delete a game and all its moves/analysis (cascades).
 
-### `GET /api/admin/settings`
+### `GET /api/v1/admin/settings`
 
 Get site settings from DB.
 
-### `PUT /api/admin/settings`
+### `PUT /api/v1/admin/settings`
 
 Update site settings. Persisted to DB (survives container restarts).
 
@@ -124,7 +124,7 @@ Update site settings. Persisted to DB (survives container restarts).
 
 `siteName` is sanitized and clamped to 100 characters. `maxUsers` clamped to 0-1000000.
 
-### `GET /api/admin/audit-log?page=1&limit=50&action=user.update&adminId=clx...`
+### `GET /api/v1/admin/audit-log?page=1&limit=50&action=user.update&adminId=clx...`
 
 Paginated audit log with action and admin filters.
 

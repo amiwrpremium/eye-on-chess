@@ -4,7 +4,7 @@ Activity feed showing recent events for the user and their friends. All endpoint
 
 ## REST Endpoints
 
-### `GET /api/activity`
+### `GET /api/v1/activity`
 
 Get the activity feed. Returns events from the last 24 hours for the authenticated user and their friends. Cached in Redis for 30 seconds.
 

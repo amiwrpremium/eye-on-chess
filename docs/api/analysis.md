@@ -4,7 +4,7 @@ Post-game analysis powered by Stockfish.
 
 ## Endpoints (Auth Required)
 
-### `POST /api/games/:id/analyze`
+### `POST /api/v1/games/:id/analyze`
 
 Queue a game for analysis. Must be a player in the game. Game must be completed.
 
@@ -16,7 +16,7 @@ Queue a game for analysis. Must be a player in the game. Game must be completed.
 
 If already queued/processing: returns current status without re-queuing.
 
-### `GET /api/games/:id/analysis`
+### `GET /api/v1/games/:id/analysis`
 
 Get analysis results.
 

@@ -4,7 +4,7 @@ Personal statistics dashboard. All endpoints require authentication.
 
 ## REST Endpoints
 
-### `GET /api/stats`
+### `GET /api/v1/stats`
 
 Get the authenticated user's stats dashboard data. Cached in Redis for 60 seconds.
 

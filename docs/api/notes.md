@@ -4,7 +4,7 @@ Personal notes on games. Each user can store one note per game. All endpoints re
 
 ## REST Endpoints
 
-### `GET /api/games/:id/notes`
+### `GET /api/v1/games/:id/notes`
 
 Get the authenticated user's note for a game.
 
@@ -21,7 +21,7 @@ Get the authenticated user's note for a game.
 
 Returns `{ "note": null }` if no note exists.
 
-### `PUT /api/games/:id/notes`
+### `PUT /api/v1/games/:id/notes`
 
 Create, update, or delete a note for a game.
 

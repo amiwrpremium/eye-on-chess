@@ -2,7 +2,7 @@
 
 ## REST Endpoints (All Auth Required)
 
-### `POST /api/games/friend`
+### `POST /api/v1/games/friend`
 
 Challenge a friend to a game.
 
@@ -45,7 +45,7 @@ Custom time controls are auto-categorized based on `initialTime + increment * 40
 
 Creates a `WAITING` game and emits `challenge:incoming` via Socket.io.
 
-### `POST /api/games/challenge/accept`
+### `POST /api/v1/games/challenge/accept`
 
 Accept a challenge.
 
@@ -57,7 +57,7 @@ Accept a challenge.
 
 Sets game to `ACTIVE`, initializes clocks in Redis, emits `challenge:accepted`.
 
-### `POST /api/games/challenge/decline`
+### `POST /api/v1/games/challenge/decline`
 
 Decline a challenge.
 
@@ -69,11 +69,11 @@ Decline a challenge.
 
 Deletes the game, emits `challenge:declined`.
 
-### `GET /api/games/:id`
+### `GET /api/v1/games/:id`
 
 Get full game state including players and moves.
 
-### `POST /api/games/bot`
+### `POST /api/v1/games/bot`
 
 Create a bot game.
 
@@ -118,7 +118,7 @@ Create a bot game.
 
 `botFirstMove` is non-null when the bot plays white and makes the opening move immediately.
 
-### `POST /api/games/:id/move`
+### `POST /api/v1/games/:id/move`
 
 Make a move in a bot game. The server validates the player's move, applies it, then computes and applies the bot's response in the same request.
 
@@ -145,7 +145,7 @@ When the game ends (after either the player's or bot's move), `gameOver` contain
 
 **Errors:** `404` game not found, `400` game not active / not a bot game / not your turn / invalid move, `403` not your game.
 
-### `POST /api/games/:id/resign`
+### `POST /api/v1/games/:id/resign`
 
 Resign a bot game.
 
@@ -157,7 +157,7 @@ Resign a bot game.
 
 The result reflects the opponent winning (if you are white, result is `BLACK_WIN`).
 
-### `POST /api/games/sync`
+### `POST /api/v1/games/sync`
 
 Sync an offline bot game to the server. The server replays all moves to validate them, then creates the game and move records.
 
@@ -186,13 +186,13 @@ Sync an offline bot game to the server. The server replays all moves to validate
 
 The synced game is always stored as `UNLIMITED` time control with `isVsBot: true`.
 
-### `GET /api/games/:id/pgn`
+### `GET /api/v1/games/:id/pgn`
 
 Export a game as a PGN file.
 
 **Response:** `text/plain` with `Content-Disposition: attachment` header. Includes standard PGN headers (Event, Site, Date, White, Black, Result, WhiteElo, BlackElo, TimeControl, Termination) followed by the move text.
 
-### `GET /api/games/active`
+### `GET /api/v1/games/active`
 
 Get the authenticated user's currently active game (if any).
 
@@ -204,7 +204,7 @@ Get the authenticated user's currently active game (if any).
 
 Returns `{ "game": null }` if no active game exists. The game object includes players and moves.
 
-### `GET /api/games/history`
+### `GET /api/v1/games/history`
 
 Get paginated game history for the authenticated user (completed and aborted games).
 

@@ -4,7 +4,7 @@ Organize games into named collections. All endpoints require authentication.
 
 ## REST Endpoints
 
-### `GET /api/collections`
+### `GET /api/v1/collections`
 
 List the authenticated user's collections, ordered by creation date ascending.
 
@@ -18,7 +18,7 @@ List the authenticated user's collections, ordered by creation date ascending.
 }
 ```
 
-### `POST /api/collections`
+### `POST /api/v1/collections`
 
 Create a new collection.
 
@@ -38,7 +38,7 @@ Name is trimmed and capped at 50 characters.
 
 **Errors:** `400` name is required, `409` collection with this name already exists.
 
-### `DELETE /api/collections/:id`
+### `DELETE /api/v1/collections/:id`
 
 Delete a collection. The "Favorites" collection cannot be deleted.
 
@@ -50,7 +50,7 @@ Delete a collection. The "Favorites" collection cannot be deleted.
 
 **Errors:** `404` collection not found, `403` not your collection, `400` cannot delete Favorites.
 
-### `GET /api/collections/:id/games`
+### `GET /api/v1/collections/:id/games`
 
 Get paginated list of games in a collection.
 
@@ -75,7 +75,7 @@ Each game includes: `id`, `status`, `result`, `termination`, `timeControl`, `isV
 
 **Errors:** `404` collection not found, `403` not your collection.
 
-### `POST /api/collections/:id/games`
+### `POST /api/v1/collections/:id/games`
 
 Add a game to a collection. Idempotent -- adding a game that already exists returns success.
 
@@ -93,7 +93,7 @@ Add a game to a collection. Idempotent -- adding a game that already exists retu
 
 **Errors:** `404` collection not found, `403` not your collection.
 
-### `DELETE /api/collections/:id/games/:gameId`
+### `DELETE /api/v1/collections/:id/games/:gameId`
 
 Remove a game from a collection. Silently succeeds even if the game was not in the collection.
 
@@ -105,7 +105,7 @@ Remove a game from a collection. Silently succeeds even if the game was not in t
 
 **Errors:** `404` collection not found, `403` not your collection.
 
-### `GET /api/games/:id/collections`
+### `GET /api/v1/games/:id/collections`
 
 Get which of the authenticated user's collections a game belongs to.
 

@@ -54,6 +54,7 @@ export default function GamePage() {
 
   const sound = useSound();
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [flipDisplay, setFlipDisplay] = useState(false);
 
   useKeyboardShortcuts({
     ArrowLeft: () => setCurrentPly((p) => Math.max(0, p - 1)),
@@ -62,6 +63,8 @@ export default function GamePage() {
     End: () => setCurrentPly(moves.length),
     r: () => status === "ACTIVE" && !gameOver && setConfirmResign(true),
     R: () => status === "ACTIVE" && !gameOver && setConfirmResign(true),
+    f: () => setFlipDisplay((f) => !f),
+    F: () => setFlipDisplay((f) => !f),
     Escape: () => {
       setConfirmResign(false);
       setConfirmDraw(false);
@@ -74,7 +77,12 @@ export default function GamePage() {
   const joinedRef = useRef(false);
 
   const isWhite = user?.id === white?.id;
-  const orientation = isWhite ? "white" : "black";
+  const baseOrientation = isWhite ? "white" : "black";
+  const orientation = flipDisplay
+    ? baseOrientation === "white"
+      ? "black"
+      : "white"
+    : baseOrientation;
   const isMyTurn =
     status === "ACTIVE" &&
     ((clocks?.turn === "white" && isWhite) || (clocks?.turn === "black" && !isWhite));
@@ -407,6 +415,13 @@ export default function GamePage() {
               >
                 &raquo;
               </button>
+              <button
+                onClick={() => setFlipDisplay((f) => !f)}
+                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm ml-2"
+                title="Flip board (F)"
+              >
+                ↕
+              </button>
             </div>
 
             {/* Game actions */}
@@ -508,6 +523,7 @@ export default function GamePage() {
           { key: "←/→", description: "Previous/next move" },
           { key: "Home/End", description: "First/last move" },
           { key: "R", description: "Resign" },
+          { key: "F", description: "Flip board" },
           { key: "Esc", description: "Close modal" },
           { key: "?", description: "This help" },
         ]}

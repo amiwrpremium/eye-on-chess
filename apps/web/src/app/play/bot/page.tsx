@@ -313,13 +313,29 @@ export default function PlayBotPage() {
 
   /** Build a fallback BotPersonality from the raw Elo slider value (custom elo mode). */
   function buildFallbackPersonality(elo: number): BotPersonality {
+    const tier = elo >= 2000 ? "engine" : elo >= 1300 ? "hybrid" : "custom";
+    const category =
+      elo <= 400
+        ? "beginner"
+        : elo <= 800
+          ? "novice"
+          : elo <= 1200
+            ? "intermediate"
+            : elo <= 1600
+              ? "advanced"
+              : elo <= 2000
+                ? "expert"
+                : elo <= 2500
+                  ? "master"
+                  : "grandmaster";
     return {
       id: "custom",
       name: `Custom (${elo})`,
       elo,
       description: "Custom Elo bot",
       avatar: "\u{1F916}",
-      tier: elo >= 2000 ? "engine" : elo >= 1300 ? "hybrid" : "custom",
+      tier,
+      category,
       randomMoveChance: elo < 600 ? 0.3 : elo < 1200 ? 0.1 : 0.02,
       blunderChance: elo < 600 ? 0.25 : elo < 1200 ? 0.12 : 0.05,
       captureGreed: 0.4,
@@ -735,8 +751,13 @@ export default function PlayBotPage() {
                 {useCustomElo ? "Choose a personality" : "Custom Elo"}
               </button>
             </div>
-            {useCustomElo ? (
+            {useCustomElo || botList.length === 0 ? (
               <>
+                {botList.length === 0 && !isOnline && (
+                  <p className="text-xs text-gray-500 text-center mb-2">
+                    Bot personalities available when online. Using custom Elo.
+                  </p>
+                )}
                 <div className="text-center mb-2">
                   <span className="text-3xl font-bold">{botElo}</span>
                   <span className="text-gray-400 ml-2">{eloLabel(botElo)}</span>

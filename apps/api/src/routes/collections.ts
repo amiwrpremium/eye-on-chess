@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { parsePagination, paginationMeta } from "../lib/pagination.js";
 
 /** Register collection routes (create, update, delete, manage game collections). */
 export async function collectionRoutes(app: FastifyInstance) {
@@ -72,8 +73,7 @@ export async function collectionRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const userId = request.user.userId;
       const { id } = request.params;
-      const page = Math.max(1, parseInt(request.query.page || "1"));
-      const limit = Math.min(50, Math.max(1, parseInt(request.query.limit || "20")));
+      const { page, limit, skip, take } = parsePagination(request.query);
 
       const collection = await prisma.collection.findUnique({ where: { id } });
       if (!collection) return reply.status(404).send({ error: "Collection not found" });
@@ -102,8 +102,8 @@ export async function collectionRoutes(app: FastifyInstance) {
             },
           },
           orderBy: { id: "desc" },
-          skip: (page - 1) * limit,
-          take: limit,
+          skip,
+          take,
         }),
         prisma.gameCollection.count({ where: { collectionId: id } }),
       ]);
@@ -111,7 +111,7 @@ export async function collectionRoutes(app: FastifyInstance) {
       return {
         collection: { id: collection.id, name: collection.name },
         games: items.map((i) => i.game),
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: paginationMeta(page, limit, total),
       };
     }
   );

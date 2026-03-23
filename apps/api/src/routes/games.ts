@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { Chess } from "chess.js";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { parsePagination, paginationMeta } from "../lib/pagination.js";
 import { initClocks, onMove as clockOnMove } from "../lib/gameClock.js";
 import { getIO } from "../lib/socket.js";
 import { getBotMove } from "../lib/botEngine.js";
@@ -284,8 +285,7 @@ export async function gameRoutes(app: FastifyInstance) {
     Querystring: { page?: string; limit?: string };
   }>("/api/games/history", async (request) => {
     const userId = request.user.userId;
-    const page = Math.max(1, parseInt(request.query.page || "1"));
-    const limit = Math.min(50, Math.max(1, parseInt(request.query.limit || "20")));
+    const { page, limit, skip, take } = parsePagination(request.query);
 
     const where = {
       status: { in: ["COMPLETED" as const, "ABORTED" as const] },
@@ -311,15 +311,15 @@ export async function gameRoutes(app: FastifyInstance) {
           black: { select: { username: true, rating: true } },
         },
         orderBy: { createdAt: "desc" },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip,
+        take,
       }),
       prisma.game.count({ where }),
     ]);
 
     return {
       games,
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      pagination: paginationMeta(page, limit, total),
     };
   });
 

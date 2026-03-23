@@ -101,6 +101,15 @@ The Redis client uses an exponential backoff reconnect strategy:
 
 Brief Redis outages (restart, network blip) are handled transparently without manual intervention.
 
+## Metrics Endpoints
+
+The API exposes metrics in two formats:
+
+- **`GET /metrics`** — Prometheus text format. This is the standard scrape target for Prometheus, returning Node.js process metrics and HTTP request histograms in the OpenMetrics text exposition format.
+- **`GET /api/metrics/app`** — JSON format. Returns application-level stats (`totalUsers`, `activeGames`, `analysisQueue`) as a JSON object, suitable for custom dashboards or health checks that don't use Prometheus.
+
+See [Observability](../deployment/observability.md) for dashboard setup and metric definitions.
+
 ## Health Check
 
 `GET /health` pings both Postgres and Redis, returning per-service status with latency.

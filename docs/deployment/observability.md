@@ -74,9 +74,13 @@ These include the request ID for end-to-end tracing. View them in the Grafana lo
 - Worker logs filtered
 - Error logs filtered (`level 50` / "error" keyword)
 
-## Metrics Endpoint
+## Metrics Endpoints
 
-The API exposes Prometheus metrics at `GET /metrics`:
+The API exposes metrics via two endpoints in different formats:
+
+### `GET /metrics` — Prometheus text format
+
+This is the standard Prometheus scrape target. It returns metrics in the OpenMetrics text exposition format, which Prometheus scrapes every 15 seconds (configured in `deployment/prometheus/prometheus.yml`). Use this endpoint for Prometheus/Grafana dashboards.
 
 ```
 # Default Node.js metrics (prom-client)
@@ -92,7 +96,17 @@ The API exposes Prometheus metrics at `GET /metrics`:
 - http_request_duration_seconds_sum
 ```
 
-There's also `GET /api/metrics/app` returning JSON with:
+### `GET /api/metrics/app` — JSON format
+
+Returns application-level stats as a JSON object. This is intended for custom dashboards, health check scripts, or any consumer that prefers JSON over Prometheus text format.
+
+```json
+{
+  "totalUsers": 150,
+  "activeGames": 3,
+  "analysisQueue": 0
+}
+```
 
 - `totalUsers` — total registered users
 - `activeGames` — currently active games

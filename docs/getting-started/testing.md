@@ -1,6 +1,6 @@
 # Testing
 
-EyeOnChess uses [Vitest](https://vitest.dev/) as its test framework across all packages and apps. The test suite contains 323+ tests across 30 test files.
+EyeOnChess uses [Vitest](https://vitest.dev/) as its test framework across all packages and apps. The test suite contains 670+ tests across the monorepo.
 
 ## Running Tests
 

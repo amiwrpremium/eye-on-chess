@@ -58,6 +58,18 @@ The seed user is created with `role: ADMIN` and `verified: true`.
 | ---------------- | --------------------------------------------------------------------------- | ----------- |
 | `STOCKFISH_PATH` | Path to the Stockfish binary. Auto-detected in the Docker worker container. | `stockfish` |
 
+## YAML Configuration Files
+
+In addition to environment variables, some features are configured via YAML files in `deployment/config/`.
+
+### `deployment/config/rate-limits.yml`
+
+Per-route rate limits are defined in this file. Each route can specify its own `max` (requests) and `timeWindow` values, overriding the global defaults. Changes to this file are picked up automatically via hot-reload — no server restart is required.
+
+### `deployment/config/bots.yml`
+
+Bot personality definitions live in this file. It is the single source of truth for all bot names, ratings, playstyles, and tier assignments. The database seeder reads from this file on startup, so any changes to bot definitions should be made here first.
+
 ## Production Checklist
 
 Before deploying to production, ensure:

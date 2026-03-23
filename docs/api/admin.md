@@ -42,6 +42,30 @@ Paginated user list with search and sorting.
 
 **Sortable fields:** `createdAt`, `username`, `email`, `rating`, `role`
 
+### `POST /api/admin/users`
+
+Create a new user with a server-generated password.
+
+**Body:**
+
+```json
+{
+  "username": "alice",
+  "email": "alice@example.com"
+}
+```
+
+**Response:**
+
+```json
+{
+  "user": { "id": "clx...", "username": "alice", "email": "alice@example.com" },
+  "generatedPassword": "aB3x...random"
+}
+```
+
+The generated password is returned only once in the response. The admin must share it with the user securely. The user is created with `role: USER`, `active: true`, and `verified: true`.
+
 ### `PATCH /api/admin/users/:id`
 
 Update user properties.

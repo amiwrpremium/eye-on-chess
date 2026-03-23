@@ -54,6 +54,21 @@ Cross-origin requests are restricted to the configured `SITE_URL`:
 
 Set `SITE_URL` in your `.env` to match your frontend domain (e.g. `https://chess.example.com`).
 
+## Error Codes
+
+All error responses include a machine-readable `code` field alongside the human-readable `error` message:
+
+```json
+{
+  "code": "AUTH_INVALID_CREDENTIALS",
+  "error": "Invalid credentials"
+}
+```
+
+Error codes follow `DOMAIN_SPECIFIC_ERROR` naming in SCREAMING*SNAKE_CASE. Domains: `AUTH*_`, `GAME\__`, `FRIEND*\*`, `ADMIN*_`, `COLLECTION\__`, `INVITE*\*`, `ANALYSIS*_`, `NOTE\__`. Generic codes: `VALIDATION_FAILED`, `NOT_FOUND`, `UNAUTHORIZED`, `INTERNAL_ERROR`.
+
+All error code constants are defined in `apps/api/src/lib/errorCodes.ts`. The `apiError(reply, status, code, message)` helper standardizes error responses across all routes.
+
 ## Request Validation
 
 All request bodies, URL parameters, and query strings are validated at runtime using [Zod](https://zod.dev/) schemas via `fastify-type-provider-zod`. Validation runs before the route handler — invalid requests get a `400` response immediately without hitting any business logic.

@@ -12,6 +12,21 @@
 - [Notes](notes.md) — Personal game notes
 - [WebSocket Events](websocket.md) — Socket.io real-time events reference
 
+## Security Headers
+
+All API responses include security headers via `@fastify/helmet`:
+
+| Header                              | Value              | Purpose                       |
+| ----------------------------------- | ------------------ | ----------------------------- |
+| `X-Frame-Options`                   | `SAMEORIGIN`       | Prevents clickjacking         |
+| `X-Content-Type-Options`            | `nosniff`          | Prevents MIME type sniffing   |
+| `X-DNS-Prefetch-Control`            | `off`              | Prevents DNS prefetch leaks   |
+| `X-Download-Options`                | `noopen`           | Prevents IE file execution    |
+| `X-Permitted-Cross-Domain-Policies` | `none`             | Blocks Flash/PDF cross-domain |
+| `Strict-Transport-Security`         | `max-age=15552000` | HSTS in production            |
+
+Content-Security-Policy is not enabled (requires per-app customization).
+
 ## CORS
 
 Cross-origin requests are restricted to the configured `SITE_URL`:

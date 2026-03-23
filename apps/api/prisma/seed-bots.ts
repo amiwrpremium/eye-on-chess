@@ -58,18 +58,20 @@ async function main() {
 
   const bots = loadBotsFromYaml();
 
-  let created = 0;
-  let skipped = 0;
+  // Batch check which bots already exist
+  const existing = await prisma.botProfile.findMany({
+    where: { botId: { in: bots.map((b) => b.id) } },
+    select: { botId: true },
+  });
+  const existingIds = new Set(existing.map((e) => e.botId));
 
-  for (let i = 0; i < bots.length; i++) {
-    const bot = bots[i];
-    const existing = await prisma.botProfile.findUnique({ where: { botId: bot.id } });
-    if (existing) {
-      skipped++;
-      continue;
-    }
-    await prisma.botProfile.create({
-      data: {
+  const toCreate = bots
+    .map((bot, i) => ({ bot, sortOrder: i }))
+    .filter(({ bot }) => !existingIds.has(bot.id));
+
+  if (toCreate.length > 0) {
+    await prisma.botProfile.createMany({
+      data: toCreate.map(({ bot, sortOrder }) => ({
         botId: bot.id,
         name: bot.name,
         elo: bot.elo,
@@ -84,13 +86,16 @@ async function main() {
         maxDepth: bot.maxDepth,
         queenEarly: bot.queenEarly,
         pawnPusher: bot.pawnPusher,
-        sortOrder: i,
-      },
+        sortOrder,
+      })),
     });
-    created++;
-    console.log(`  + ${bot.avatar} ${bot.name} (${bot.elo}) — ${bot.category}`);
+    for (const { bot } of toCreate) {
+      console.log(`  + ${bot.avatar} ${bot.name} (${bot.elo}) — ${bot.category}`);
+    }
   }
 
+  const created = toCreate.length;
+  const skipped = bots.length - created;
   console.log(`\nBot seed complete: ${created} created, ${skipped} already existed (untouched).`);
 }
 

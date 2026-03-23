@@ -212,38 +212,46 @@ async function main() {
     console.log(`  User: ${user.username} (rating: ${u.rating})`);
   }
 
-  // Create friendships — first 5 are accepted friends with admin
+  // Create friendships — batch check + create
   console.log("\nCreating friendships...");
-  for (let i = 0; i < 5; i++) {
-    const existing = await prisma.friendship.findUnique({
-      where: { requesterId_addresseeId: { requesterId: admin.id, addresseeId: users[i].id } },
-    });
-    if (!existing) {
-      await prisma.friendship.create({
-        data: {
-          requesterId: admin.id,
-          addresseeId: users[i].id,
-          status: "ACCEPTED",
-        },
-      });
-      console.log(`  Friends: ${admin.username} <-> ${users[i].username}`);
+  const friendUsers = users.slice(0, 5);
+  const pendingUsers = users.slice(5, 7);
+
+  // Check existing friendships in one query
+  const existingFriendships = await prisma.friendship.findMany({
+    where: {
+      OR: [
+        ...friendUsers.map((u) => ({ requesterId: admin.id, addresseeId: u.id })),
+        ...pendingUsers.map((u) => ({ requesterId: u.id, addresseeId: admin.id })),
+      ],
+    },
+    select: { requesterId: true, addresseeId: true },
+  });
+  const friendshipKeys = new Set(
+    existingFriendships.map((f) => `${f.requesterId}:${f.addresseeId}`)
+  );
+
+  // Accepted friends
+  const acceptedToCreate = friendUsers
+    .filter((u) => !friendshipKeys.has(`${admin.id}:${u.id}`))
+    .map((u) => ({ requesterId: admin.id, addresseeId: u.id, status: "ACCEPTED" as const }));
+  if (acceptedToCreate.length > 0) {
+    await prisma.friendship.createMany({ data: acceptedToCreate });
+    for (const f of acceptedToCreate) {
+      const u = users.find((u) => u.id === f.addresseeId);
+      console.log(`  Friends: ${admin.username} <-> ${u?.username}`);
     }
   }
 
-  // Next 2 are pending friend requests to admin
-  for (let i = 5; i < 7; i++) {
-    const existing = await prisma.friendship.findUnique({
-      where: { requesterId_addresseeId: { requesterId: users[i].id, addresseeId: admin.id } },
-    });
-    if (!existing) {
-      await prisma.friendship.create({
-        data: {
-          requesterId: users[i].id,
-          addresseeId: admin.id,
-          status: "PENDING",
-        },
-      });
-      console.log(`  Pending: ${users[i].username} -> ${admin.username}`);
+  // Pending requests
+  const pendingToCreate = pendingUsers
+    .filter((u) => !friendshipKeys.has(`${u.id}:${admin.id}`))
+    .map((u) => ({ requesterId: u.id, addresseeId: admin.id, status: "PENDING" as const }));
+  if (pendingToCreate.length > 0) {
+    await prisma.friendship.createMany({ data: pendingToCreate });
+    for (const f of pendingToCreate) {
+      const u = users.find((u) => u.id === f.requesterId);
+      console.log(`  Pending: ${u?.username} -> ${admin.username}`);
     }
   }
 
@@ -291,16 +299,18 @@ async function main() {
     },
   });
 
-  // Add first 3 admin games to collection
-  for (const gameId of adminGameIds.slice(0, 3)) {
-    const existing = await prisma.gameCollection.findUnique({
-      where: { gameId_collectionId: { gameId, collectionId: collection.id } },
-    });
-    if (!existing) {
-      await prisma.gameCollection.create({
-        data: { gameId, collectionId: collection.id },
-      });
-    }
+  // Add first 3 admin games to collection (batched)
+  const gameIdsToAdd = adminGameIds.slice(0, 3);
+  const existingCollectionGames = await prisma.gameCollection.findMany({
+    where: { collectionId: collection.id, gameId: { in: gameIdsToAdd } },
+    select: { gameId: true },
+  });
+  const existingGameIds = new Set(existingCollectionGames.map((e) => e.gameId));
+  const collectionToCreate = gameIdsToAdd
+    .filter((gid) => !existingGameIds.has(gid))
+    .map((gameId) => ({ gameId, collectionId: collection.id }));
+  if (collectionToCreate.length > 0) {
+    await prisma.gameCollection.createMany({ data: collectionToCreate });
   }
   console.log(`  Collection "${collection.name}" with ${Math.min(3, adminGameIds.length)} games`);
 

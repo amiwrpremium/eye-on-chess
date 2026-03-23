@@ -119,6 +119,30 @@ make shell-api
 npx prisma migrate dev --name your-migration-name
 ```
 
+## Git Hooks
+
+The project uses Husky for git hooks:
+
+| Hook         | Action                                                |
+| ------------ | ----------------------------------------------------- |
+| `pre-commit` | Runs lint-staged (ESLint + Prettier on changed files) |
+| `commit-msg` | Validates conventional commit format                  |
+| `pre-push`   | Runs all tests (`pnpm test`)                          |
+
+## Changelog
+
+Generate `CHANGELOG.md` from conventional commits:
+
+```bash
+make changelog
+```
+
+This parses all commits following the conventional commit format and groups them by type (features, fixes, etc.).
+
+## API Docs
+
+Interactive Swagger UI is available at `/docs` when the API is running. The OpenAPI spec is auto-generated from route schemas.
+
 ## Code Style
 
 - TypeScript strict mode everywhere

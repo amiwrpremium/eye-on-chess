@@ -15,13 +15,13 @@ declare module "fastify" {
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
   const header = request.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
-    return reply.status(401).send({ error: "Missing or invalid token" });
+    return reply.status(401).send({ code: "UNAUTHORIZED", error: "Missing or invalid token" });
   }
 
   try {
     const token = header.slice(7);
     request.user = verifyAccessToken(token);
   } catch {
-    return reply.status(401).send({ error: "Invalid or expired token" });
+    return reply.status(401).send({ code: "UNAUTHORIZED", error: "Invalid or expired token" });
   }
 }

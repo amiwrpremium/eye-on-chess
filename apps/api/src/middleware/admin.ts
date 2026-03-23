@@ -6,7 +6,7 @@ import crypto from "crypto";
 export async function adminMiddleware(request: FastifyRequest, reply: FastifyReply) {
   const userId = request.user?.userId;
   if (!userId) {
-    return reply.status(401).send({ error: "Not authenticated" });
+    return reply.status(401).send({ code: "UNAUTHORIZED", error: "Not authenticated" });
   }
 
   const user = await prisma.user.findUnique({
@@ -15,7 +15,7 @@ export async function adminMiddleware(request: FastifyRequest, reply: FastifyRep
   });
 
   if (!user || !user.active || user.role !== "ADMIN") {
-    return reply.status(403).send({ error: "Admin access required" });
+    return reply.status(403).send({ code: "ADMIN_FORBIDDEN", error: "Admin access required" });
   }
 }
 
@@ -40,7 +40,7 @@ export async function adminRateLimit(request: FastifyRequest, reply: FastifyRepl
   reply.header("X-RateLimit-Remaining", Math.max(0, RATE_LIMIT - entry.count));
 
   if (entry.count > RATE_LIMIT) {
-    return reply.status(429).send({ error: "Too many requests" });
+    return reply.status(429).send({ code: "ADMIN_RATE_LIMITED", error: "Too many requests" });
   }
 }
 
@@ -68,7 +68,7 @@ export async function csrfProtection(request: FastifyRequest, reply: FastifyRepl
   const headerToken = request.headers[CSRF_HEADER] as string | undefined;
 
   if (!cookieToken || !headerToken || cookieToken !== headerToken) {
-    return reply.status(403).send({ error: "Invalid CSRF token" });
+    return reply.status(403).send({ code: "ADMIN_CSRF_INVALID", error: "Invalid CSRF token" });
   }
 }
 

@@ -44,18 +44,19 @@ async function main() {
   // Zod request validation
   fastify.setValidatorCompiler(validatorCompiler);
 
-  // Standardize validation errors to match existing { error: "..." } shape
+  // Structured error responses with error codes
   fastify.setErrorHandler((error, request, reply) => {
     if (error.validation) {
       const messages = error.validation.map((v) => v.message).join("; ");
-      return reply.status(400).send({ error: messages || "Validation failed" });
+      return reply
+        .status(400)
+        .send({ code: "VALIDATION_FAILED", error: messages || "Validation failed" });
     }
-    // Let Fastify handle all other errors with its default behavior
     if (error.statusCode && error.statusCode < 500) {
-      return reply.status(error.statusCode).send({ error: error.message });
+      return reply.status(error.statusCode).send({ code: "UNAUTHORIZED", error: error.message });
     }
     request.log.error(error);
-    reply.status(500).send({ error: "Internal server error" });
+    reply.status(500).send({ code: "INTERNAL_ERROR", error: "Internal server error" });
   });
 
   // CORS — whitelist based on SITE_URL, permissive in development

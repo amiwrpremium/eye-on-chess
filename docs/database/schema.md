@@ -18,24 +18,27 @@ PostgreSQL database managed by Prisma ORM. Schema defined in `apps/api/prisma/sc
 
 ### User
 
-| Field          | Type          | Notes              |
-| -------------- | ------------- | ------------------ |
-| `id`           | String (cuid) | Primary key        |
-| `email`        | String        | Unique             |
-| `username`     | String        | Unique             |
-| `passwordHash` | String        | bcrypt (12 rounds) |
-| `avatarUrl`    | String?       |                    |
-| `rating`       | Int           | Default: 1200      |
-| `role`         | UserRole      | Default: USER      |
-| `active`       | Boolean       | Default: true      |
-| `verified`     | Boolean       | Default: false     |
-| `darkMode`     | Boolean       | Default: true      |
-| `boardTheme`   | String        | Default: "classic" |
-| `pieceSet`     | String        | Default: "classic" |
-| `createdAt`    | DateTime      | Auto               |
-| `updatedAt`    | DateTime      | Auto               |
+| Field           | Type          | Notes              |
+| --------------- | ------------- | ------------------ |
+| `id`            | String (cuid) | Primary key        |
+| `email`         | String        | Unique             |
+| `username`      | String        | Unique             |
+| `passwordHash`  | String        | bcrypt (12 rounds) |
+| `avatarUrl`     | String?       |                    |
+| `rating`        | Int           | Default: 1200      |
+| `role`          | UserRole      | Default: USER      |
+| `active`        | Boolean       | Default: true      |
+| `tosAccepted`   | Boolean       | Default: false     |
+| `tosAcceptedAt` | DateTime?     |                    |
+| `verified`      | Boolean       | Default: false     |
+| `darkMode`      | Boolean       | Default: true      |
+| `boardTheme`    | String        | Default: "classic" |
+| `pieceSet`      | String        | Default: "classic" |
+| `soundEnabled`  | Boolean       | Default: true      |
+| `createdAt`     | DateTime      | Auto               |
+| `updatedAt`     | DateTime      | Auto               |
 
-**Relations:** games (white/black), friendships (requester/addressee), refresh tokens, audit logs
+**Relations:** games (white/black), friendships (requester/addressee), refresh tokens, audit logs, collections, invites (created/used), game notes
 
 ### RefreshToken
 
@@ -81,8 +84,11 @@ PostgreSQL database managed by Prisma ORM. Schema defined in `apps/api/prisma/sc
 | `blackTimeLeft` | Int?          | Milliseconds               |
 | `isVsBot`       | Boolean       | Default: false             |
 | `botElo`        | Int?          |                            |
+| `createdAt`     | DateTime      | Auto                       |
+| `startedAt`     | DateTime?     |                            |
+| `endedAt`       | DateTime?     |                            |
 
-**Relations:** moves, analysis
+**Relations:** moves, analysis, game collections, game notes
 
 **Indexes:** `status`, `whiteId`, `blackId`, `createdAt`, `endedAt`
 
@@ -156,6 +162,87 @@ Singleton table (always has id `"singleton"`).
 
 **Indexes:** `adminId`, `createdAt`
 
+### Collection
+
+| Field       | Type          | Notes                      |
+| ----------- | ------------- | -------------------------- |
+| `id`        | String (cuid) | Primary key                |
+| `userId`    | String        | FK → User (cascade delete) |
+| `name`      | String        |                            |
+| `createdAt` | DateTime      | Auto                       |
+
+**Unique constraint:** `[userId, name]`
+
+**Index:** `userId`
+
+**Relations:** games (via GameCollection)
+
+### GameCollection
+
+| Field          | Type          | Notes                            |
+| -------------- | ------------- | -------------------------------- |
+| `id`           | String (cuid) | Primary key                      |
+| `gameId`       | String        | FK → Game (cascade delete)       |
+| `collectionId` | String        | FK → Collection (cascade delete) |
+
+**Unique constraint:** `[gameId, collectionId]`
+
+**Index:** `collectionId`
+
+### Invite
+
+| Field       | Type          | Notes                       |
+| ----------- | ------------- | --------------------------- |
+| `id`        | String (cuid) | Primary key                 |
+| `code`      | String        | Unique                      |
+| `creatorId` | String        | FK → User (cascade delete)  |
+| `usedById`  | String?       | Unique FK → User (set null) |
+| `usedAt`    | DateTime?     |                             |
+| `createdAt` | DateTime      | Auto                        |
+
+**Indexes:** `creatorId`, `code`
+
+### GameNote
+
+| Field       | Type          | Notes                      |
+| ----------- | ------------- | -------------------------- |
+| `id`        | String (cuid) | Primary key                |
+| `userId`    | String        | FK → User (cascade delete) |
+| `gameId`    | String        | FK → Game (cascade delete) |
+| `text`      | String        |                            |
+| `createdAt` | DateTime      | Auto                       |
+| `updatedAt` | DateTime      | Auto                       |
+
+**Unique constraint:** `[userId, gameId]`
+
+**Indexes:** `userId`, `gameId`
+
+### BotProfile
+
+| Field              | Type          | Notes               |
+| ------------------ | ------------- | ------------------- |
+| `id`               | String (cuid) | Primary key         |
+| `botId`            | String        | Unique              |
+| `name`             | String        |                     |
+| `elo`              | Int           |                     |
+| `description`      | String        |                     |
+| `avatar`           | String        |                     |
+| `category`         | String        | Default: "beginner" |
+| `tier`             | String        | Default: "custom"   |
+| `enabled`          | Boolean       | Default: true       |
+| `randomMoveChance` | Float         | Default: 0          |
+| `blunderChance`    | Float         | Default: 0          |
+| `captureGreed`     | Float         | Default: 0          |
+| `aggressionBias`   | Float         | Default: 0          |
+| `maxDepth`         | Int           | Default: 3          |
+| `queenEarly`       | Boolean       | Default: false      |
+| `pawnPusher`       | Boolean       | Default: false      |
+| `sortOrder`        | Int           | Default: 0          |
+| `createdAt`        | DateTime      | Auto                |
+| `updatedAt`        | DateTime      | Auto                |
+
+**Indexes:** `elo`, `category`
+
 ## Entity Relationship Diagram
 
 ```
@@ -165,10 +252,18 @@ User ──1:N──> Friendship (as addressee)
 User ──1:N──> Game (as white)
 User ──1:N──> Game (as black)
 User ──1:N──> AuditLog
+User ──1:N──> Collection
+User ──1:N──> Invite (as creator)
+User ──1:1──> Invite (as usedBy)
+User ──1:N──> GameNote
 
 Game ──1:N──> Move
 Game ──1:1──> GameAnalysis
+Game ──1:N──> GameCollection
+Game ──1:N──> GameNote
 
 Move ──1:1──> MoveFeedback
 GameAnalysis ──1:N──> MoveFeedback
+
+Collection ──1:N──> GameCollection
 ```

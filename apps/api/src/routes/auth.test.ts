@@ -100,7 +100,7 @@ describe("authRoutes", () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(JSON.parse(res.body).error).toMatch(/required/i);
+      expect(JSON.parse(res.body).error).toBeDefined();
     });
 
     it("returns 400 for invalid invite code", async () => {

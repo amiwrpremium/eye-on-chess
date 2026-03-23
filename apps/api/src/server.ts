@@ -22,6 +22,7 @@ import { prisma } from "./lib/prisma.js";
 import { redis } from "./lib/redis.js";
 import { registerRequestLogger } from "./middleware/requestLogger.js";
 import { registerEtag } from "./middleware/etag.js";
+import { checkHealth } from "./lib/healthCheck.js";
 import { initRateLimitConfig, getRouteLimit } from "./lib/rateLimit.js";
 
 async function main() {
@@ -91,8 +92,10 @@ async function main() {
   await fastify.register(activityRoutes);
   await fastify.register(statsRoutes);
 
-  fastify.get("/health", async () => {
-    return { status: "ok", timestamp: new Date().toISOString() };
+  fastify.get("/health", async (_request, reply) => {
+    const health = await checkHealth();
+    reply.code(health.status === "ok" ? 200 : 503);
+    return health;
   });
 
   fastify.get("/api/settings", async () => {

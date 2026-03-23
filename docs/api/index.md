@@ -12,6 +12,10 @@
 - [Notes](notes.md) — Personal game notes
 - [WebSocket Events](websocket.md) — Socket.io real-time events reference
 
+## Response Compression
+
+All API responses are gzip-compressed via `@fastify/compress` when the client sends `Accept-Encoding: gzip`. This works at the application level in addition to nginx gzip, ensuring compression even when accessing the API directly (e.g., port 3001 in dev mode).
+
 ## Request ID Tracing
 
 Every request gets a unique ID (`reqId`) propagated through the entire async call chain via Node.js `AsyncLocalStorage`. This means:

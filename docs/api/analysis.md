@@ -63,6 +63,15 @@ Get analysis results.
 5. Accuracy computed per player
 6. Results saved to `GameAnalysis` + `MoveFeedback` tables
 
+## Reliability
+
+The worker includes several reliability mechanisms:
+
+- **Circuit breaker**: If 3 consecutive analysis jobs fail, the Stockfish engine is automatically restarted
+- **Retry tracking**: Failed jobs are re-queued up to 3 times (retry count tracked in Redis with 1h TTL)
+- **Dead letter queue**: Jobs that fail 3 times are moved to `analysis:dlq` and marked as error — they won't be retried
+- **Graceful recovery**: After engine restart, the worker resumes processing from the next job in the queue
+
 ## Move Classifications
 
 | Classification | CP Loss                                    | Color       |

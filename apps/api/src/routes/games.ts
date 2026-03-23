@@ -652,18 +652,16 @@ export async function gameRoutes(app: FastifyInstance) {
       },
     });
 
-    // Create move records
-    for (const m of moves) {
-      await prisma.move.create({
-        data: {
-          gameId: game.id,
-          ply: m.ply,
-          san: m.san,
-          uci: m.uci,
-          fen: m.fen,
-        },
-      });
-    }
+    // Create move records (batched)
+    await prisma.move.createMany({
+      data: moves.map((m) => ({
+        gameId: game.id,
+        ply: m.ply,
+        san: m.san,
+        uci: m.uci,
+        fen: m.fen,
+      })),
+    });
 
     return { success: true, gameId: game.id };
   });

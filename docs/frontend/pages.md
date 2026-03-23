@@ -19,18 +19,18 @@ All pages use the Next.js 14 App Router under `apps/web/src/app/`.
 
 Redirects to `/login` if no refresh token cookie.
 
-| Route                | File                          | Description                                                                                 |
-| -------------------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
-| `/play`              | `play/page.tsx`               | Play hub — challenge friend, profile, friends, settings links. Shows admin link for admins. |
-| `/play/friend`       | `play/friend/page.tsx`        | Challenge a friend — online friends list, time control presets + custom picker              |
-| `/play/bot`          | `play/bot/page.tsx`           | Bot game — Elo slider, game mode selection, plays against Stockfish WASM engine             |
-| `/game/:id`          | `game/[id]/page.tsx`          | Live game — board, clocks, player info, move list, draw/resign, reconnection handling       |
-| `/game/:id/analysis` | `game/[id]/analysis/page.tsx` | Post-game analysis — replay board, eval bar, eval graph, classifications, accuracy          |
-| `/friends`           | `friends/page.tsx`            | Friends list (online indicators), incoming requests, user search                            |
-| `/stats`             | `stats/page.tsx`              | Personal stats dashboard — rating chart, record, openings, accuracy, streaks, activity      |
-| `/collections`       | `collections/page.tsx`        | Game collection management — create, rename, delete, and browse saved game collections      |
-| `/invites`           | `invites/page.tsx`            | Invite code management — generate, copy, and share invite codes                             |
-| `/settings`          | `settings/page.tsx`           | Dark/light mode toggle, board theme picker (6 themes), piece set picker (3 sets)            |
+| Route                | File                          | Description                                                                                                                   |
+| -------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `/play`              | `play/page.tsx`               | Play hub — challenge friend, profile, friends, settings links. Shows admin link for admins.                                   |
+| `/play/friend`       | `play/friend/page.tsx`        | Challenge a friend — online friends list, time control presets + custom picker                                                |
+| `/play/bot`          | `play/bot/page.tsx`           | Bot game — Elo slider, game mode selection, plays against Stockfish WASM engine                                               |
+| `/game/:id`          | `game/[id]/page.tsx`          | Live game — board, clocks, captured pieces, player info, move list, board flip, draw/resign, reactions, reconnection handling |
+| `/game/:id/analysis` | `game/[id]/analysis/page.tsx` | Post-game analysis — replay board, eval bar, eval graph, classifications, accuracy                                            |
+| `/friends`           | `friends/page.tsx`            | Friends list (online indicators), incoming requests, user search                                                              |
+| `/stats`             | `stats/page.tsx`              | Personal stats dashboard — rating chart, record, openings, accuracy, streaks, activity                                        |
+| `/collections`       | `collections/page.tsx`        | Game collection management — create, rename, delete, and browse saved game collections                                        |
+| `/invites`           | `invites/page.tsx`            | Invite code management — generate, copy, and share invite codes                                                               |
+| `/settings`          | `settings/page.tsx`           | Dark/light mode toggle, board theme picker (6 themes), piece set picker (3 sets)                                              |
 
 ## Admin Pages (require ADMIN role)
 

@@ -26,6 +26,7 @@ Each page displays its shortcuts in a help dialog toggled with `?`.
 | `Right`  | Next move                         |
 | `Home`   | Go to first move                  |
 | `End`    | Go to last move                   |
+| `F`      | Flip board                        |
 | `R`      | Resign (opens confirmation modal) |
 | `Escape` | Close modals (resign, draw, help) |
 | `?`      | Toggle shortcuts help dialog      |

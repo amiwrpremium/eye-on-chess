@@ -24,10 +24,18 @@ import {
 } from "../../../lib/offlineSync";
 import { useSound } from "../../../lib/useSound";
 import { useKeyboardShortcuts } from "../../../lib/useKeyboardShortcuts";
-import ChessBoard from "../../../components/ChessBoard";
+import dynamic from "next/dynamic";
 import KeyboardShortcutsHelp from "../../../components/KeyboardShortcutsHelp";
 import ExportPGN from "../../../components/ExportPGN";
-import EvaluationBar from "../../../components/EvaluationBar";
+import { BoardSkeleton } from "../../../components/Skeleton";
+
+const ChessBoard = dynamic(() => import("../../../components/ChessBoard"), {
+  loading: () => <BoardSkeleton />,
+  ssr: false,
+});
+const EvaluationBar = dynamic(() => import("../../../components/EvaluationBar"), {
+  ssr: false,
+});
 import MoveList from "../../../components/MoveList";
 import CapturedPieces from "../../../components/CapturedPieces";
 import MoveFeedbackPopup from "../../../components/MoveFeedbackPopup";

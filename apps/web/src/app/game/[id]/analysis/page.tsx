@@ -9,9 +9,19 @@ import KeyboardShortcutsHelp from "../../../../components/KeyboardShortcutsHelp"
 import { useKeyboardShortcuts } from "../../../../lib/useKeyboardShortcuts";
 import api from "../../../../lib/api";
 import { useAuthStore } from "../../../../stores/auth";
-import ChessBoard from "../../../../components/ChessBoard";
-import EvaluationBar from "../../../../components/EvaluationBar";
-import EvalGraph from "../../../../components/EvalGraph";
+import dynamic from "next/dynamic";
+import { BoardSkeleton } from "../../../../components/Skeleton";
+
+const ChessBoard = dynamic(() => import("../../../../components/ChessBoard"), {
+  loading: () => <BoardSkeleton />,
+  ssr: false,
+});
+const EvaluationBar = dynamic(() => import("../../../../components/EvaluationBar"), {
+  ssr: false,
+});
+const EvalGraph = dynamic(() => import("../../../../components/EvalGraph"), {
+  ssr: false,
+});
 import type { Player } from "@eyeonchess/chess";
 import { CLASSIFICATION_COLORS, CLASSIFICATION_SYMBOLS } from "@eyeonchess/chess";
 

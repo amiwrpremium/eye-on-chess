@@ -5,8 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
 import { connectSocket, getSocket } from "../../../lib/socket";
-import ChessBoard from "../../../components/ChessBoard";
+import dynamic from "next/dynamic";
+import { BoardSkeleton } from "../../../components/Skeleton";
 import MoveList from "../../../components/MoveList";
+
+const ChessBoard = dynamic(() => import("../../../components/ChessBoard"), {
+  loading: () => <BoardSkeleton />,
+  ssr: false,
+});
 import PlayerClock from "../../../components/PlayerClock";
 import ConfirmModal from "../../../components/ConfirmModal";
 import KeyboardShortcutsHelp from "../../../components/KeyboardShortcutsHelp";

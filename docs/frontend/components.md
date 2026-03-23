@@ -80,6 +80,18 @@ Floating animated reaction bubbles. Renders incoming and outgoing reactions as a
 
 ## Game Components
 
+### `BotSelector`
+
+Scrollable grid of bot personality cards grouped by skill category (Beginner through Grandmaster). Each category has a sticky header with Elo range, followed by cards showing the bot's emoji avatar, name, Elo badge (color-coded by Elo band), and a short description. The selected bot receives a colored ring matching its Elo band.
+
+**Props:** `selected: BotPersonality | null`, `onSelect: (bot) => void`, `bots: BotPersonality[]`
+
+### `CapturedPieces`
+
+Displays a row of Unicode piece symbols representing pieces captured by one side. Compares the current board position (via FEN) against starting piece counts to compute which opponent pieces are missing. Returns null if no pieces have been captured.
+
+**Props:** `fen: string`, `color: 'white' | 'black'`
+
 ### `GameOverModal`
 
 Game result display with rematch flow. Shows the outcome (win/loss/draw), termination reason, rating changes, and a rematch button.
@@ -106,7 +118,7 @@ Collection selection dropdown. Lets users pick from existing game collections or
 
 ### `TosGate`
 
-Terms of Service acceptance gate. Blocks access to the app until the user accepts the current Terms of Service.
+Terms of Service acceptance gate. Blocks the app UI until the authenticated user accepts the Terms of Service. Renders children directly if not logged in or already accepted. Shows an inline summary of the Terms and Privacy Policy with Accept/Decline buttons. Declining deactivates the account via `POST /api/auth/decline-tos`; accepting calls `POST /api/auth/accept-tos` and updates the auth store.
 
 ## Stats Components
 
@@ -166,4 +178,12 @@ Fixed-position toast notification. Zustand-backed — call `useToast().show(mess
 
 ### `ConfirmModal`
 
-Reusable confirmation dialog with danger/primary variants. Used for all destructive admin actions.
+Reusable confirmation dialog with configurable title, message, button label, and danger/primary styling. Supports a loading state that disables both buttons and replaces the confirm label with an ellipsis. Returns null when not open.
+
+**Props:** `open: boolean`, `title: string`, `message: string`, `confirmLabel?: string`, `confirmVariant?: 'danger' | 'primary'`, `onConfirm: () => void`, `onCancel: () => void`, `loading?: boolean`
+
+### `KeyboardShortcutsHelp`
+
+Modal overlay listing available keyboard shortcuts as key/description pairs in a two-column layout. Closes when clicking the backdrop or the Esc button. Accepts an array of `{ key, description }` objects.
+
+**Props:** `open: boolean`, `onClose: () => void`, `shortcuts: { key: string, description: string }[]`

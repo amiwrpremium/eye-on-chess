@@ -51,15 +51,17 @@ Bots are grouped into skill categories in the UI:
 
 Each bot has tunable parameters that control its playstyle:
 
-| Parameter          | Range   | Effect                                                  |
-| ------------------ | ------- | ------------------------------------------------------- |
-| `randomMoveChance` | 0-0.5   | Chance to play a completely random legal move           |
-| `blunderChance`    | 0-0.3   | Chance to deliberately miss the best move               |
-| `captureGreed`     | 0-1     | Bias toward capturing pieces even when it's a bad trade |
-| `aggressionBias`   | -1 to 1 | Preference for attacking (+) vs defensive (-) moves     |
-| `maxDepth`         | 1-18    | How many moves ahead the bot can "see"                  |
-| `queenEarly`       | bool    | Brings queen out in the first 5 moves                   |
-| `pawnPusher`       | bool    | Pushes random edge pawns                                |
+| Parameter          | Range   | Effect                                                   |
+| ------------------ | ------- | -------------------------------------------------------- |
+| `randomMoveChance` | 0-0.5   | Chance to play a completely random legal move            |
+| `blunderChance`    | 0-0.3   | Chance to deliberately miss the best move                |
+| `captureGreed`     | 0-1     | Bias toward capturing pieces even when it's a bad trade  |
+| `aggressionBias`   | -1 to 1 | Preference for attacking (+) vs defensive (-) moves      |
+| `maxDepth`         | 1-18    | How many moves ahead the bot can "see"                   |
+| `queenEarly`       | bool    | Brings queen out in the first 5 moves                    |
+| `pawnPusher`       | bool    | Pushes random edge pawns                                 |
+| `sortOrder`        | int     | Controls display order in API responses (lower = first)  |
+| `enabled`          | bool    | Admins can disable a bot without deleting it from the DB |
 
 ## Bot Selection UI
 
@@ -77,7 +79,7 @@ A "Custom Elo" toggle allows advanced users to use the raw Elo slider with Stock
 make seed-bots    # Reads bots.yml, creates only missing bots in DB
 ```
 
-The seeder also runs automatically on every API container restart. It **never updates** existing bots — only creates new ones. This preserves any admin panel customizations.
+The seeder also runs automatically on every API container restart. It only creates bots that don't already exist in the database — it never overwrites existing rows. This means admin edits (name, description, Elo, behavior parameters, enabled/disabled state) are fully preserved across restarts and redeployments.
 
 ## Adding a New Bot
 

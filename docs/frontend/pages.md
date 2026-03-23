@@ -28,6 +28,7 @@ Redirects to `/login` if no refresh token cookie.
 | `/game/:id/analysis` | `game/[id]/analysis/page.tsx` | Post-game analysis — replay board, eval bar, eval graph, classifications, accuracy                                            |
 | `/friends`           | `friends/page.tsx`            | Friends list (online indicators), incoming requests, user search                                                              |
 | `/stats`             | `stats/page.tsx`              | Personal stats dashboard — rating chart, record, openings, accuracy, streaks, activity                                        |
+| `/history`           | `history/page.tsx`            | Game history — paginated list of past games with result, opponent, time control, notes, and PGN export                        |
 | `/collections`       | `collections/page.tsx`        | Game collection management — create, rename, delete, and browse saved game collections                                        |
 | `/invites`           | `invites/page.tsx`            | Invite code management — generate, copy, and share invite codes                                                               |
 | `/settings`          | `settings/page.tsx`           | Dark/light mode toggle, board theme picker (6 themes), piece set picker (3 sets)                                              |
@@ -52,4 +53,4 @@ Redirects to `/play` if not admin. Uses `AdminLayout` with sidebar navigation.
 - Redirect authenticated users away from `/login` and `/register` → `/play`
 - Check is based on `refresh_token` cookie existence (not JWT validation — that happens API-side)
 
-Protected route prefixes: `/play`, `/friends`, `/game`, `/settings`, `/admin`
+Protected route prefixes: `/play`, `/friends`, `/game`, `/history`, `/collections`, `/settings`, `/admin`

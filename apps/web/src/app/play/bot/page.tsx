@@ -583,14 +583,6 @@ export default function PlayBotPage() {
     if (!isWhite) makeBotMove(chess, []);
   }
 
-  if (isLoading || !user) {
-    return (
-      <main className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-400">Loading...</p>
-      </main>
-    );
-  }
-
   const baseOrientation = playerIsWhite ? "white" : "black";
   const orientation = flipDisplay
     ? baseOrientation === "white"
@@ -616,6 +608,14 @@ export default function PlayBotPage() {
       return false;
     }
   }, [displayFen]);
+
+  if (isLoading || !user) {
+    return (
+      <main className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-400">Loading...</p>
+      </main>
+    );
+  }
 
   const arrows: { from: string; to: string; color: string }[] = [];
   if (hintStep === 2 && hintSource && hintDest)

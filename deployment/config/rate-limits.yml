@@ -19,48 +19,48 @@ global:
 # Per-route overrides
 routes:
   # Auth — strict to prevent brute force
-  "/api/auth/login":
+  "/api/v1/auth/login":
     max: 10
     timeWindow: "1 minute"
 
-  "/api/auth/register":
+  "/api/v1/auth/register":
     max: 5
     timeWindow: "1 minute"
 
-  "/api/auth/refresh":
+  "/api/v1/auth/refresh":
     max: 30
     timeWindow: "1 minute"
 
-  "/api/auth/logout":
+  "/api/v1/auth/logout":
     max: 10
     timeWindow: "1 minute"
 
   # Game creation
-  "/api/games/bot":
+  "/api/v1/games/bot":
     max: 10
     timeWindow: "1 minute"
 
-  "/api/games/friend":
+  "/api/v1/games/friend":
     max: 10
     timeWindow: "1 minute"
 
   # Game moves — higher limit for active play
-  "/api/games/*/move":
+  "/api/v1/games/*/move":
     max: 60
     timeWindow: "1 minute"
 
   # Analysis — expensive operation
-  "/api/games/*/analyze":
+  "/api/v1/games/*/analyze":
     max: 5
     timeWindow: "1 minute"
 
   # Admin — already has its own rate limiter, but cap globally too
-  "/api/admin/*":
+  "/api/v1/admin/*":
     max: 60
     timeWindow: "1 minute"
 
   # User search
-  "/api/users/search":
+  "/api/v1/users/search":
     max: 30
     timeWindow: "1 minute"
 

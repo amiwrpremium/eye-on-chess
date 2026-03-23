@@ -24,9 +24,9 @@ describe("collectionRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── GET /api/collections ────────────────────────────
+  // ── GET /collections ────────────────────────────
 
-  describe("GET /api/collections", () => {
+  describe("GET /collections", () => {
     it("returns list of user collections", async () => {
       const prisma = getPrisma();
       prisma.collection.findMany.mockResolvedValue([
@@ -36,7 +36,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/collections",
+        url: "/collections",
         headers: authHeader(),
       });
 
@@ -50,16 +50,16 @@ describe("collectionRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/collections",
+        url: "/collections",
       });
 
       expect(res.statusCode).toBe(401);
     });
   });
 
-  // ── POST /api/collections ───────────────────────────
+  // ── POST /collections ───────────────────────────
 
-  describe("POST /api/collections", () => {
+  describe("POST /collections", () => {
     it("creates a collection successfully", async () => {
       const prisma = getPrisma();
       prisma.collection.findUnique.mockResolvedValue(null);
@@ -72,7 +72,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/collections",
+        url: "/collections",
         headers: authHeader(),
         payload: { name: "My Collection" },
       });
@@ -85,7 +85,7 @@ describe("collectionRoutes", () => {
     it("returns 400 when name is empty", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/collections",
+        url: "/collections",
         headers: authHeader(),
         payload: { name: "" },
       });
@@ -99,7 +99,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/collections",
+        url: "/collections",
         headers: authHeader(),
         payload: { name: "Favorites" },
       });
@@ -108,9 +108,9 @@ describe("collectionRoutes", () => {
     });
   });
 
-  // ── DELETE /api/collections/:id ─────────────────────
+  // ── DELETE /collections/:id ─────────────────────
 
-  describe("DELETE /api/collections/:id", () => {
+  describe("DELETE /collections/:id", () => {
     it("deletes a collection successfully", async () => {
       const prisma = getPrisma();
       prisma.collection.findUnique.mockResolvedValue({
@@ -122,7 +122,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/collections/c-1",
+        url: "/collections/c-1",
         headers: authHeader(),
       });
 
@@ -136,7 +136,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/collections/nonexistent",
+        url: "/collections/nonexistent",
         headers: authHeader(),
       });
 
@@ -153,7 +153,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/collections/c-1",
+        url: "/collections/c-1",
         headers: authHeader(),
       });
 
@@ -170,7 +170,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/collections/c-1",
+        url: "/collections/c-1",
         headers: authHeader(),
       });
 
@@ -179,9 +179,9 @@ describe("collectionRoutes", () => {
     });
   });
 
-  // ── GET /api/collections/:id/games ──────────────────
+  // ── GET /collections/:id/games ──────────────────
 
-  describe("GET /api/collections/:id/games", () => {
+  describe("GET /collections/:id/games", () => {
     it.skip("returns paginated games in collection", async () => {
       const prisma = getPrisma();
       prisma.collection.findUnique.mockResolvedValue({
@@ -211,7 +211,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/collections/c-1/games",
+        url: "/collections/c-1/games",
         headers: authHeader(),
       });
 
@@ -228,7 +228,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/collections/nonexistent/games",
+        url: "/collections/nonexistent/games",
         headers: authHeader(),
       });
 
@@ -245,7 +245,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/collections/c-1/games",
+        url: "/collections/c-1/games",
         headers: authHeader(),
       });
 
@@ -253,9 +253,9 @@ describe("collectionRoutes", () => {
     });
   });
 
-  // ── POST /api/collections/:id/games ─────────────────
+  // ── POST /collections/:id/games ─────────────────
 
-  describe("POST /api/collections/:id/games", () => {
+  describe("POST /collections/:id/games", () => {
     it("adds a game to a collection", async () => {
       const prisma = getPrisma();
       prisma.collection.findUnique.mockResolvedValue({
@@ -268,7 +268,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/collections/c-1/games",
+        url: "/collections/c-1/games",
         headers: authHeader(),
         payload: { gameId: "g-1" },
       });
@@ -288,7 +288,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/collections/c-1/games",
+        url: "/collections/c-1/games",
         headers: authHeader(),
         payload: { gameId: "g-1" },
       });
@@ -298,9 +298,9 @@ describe("collectionRoutes", () => {
     });
   });
 
-  // ── DELETE /api/collections/:id/games/:gameId ───────
+  // ── DELETE /collections/:id/games/:gameId ───────
 
-  describe("DELETE /api/collections/:id/games/:gameId", () => {
+  describe("DELETE /collections/:id/games/:gameId", () => {
     it("removes a game from collection", async () => {
       const prisma = getPrisma();
       prisma.collection.findUnique.mockResolvedValue({
@@ -312,7 +312,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/collections/c-1/games/g-1",
+        url: "/collections/c-1/games/g-1",
         headers: authHeader(),
       });
 
@@ -321,9 +321,9 @@ describe("collectionRoutes", () => {
     });
   });
 
-  // ── GET /api/games/:id/collections ──────────────────
+  // ── GET /games/:id/collections ──────────────────
 
-  describe("GET /api/games/:id/collections", () => {
+  describe("GET /games/:id/collections", () => {
     it("returns collections a game belongs to", async () => {
       const prisma = getPrisma();
       prisma.gameCollection.findMany.mockResolvedValue([
@@ -332,7 +332,7 @@ describe("collectionRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1/collections",
+        url: "/games/g-1/collections",
         headers: authHeader(),
       });
 

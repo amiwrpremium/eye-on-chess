@@ -18,16 +18,16 @@ describe("inviteRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── GET /api/invites/validate/:code ─────────────────
+  // ── GET /invites/validate/:code ─────────────────
 
-  describe("GET /api/invites/validate/:code", () => {
+  describe("GET /invites/validate/:code", () => {
     it("returns valid for unused invite", async () => {
       const prisma = getPrisma();
       prisma.invite.findUnique.mockResolvedValue({ id: "inv-1", usedById: null });
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/invites/validate/abc123",
+        url: "/invites/validate/abc123",
       });
 
       expect(res.statusCode).toBe(200);
@@ -40,7 +40,7 @@ describe("inviteRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/invites/validate/nonexistent",
+        url: "/invites/validate/nonexistent",
       });
 
       expect(res.statusCode).toBe(404);
@@ -53,7 +53,7 @@ describe("inviteRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/invites/validate/used-code",
+        url: "/invites/validate/used-code",
       });
 
       expect(res.statusCode).toBe(410);
@@ -61,9 +61,9 @@ describe("inviteRoutes", () => {
     });
   });
 
-  // ── GET /api/invites/stats ──────────────────────────
+  // ── GET /invites/stats ──────────────────────────
 
-  describe("GET /api/invites/stats", () => {
+  describe("GET /invites/stats", () => {
     it("returns invite stats", async () => {
       const prisma = getPrisma();
       prisma.invite.count
@@ -72,7 +72,7 @@ describe("inviteRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/invites/stats",
+        url: "/invites/stats",
         headers: authHeader(),
       });
 
@@ -88,16 +88,16 @@ describe("inviteRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/invites/stats",
+        url: "/invites/stats",
       });
 
       expect(res.statusCode).toBe(401);
     });
   });
 
-  // ── GET /api/invites ────────────────────────────────
+  // ── GET /invites ────────────────────────────────
 
-  describe("GET /api/invites", () => {
+  describe("GET /invites", () => {
     it("returns list of user invites", async () => {
       const prisma = getPrisma();
       prisma.invite.findMany.mockResolvedValue([
@@ -121,7 +121,7 @@ describe("inviteRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/invites",
+        url: "/invites",
         headers: authHeader(),
       });
 
@@ -134,9 +134,9 @@ describe("inviteRoutes", () => {
     });
   });
 
-  // ── POST /api/invites ───────────────────────────────
+  // ── POST /invites ───────────────────────────────
 
-  describe("POST /api/invites", () => {
+  describe("POST /invites", () => {
     it("generates a new invite code", async () => {
       const prisma = getPrisma();
       prisma.invite.count
@@ -148,7 +148,7 @@ describe("inviteRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/invites",
+        url: "/invites",
         headers: authHeader(),
       });
 
@@ -165,7 +165,7 @@ describe("inviteRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/invites",
+        url: "/invites",
         headers: authHeader(),
       });
 

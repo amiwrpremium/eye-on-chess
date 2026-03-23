@@ -18,9 +18,9 @@ describe("userRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── GET /api/users/search ───────────────────────────
+  // ── GET /users/search ───────────────────────────
 
-  describe("GET /api/users/search", () => {
+  describe("GET /users/search", () => {
     it("returns matching users", async () => {
       const prisma = getPrisma();
       prisma.user.findMany.mockResolvedValue([
@@ -30,7 +30,7 @@ describe("userRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/users/search?q=alice",
+        url: "/users/search?q=alice",
         headers: authHeader(),
       });
 
@@ -43,7 +43,7 @@ describe("userRoutes", () => {
     it("returns 400 when query is empty", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/users/search?q=",
+        url: "/users/search?q=",
         headers: authHeader(),
       });
 
@@ -53,7 +53,7 @@ describe("userRoutes", () => {
     it("returns 400 when query param missing", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/users/search",
+        url: "/users/search",
         headers: authHeader(),
       });
 
@@ -63,16 +63,16 @@ describe("userRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/users/search?q=alice",
+        url: "/users/search?q=alice",
       });
 
       expect(res.statusCode).toBe(401);
     });
   });
 
-  // ── GET /api/users/:username ────────────────────────
+  // ── GET /users/:username ────────────────────────
 
-  describe("GET /api/users/:username", () => {
+  describe("GET /users/:username", () => {
     it("returns user profile with stats", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValue({
@@ -90,7 +90,7 @@ describe("userRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/users/alice",
+        url: "/users/alice",
       });
 
       expect(res.statusCode).toBe(200);
@@ -109,7 +109,7 @@ describe("userRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/users/nonexistent",
+        url: "/users/nonexistent",
       });
 
       expect(res.statusCode).toBe(404);
@@ -132,7 +132,7 @@ describe("userRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/users/alice?vsUserId=u-2",
+        url: "/users/alice?vsUserId=u-2",
       });
 
       expect(res.statusCode).toBe(200);
@@ -155,7 +155,7 @@ describe("userRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/users/alice?vsUserId=u-1",
+        url: "/users/alice?vsUserId=u-1",
       });
 
       expect(res.statusCode).toBe(200);

@@ -48,13 +48,13 @@ describe("adminRoutes", () => {
     };
   }
 
-  // ── GET /api/admin/csrf ─────────────────────────────
+  // ── GET /admin/csrf ─────────────────────────────
 
-  describe("GET /api/admin/csrf", () => {
+  describe("GET /admin/csrf", () => {
     it("returns a CSRF token", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/csrf",
+        url: "/admin/csrf",
         headers: authHeader(ADMIN_USER),
       });
 
@@ -65,7 +65,7 @@ describe("adminRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/csrf",
+        url: "/admin/csrf",
       });
 
       expect(res.statusCode).toBe(401);
@@ -80,7 +80,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/csrf",
+        url: "/admin/csrf",
         headers: authHeader(TEST_USER),
       });
 
@@ -88,9 +88,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── GET /api/admin/dashboard ────────────────────────
+  // ── GET /admin/dashboard ────────────────────────
 
-  describe("GET /api/admin/dashboard", () => {
+  describe("GET /admin/dashboard", () => {
     it("returns dashboard stats", async () => {
       const prisma = getPrisma();
       const redis = getRedis();
@@ -115,7 +115,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/dashboard",
+        url: "/admin/dashboard",
         headers: authHeader(ADMIN_USER),
       });
 
@@ -127,9 +127,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── GET /api/admin/users ────────────────────────────
+  // ── GET /admin/users ────────────────────────────
 
-  describe("GET /api/admin/users", () => {
+  describe("GET /admin/users", () => {
     it("returns paginated user list", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValueOnce({ role: "ADMIN", active: true });
@@ -149,7 +149,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/users",
+        url: "/admin/users",
         headers: authHeader(ADMIN_USER),
       });
 
@@ -160,9 +160,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── PATCH /api/admin/users/:id ──────────────────────
+  // ── PATCH /admin/users/:id ──────────────────────
 
-  describe("PATCH /api/admin/users/:id", () => {
+  describe("PATCH /admin/users/:id", () => {
     it("updates a user", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValueOnce({ role: "ADMIN", active: true }); // admin check
@@ -178,7 +178,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "PATCH",
-        url: "/api/admin/users/u-1",
+        url: "/admin/users/u-1",
         headers: adminHeaders(),
         payload: { active: false },
       });
@@ -194,7 +194,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "PATCH",
-        url: `/api/admin/users/${ADMIN_USER.id}`,
+        url: `/admin/users/${ADMIN_USER.id}`,
         headers: adminHeaders(),
         payload: { role: "USER" },
       });
@@ -209,7 +209,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "PATCH",
-        url: `/api/admin/users/${ADMIN_USER.id}`,
+        url: `/admin/users/${ADMIN_USER.id}`,
         headers: adminHeaders(),
         payload: { active: false },
       });
@@ -227,7 +227,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "PATCH",
-        url: "/api/admin/users/other-admin",
+        url: "/admin/users/other-admin",
         headers: adminHeaders(),
         payload: { role: "USER" },
       });
@@ -237,9 +237,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── DELETE /api/admin/users/:id ─────────────────────
+  // ── DELETE /admin/users/:id ─────────────────────
 
-  describe("DELETE /api/admin/users/:id", () => {
+  describe("DELETE /admin/users/:id", () => {
     it("deletes a user", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique
@@ -250,7 +250,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/admin/users/u-1",
+        url: "/admin/users/u-1",
         headers: adminHeaders(),
       });
 
@@ -264,7 +264,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: `/api/admin/users/${ADMIN_USER.id}`,
+        url: `/admin/users/${ADMIN_USER.id}`,
         headers: adminHeaders(),
       });
 
@@ -280,7 +280,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/admin/users/nonexistent",
+        url: "/admin/users/nonexistent",
         headers: adminHeaders(),
       });
 
@@ -296,7 +296,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/admin/users/other-admin",
+        url: "/admin/users/other-admin",
         headers: adminHeaders(),
       });
 
@@ -305,9 +305,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── POST /api/admin/users ───────────────────────────
+  // ── POST /admin/users ───────────────────────────
 
-  describe("POST /api/admin/users", () => {
+  describe("POST /admin/users", () => {
     it("creates a new user", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique
@@ -326,7 +326,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/admin/users",
+        url: "/admin/users",
         headers: adminHeaders(),
         payload: { email: "new@example.com", username: "newuser", password: "password123" },
       });
@@ -342,7 +342,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/admin/users",
+        url: "/admin/users",
         headers: adminHeaders(),
         payload: { email: "a@b.com" },
       });
@@ -356,7 +356,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/admin/users",
+        url: "/admin/users",
         headers: adminHeaders(),
         payload: { email: "a@b.com", username: "test", password: "short" },
       });
@@ -373,7 +373,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/admin/users",
+        url: "/admin/users",
         headers: adminHeaders(),
         payload: { email: "dup@example.com", username: "newuser", password: "password123" },
       });
@@ -382,9 +382,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── GET /api/admin/games ────────────────────────────
+  // ── GET /admin/games ────────────────────────────
 
-  describe("GET /api/admin/games", () => {
+  describe("GET /admin/games", () => {
     it("returns paginated game list", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValueOnce({ role: "ADMIN", active: true });
@@ -403,7 +403,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/games",
+        url: "/admin/games",
         headers: authHeader(ADMIN_USER),
       });
 
@@ -414,9 +414,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── DELETE /api/admin/games/:id ─────────────────────
+  // ── DELETE /admin/games/:id ─────────────────────
 
-  describe("DELETE /api/admin/games/:id", () => {
+  describe("DELETE /admin/games/:id", () => {
     it("deletes a game", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValueOnce({ role: "ADMIN", active: true });
@@ -426,7 +426,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/admin/games/g-1",
+        url: "/admin/games/g-1",
         headers: adminHeaders(),
       });
 
@@ -441,7 +441,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/admin/games/nonexistent",
+        url: "/admin/games/nonexistent",
         headers: adminHeaders(),
       });
 
@@ -449,9 +449,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── GET /api/admin/settings ─────────────────────────
+  // ── GET /admin/settings ─────────────────────────
 
-  describe("GET /api/admin/settings", () => {
+  describe("GET /admin/settings", () => {
     it("returns existing settings", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValueOnce({ role: "ADMIN", active: true });
@@ -465,7 +465,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/settings",
+        url: "/admin/settings",
         headers: authHeader(ADMIN_USER),
       });
 
@@ -487,7 +487,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/settings",
+        url: "/admin/settings",
         headers: authHeader(ADMIN_USER),
       });
 
@@ -496,9 +496,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── PUT /api/admin/settings ─────────────────────────
+  // ── PUT /admin/settings ─────────────────────────
 
-  describe("PUT /api/admin/settings", () => {
+  describe("PUT /admin/settings", () => {
     it("updates site settings", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValueOnce({ role: "ADMIN", active: true });
@@ -513,7 +513,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/api/admin/settings",
+        url: "/admin/settings",
         headers: adminHeaders(),
         payload: {
           siteName: "Updated Name",
@@ -528,9 +528,9 @@ describe("adminRoutes", () => {
     });
   });
 
-  // ── GET /api/admin/audit-log ────────────────────────
+  // ── GET /admin/audit-log ────────────────────────
 
-  describe("GET /api/admin/audit-log", () => {
+  describe("GET /admin/audit-log", () => {
     it("returns paginated audit logs", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValueOnce({ role: "ADMIN", active: true });
@@ -551,7 +551,7 @@ describe("adminRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/admin/audit-log",
+        url: "/admin/audit-log",
         headers: authHeader(ADMIN_USER),
       });
 

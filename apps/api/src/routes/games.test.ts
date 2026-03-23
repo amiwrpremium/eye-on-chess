@@ -48,9 +48,9 @@ describe("gameRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── POST /api/games/friend ──────────────────────────
+  // ── POST /games/friend ──────────────────────────
 
-  describe("POST /api/games/friend", () => {
+  describe("POST /games/friend", () => {
     it("creates a friend game with preset", async () => {
       const prisma = getPrisma();
       prisma.friendship.findFirst.mockResolvedValue({ id: "f-1", status: "ACCEPTED" });
@@ -66,7 +66,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/friend",
+        url: "/games/friend",
         headers: authHeader(),
         payload: { friendId: "friend-id", initialTime: 600, increment: 0 },
       });
@@ -79,7 +79,7 @@ describe("gameRoutes", () => {
     it("returns 400 when friendId missing", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/friend",
+        url: "/games/friend",
         headers: authHeader(),
         payload: {},
       });
@@ -90,7 +90,7 @@ describe("gameRoutes", () => {
     it("returns 400 when challenging self", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/friend",
+        url: "/games/friend",
         headers: authHeader(),
         payload: { friendId: TEST_USER.id, initialTime: 600 },
       });
@@ -105,7 +105,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/friend",
+        url: "/games/friend",
         headers: authHeader(),
         payload: { friendId: "stranger-id", initialTime: 600 },
       });
@@ -120,7 +120,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/friend",
+        url: "/games/friend",
         headers: authHeader(),
         payload: { friendId: "friend-id" },
       });
@@ -130,9 +130,9 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── POST /api/games/challenge/accept ────────────────
+  // ── POST /games/challenge/accept ────────────────
 
-  describe("POST /api/games/challenge/accept", () => {
+  describe("POST /games/challenge/accept", () => {
     it("accepts a challenge", async () => {
       const prisma = getPrisma();
       prisma.game.findUnique.mockResolvedValue({
@@ -148,7 +148,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/challenge/accept",
+        url: "/games/challenge/accept",
         headers: authHeader(),
         payload: { gameId: "g-1" },
       });
@@ -163,7 +163,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/challenge/accept",
+        url: "/games/challenge/accept",
         headers: authHeader(),
         payload: { gameId: "nonexistent" },
       });
@@ -182,7 +182,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/challenge/accept",
+        url: "/games/challenge/accept",
         headers: authHeader(),
         payload: { gameId: "g-1" },
       });
@@ -201,7 +201,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/challenge/accept",
+        url: "/games/challenge/accept",
         headers: authHeader(),
         payload: { gameId: "g-1" },
       });
@@ -210,9 +210,9 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── POST /api/games/challenge/decline ───────────────
+  // ── POST /games/challenge/decline ───────────────
 
-  describe("POST /api/games/challenge/decline", () => {
+  describe("POST /games/challenge/decline", () => {
     it("declines a challenge", async () => {
       const prisma = getPrisma();
       prisma.game.findUnique.mockResolvedValue({
@@ -225,7 +225,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/challenge/decline",
+        url: "/games/challenge/decline",
         headers: authHeader(),
         payload: { gameId: "g-1" },
       });
@@ -240,7 +240,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/challenge/decline",
+        url: "/games/challenge/decline",
         headers: authHeader(),
         payload: { gameId: "nonexistent" },
       });
@@ -259,7 +259,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/challenge/decline",
+        url: "/games/challenge/decline",
         headers: authHeader(),
         payload: { gameId: "g-1" },
       });
@@ -268,9 +268,9 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── GET /api/games/:id ──────────────────────────────
+  // ── GET /games/:id ──────────────────────────────
 
-  describe("GET /api/games/:id", () => {
+  describe("GET /games/:id", () => {
     it("returns game state", async () => {
       const prisma = getPrisma();
       prisma.game.findUnique.mockResolvedValue({
@@ -285,7 +285,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1",
+        url: "/games/g-1",
         headers: authHeader(),
       });
 
@@ -299,7 +299,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/nonexistent",
+        url: "/games/nonexistent",
         headers: authHeader(),
       });
 
@@ -307,9 +307,9 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── GET /api/games/:id/pgn ──────────────────────────
+  // ── GET /games/:id/pgn ──────────────────────────
 
-  describe("GET /api/games/:id/pgn", () => {
+  describe("GET /games/:id/pgn", () => {
     it("returns PGN export", async () => {
       const prisma = getPrisma();
       prisma.game.findUnique.mockResolvedValue({
@@ -333,7 +333,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1/pgn",
+        url: "/games/g-1/pgn",
         headers: authHeader(),
       });
 
@@ -350,7 +350,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/nonexistent/pgn",
+        url: "/games/nonexistent/pgn",
         headers: authHeader(),
       });
 
@@ -358,9 +358,9 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── GET /api/games/active ───────────────────────────
+  // ── GET /games/active ───────────────────────────
 
-  describe("GET /api/games/active", () => {
+  describe("GET /games/active", () => {
     it("returns active game", async () => {
       const prisma = getPrisma();
       prisma.game.findFirst.mockResolvedValue({
@@ -375,7 +375,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/active",
+        url: "/games/active",
         headers: authHeader(),
       });
 
@@ -389,7 +389,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/active",
+        url: "/games/active",
         headers: authHeader(),
       });
 
@@ -398,9 +398,9 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── GET /api/games/history ──────────────────────────
+  // ── GET /games/history ──────────────────────────
 
-  describe("GET /api/games/history", () => {
+  describe("GET /games/history", () => {
     it("returns paginated game history", async () => {
       const prisma = getPrisma();
       prisma.game.findMany.mockResolvedValue([
@@ -424,7 +424,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/history",
+        url: "/games/history",
         headers: authHeader(),
       });
 
@@ -437,16 +437,16 @@ describe("gameRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/history",
+        url: "/games/history",
       });
 
       expect(res.statusCode).toBe(401);
     });
   });
 
-  // ── POST /api/games/bot ─────────────────────────────
+  // ── POST /games/bot ─────────────────────────────
 
-  describe("POST /api/games/bot", () => {
+  describe("POST /games/bot", () => {
     it("creates a bot game", async () => {
       const prisma = getPrisma();
       prisma.game.create.mockResolvedValue({
@@ -463,7 +463,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/bot",
+        url: "/games/bot",
         headers: authHeader(),
         payload: { botElo: 800, color: "white", initialTime: 600 },
       });
@@ -477,7 +477,7 @@ describe("gameRoutes", () => {
     it("returns 400 for invalid botElo", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/bot",
+        url: "/games/bot",
         headers: authHeader(),
         payload: { botElo: 100, color: "white" },
       });
@@ -489,7 +489,7 @@ describe("gameRoutes", () => {
     it("returns 400 for botElo too high", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/bot",
+        url: "/games/bot",
         headers: authHeader(),
         payload: { botElo: 5000, color: "white" },
       });
@@ -498,16 +498,16 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── POST /api/games/:id/move ────────────────────────
+  // ── POST /games/:id/move ────────────────────────
 
-  describe("POST /api/games/:id/move", () => {
+  describe("POST /games/:id/move", () => {
     it("returns 404 when game not found", async () => {
       const prisma = getPrisma();
       prisma.game.findUnique.mockResolvedValue(null);
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/nonexistent/move",
+        url: "/games/nonexistent/move",
         headers: authHeader(),
         payload: { from: "e2", to: "e4" },
       });
@@ -528,7 +528,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/move",
+        url: "/games/g-1/move",
         headers: authHeader(),
         payload: { from: "e2", to: "e4" },
       });
@@ -550,7 +550,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/move",
+        url: "/games/g-1/move",
         headers: authHeader(),
         payload: { from: "e2", to: "e4" },
       });
@@ -572,7 +572,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/move",
+        url: "/games/g-1/move",
         headers: authHeader(),
         payload: { from: "e2", to: "e4" },
       });
@@ -581,9 +581,9 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── POST /api/games/:id/resign ──────────────────────
+  // ── POST /games/:id/resign ──────────────────────
 
-  describe("POST /api/games/:id/resign", () => {
+  describe("POST /games/:id/resign", () => {
     it("resigns a game as white", async () => {
       const prisma = getPrisma();
       prisma.game.findUnique.mockResolvedValue({
@@ -596,7 +596,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/resign",
+        url: "/games/g-1/resign",
         headers: authHeader(),
       });
 
@@ -612,7 +612,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/resign",
+        url: "/games/g-1/resign",
         headers: authHeader(),
       });
 
@@ -630,7 +630,7 @@ describe("gameRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/resign",
+        url: "/games/g-1/resign",
         headers: authHeader(),
       });
 
@@ -638,13 +638,13 @@ describe("gameRoutes", () => {
     });
   });
 
-  // ── POST /api/games/sync ────────────────────────────
+  // ── POST /games/sync ────────────────────────────
 
-  describe("POST /api/games/sync", () => {
+  describe("POST /games/sync", () => {
     it("returns 400 when no moves provided", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/sync",
+        url: "/games/sync",
         headers: authHeader(),
         payload: {
           botElo: 800,

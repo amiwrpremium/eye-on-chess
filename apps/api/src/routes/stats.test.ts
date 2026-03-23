@@ -36,9 +36,9 @@ describe("statsRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── GET /api/stats ──────────────────────────────────
+  // ── GET /stats ──────────────────────────────────
 
-  describe("GET /api/stats", () => {
+  describe("GET /stats", () => {
     it("returns cached stats when available", async () => {
       const redis = getRedis();
       const cachedData = {
@@ -54,7 +54,7 @@ describe("statsRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/stats",
+        url: "/stats",
         headers: authHeader(),
       });
 
@@ -77,7 +77,7 @@ describe("statsRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/stats",
+        url: "/stats",
         headers: authHeader(),
       });
 
@@ -92,7 +92,7 @@ describe("statsRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/stats",
+        url: "/stats",
       });
 
       expect(res.statusCode).toBe(401);
@@ -124,7 +124,7 @@ describe("statsRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/stats",
+        url: "/stats",
         headers: authHeader(),
       });
 

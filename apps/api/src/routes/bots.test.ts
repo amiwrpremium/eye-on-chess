@@ -39,11 +39,11 @@ describe("botRoutes", () => {
     vi.clearAllMocks();
   });
 
-  describe("GET /api/bots", () => {
+  describe("GET /bots", () => {
     it("returns 200 with bots from database", async () => {
       getPrisma().botProfile.findMany.mockResolvedValue(MOCK_BOTS);
 
-      const res = await app.inject({ method: "GET", url: "/api/bots" });
+      const res = await app.inject({ method: "GET", url: "/bots" });
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(Array.isArray(body.bots)).toBe(true);
@@ -54,7 +54,7 @@ describe("botRoutes", () => {
     it("has correct structure", async () => {
       getPrisma().botProfile.findMany.mockResolvedValue(MOCK_BOTS);
 
-      const res = await app.inject({ method: "GET", url: "/api/bots" });
+      const res = await app.inject({ method: "GET", url: "/bots" });
       const body = JSON.parse(res.body);
       const bot = body.bots[0];
       expect(bot).toHaveProperty("id");
@@ -69,14 +69,14 @@ describe("botRoutes", () => {
     it("requires no auth", async () => {
       getPrisma().botProfile.findMany.mockResolvedValue(MOCK_BOTS);
 
-      const res = await app.inject({ method: "GET", url: "/api/bots" });
+      const res = await app.inject({ method: "GET", url: "/bots" });
       expect(res.statusCode).toBe(200);
     });
 
     it("returns empty array when no bots in DB", async () => {
       getPrisma().botProfile.findMany.mockResolvedValue([]);
 
-      const res = await app.inject({ method: "GET", url: "/api/bots" });
+      const res = await app.inject({ method: "GET", url: "/bots" });
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(body.bots).toEqual([]);

@@ -25,9 +25,9 @@ describe("activityRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── GET /api/activity ───────────────────────────────
+  // ── GET /activity ───────────────────────────────
 
-  describe("GET /api/activity", () => {
+  describe("GET /activity", () => {
     it("returns cached events when available", async () => {
       const redis = getRedis();
       const events = [
@@ -41,7 +41,7 @@ describe("activityRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/activity",
+        url: "/activity",
         headers: authHeader(),
       });
 
@@ -90,7 +90,7 @@ describe("activityRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/activity",
+        url: "/activity",
         headers: authHeader(),
       });
 
@@ -104,7 +104,7 @@ describe("activityRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/activity",
+        url: "/activity",
       });
 
       expect(res.statusCode).toBe(401);
@@ -123,7 +123,7 @@ describe("activityRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/activity",
+        url: "/activity",
         headers: authHeader(),
       });
 

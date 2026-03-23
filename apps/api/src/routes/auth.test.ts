@@ -50,9 +50,9 @@ describe("authRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── POST /api/auth/register ─────────────────────────
+  // ── POST /auth/register ─────────────────────────
 
-  describe("POST /api/auth/register", () => {
+  describe("POST /auth/register", () => {
     const validBody = {
       email: "new@example.com",
       username: "newuser",
@@ -82,7 +82,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/register",
+        url: "/auth/register",
         payload: validBody,
       });
 
@@ -95,7 +95,7 @@ describe("authRoutes", () => {
     it("returns 400 when fields are missing", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/register",
+        url: "/auth/register",
         payload: { email: "a@b.com" },
       });
 
@@ -109,7 +109,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/register",
+        url: "/auth/register",
         payload: validBody,
       });
 
@@ -127,7 +127,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/register",
+        url: "/auth/register",
         payload: validBody,
       });
 
@@ -146,7 +146,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/register",
+        url: "/auth/register",
         payload: { ...validBody, password: "short" },
       });
 
@@ -166,7 +166,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/register",
+        url: "/auth/register",
         payload: validBody,
       });
 
@@ -188,7 +188,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/register",
+        url: "/auth/register",
         payload: validBody,
       });
 
@@ -197,9 +197,9 @@ describe("authRoutes", () => {
     });
   });
 
-  // ── POST /api/auth/login ────────────────────────────
+  // ── POST /auth/login ────────────────────────────
 
-  describe("POST /api/auth/login", () => {
+  describe("POST /auth/login", () => {
     it("logs in successfully with valid credentials", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValue(TEST_USER);
@@ -208,7 +208,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/login",
+        url: "/auth/login",
         payload: { email: TEST_USER.email, password: "validpassword" },
       });
 
@@ -221,7 +221,7 @@ describe("authRoutes", () => {
     it("returns 400 when email or password missing", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/login",
+        url: "/auth/login",
         payload: { email: "a@b.com" },
       });
 
@@ -234,7 +234,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/login",
+        url: "/auth/login",
         payload: { email: "nobody@example.com", password: "password123" },
       });
 
@@ -249,7 +249,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/login",
+        url: "/auth/login",
         payload: { email: TEST_USER.email, password: "wrongpassword" },
       });
 
@@ -264,7 +264,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/login",
+        url: "/auth/login",
         payload: { email: TEST_USER.email, password: "password123" },
       });
 
@@ -273,9 +273,9 @@ describe("authRoutes", () => {
     });
   });
 
-  // ── POST /api/auth/refresh ──────────────────────────
+  // ── POST /auth/refresh ──────────────────────────
 
-  describe("POST /api/auth/refresh", () => {
+  describe("POST /auth/refresh", () => {
     it("refreshes token successfully", async () => {
       const prisma = getPrisma();
       prisma.refreshToken.findUnique.mockResolvedValue({
@@ -289,7 +289,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/refresh",
+        url: "/auth/refresh",
         cookies: { refresh_token: "some-raw-token" },
       });
 
@@ -300,7 +300,7 @@ describe("authRoutes", () => {
     it("returns 401 when no refresh cookie", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/refresh",
+        url: "/auth/refresh",
       });
 
       expect(res.statusCode).toBe(401);
@@ -319,7 +319,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/refresh",
+        url: "/auth/refresh",
         cookies: { refresh_token: "some-raw-token" },
       });
 
@@ -328,9 +328,9 @@ describe("authRoutes", () => {
     });
   });
 
-  // ── GET /api/auth/me ────────────────────────────────
+  // ── GET /auth/me ────────────────────────────────
 
-  describe("GET /api/auth/me", () => {
+  describe("GET /auth/me", () => {
     it("returns current user when authenticated", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValue({
@@ -350,7 +350,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/auth/me",
+        url: "/auth/me",
         headers: authHeader(),
       });
 
@@ -363,23 +363,23 @@ describe("authRoutes", () => {
     it("returns 401 without auth header", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/auth/me",
+        url: "/auth/me",
       });
 
       expect(res.statusCode).toBe(401);
     });
   });
 
-  // ── POST /api/auth/accept-tos ───────────────────────
+  // ── POST /auth/accept-tos ───────────────────────
 
-  describe("POST /api/auth/accept-tos", () => {
+  describe("POST /auth/accept-tos", () => {
     it("accepts TOS successfully", async () => {
       const prisma = getPrisma();
       prisma.user.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/accept-tos",
+        url: "/auth/accept-tos",
         headers: authHeader(),
       });
 
@@ -394,16 +394,16 @@ describe("authRoutes", () => {
     });
   });
 
-  // ── POST /api/auth/logout ───────────────────────────
+  // ── POST /auth/logout ───────────────────────────
 
-  describe("POST /api/auth/logout", () => {
+  describe("POST /auth/logout", () => {
     it("logs out successfully", async () => {
       const prisma = getPrisma();
       prisma.refreshToken.delete.mockResolvedValue({});
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/logout",
+        url: "/auth/logout",
         cookies: { refresh_token: "some-token" },
       });
 
@@ -414,7 +414,7 @@ describe("authRoutes", () => {
     it("logs out even without refresh cookie", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/logout",
+        url: "/auth/logout",
       });
 
       expect(res.statusCode).toBe(200);
@@ -422,9 +422,9 @@ describe("authRoutes", () => {
     });
   });
 
-  // ── PUT /api/auth/preferences ───────────────────────
+  // ── PUT /auth/preferences ───────────────────────
 
-  describe("PUT /api/auth/preferences", () => {
+  describe("PUT /auth/preferences", () => {
     it("updates preferences successfully", async () => {
       const prisma = getPrisma();
       prisma.user.update.mockResolvedValue({
@@ -436,7 +436,7 @@ describe("authRoutes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/api/auth/preferences",
+        url: "/auth/preferences",
         headers: authHeader(),
         payload: { darkMode: false, boardTheme: "wood", pieceSet: "modern", soundEnabled: false },
       });
@@ -447,16 +447,16 @@ describe("authRoutes", () => {
     });
   });
 
-  // ── POST /api/auth/decline-tos ──────────────────────
+  // ── POST /auth/decline-tos ──────────────────────
 
-  describe("POST /api/auth/decline-tos", () => {
+  describe("POST /auth/decline-tos", () => {
     it("declines TOS and deactivates account", async () => {
       const prisma = getPrisma();
       prisma.user.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/auth/decline-tos",
+        url: "/auth/decline-tos",
         headers: authHeader(),
       });
 

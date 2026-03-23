@@ -18,9 +18,9 @@ describe("noteRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── GET /api/games/:id/notes ────────────────────────
+  // ── GET /games/:id/notes ────────────────────────
 
-  describe("GET /api/games/:id/notes", () => {
+  describe("GET /games/:id/notes", () => {
     it("returns existing note", async () => {
       const prisma = getPrisma();
       const updatedAt = new Date();
@@ -31,7 +31,7 @@ describe("noteRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1/notes",
+        url: "/games/g-1/notes",
         headers: authHeader(),
       });
 
@@ -46,7 +46,7 @@ describe("noteRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1/notes",
+        url: "/games/g-1/notes",
         headers: authHeader(),
       });
 
@@ -57,16 +57,16 @@ describe("noteRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1/notes",
+        url: "/games/g-1/notes",
       });
 
       expect(res.statusCode).toBe(401);
     });
   });
 
-  // ── PUT /api/games/:id/notes ────────────────────────
+  // ── PUT /games/:id/notes ────────────────────────
 
-  describe("PUT /api/games/:id/notes", () => {
+  describe("PUT /games/:id/notes", () => {
     it("creates or updates a note", async () => {
       const prisma = getPrisma();
       prisma.game.findUnique.mockResolvedValue({ id: "g-1" });
@@ -78,7 +78,7 @@ describe("noteRoutes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/api/games/g-1/notes",
+        url: "/games/g-1/notes",
         headers: authHeader(),
         payload: { text: "Updated note" },
       });
@@ -95,7 +95,7 @@ describe("noteRoutes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/api/games/g-1/notes",
+        url: "/games/g-1/notes",
         headers: authHeader(),
         payload: { text: "" },
       });
@@ -111,7 +111,7 @@ describe("noteRoutes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/api/games/g-1/notes",
+        url: "/games/g-1/notes",
         headers: authHeader(),
         payload: {},
       });
@@ -126,7 +126,7 @@ describe("noteRoutes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/api/games/nonexistent/notes",
+        url: "/games/nonexistent/notes",
         headers: authHeader(),
         payload: { text: "A note" },
       });

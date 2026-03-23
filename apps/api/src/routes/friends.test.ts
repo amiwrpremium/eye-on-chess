@@ -24,9 +24,9 @@ describe("friendRoutes", () => {
     vi.clearAllMocks();
   });
 
-  // ── GET /api/friends ────────────────────────────────
+  // ── GET /friends ────────────────────────────────
 
-  describe("GET /api/friends", () => {
+  describe("GET /friends", () => {
     it("returns list of friends", async () => {
       const prisma = getPrisma();
       prisma.friendship.findMany.mockResolvedValue([
@@ -42,7 +42,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/friends",
+        url: "/friends",
         headers: authHeader(),
       });
 
@@ -56,16 +56,16 @@ describe("friendRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/friends",
+        url: "/friends",
       });
 
       expect(res.statusCode).toBe(401);
     });
   });
 
-  // ── GET /api/friends/requests ───────────────────────
+  // ── GET /friends/requests ───────────────────────
 
-  describe("GET /api/friends/requests", () => {
+  describe("GET /friends/requests", () => {
     it("returns pending friend requests", async () => {
       const prisma = getPrisma();
       prisma.friendship.findMany.mockResolvedValue([
@@ -81,7 +81,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/friends/requests",
+        url: "/friends/requests",
         headers: authHeader(),
       });
 
@@ -92,9 +92,9 @@ describe("friendRoutes", () => {
     });
   });
 
-  // ── POST /api/friends/request ───────────────────────
+  // ── POST /friends/request ───────────────────────
 
-  describe("POST /api/friends/request", () => {
+  describe("POST /friends/request", () => {
     it("sends a friend request successfully", async () => {
       const prisma = getPrisma();
       prisma.user.findUnique.mockResolvedValue({ id: "target-id", username: "target" });
@@ -103,7 +103,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/request",
+        url: "/friends/request",
         headers: authHeader(),
         payload: { username: "target" },
       });
@@ -115,7 +115,7 @@ describe("friendRoutes", () => {
     it("returns 400 when username is missing", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/request",
+        url: "/friends/request",
         headers: authHeader(),
         payload: {},
       });
@@ -129,7 +129,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/request",
+        url: "/friends/request",
         headers: authHeader(),
         payload: { username: "nonexistent" },
       });
@@ -143,7 +143,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/request",
+        url: "/friends/request",
         headers: authHeader(),
         payload: { username: TEST_USER.username },
       });
@@ -164,7 +164,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/request",
+        url: "/friends/request",
         headers: authHeader(),
         payload: { username: "target" },
       });
@@ -185,7 +185,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/request",
+        url: "/friends/request",
         headers: authHeader(),
         payload: { username: "target" },
       });
@@ -207,7 +207,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/request",
+        url: "/friends/request",
         headers: authHeader(),
         payload: { username: "target" },
       });
@@ -217,9 +217,9 @@ describe("friendRoutes", () => {
     });
   });
 
-  // ── POST /api/friends/accept ────────────────────────
+  // ── POST /friends/accept ────────────────────────
 
-  describe("POST /api/friends/accept", () => {
+  describe("POST /friends/accept", () => {
     it("accepts a friend request", async () => {
       const prisma = getPrisma();
       prisma.friendship.findUnique.mockResolvedValue({
@@ -232,7 +232,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/accept",
+        url: "/friends/accept",
         headers: authHeader(),
         payload: { friendshipId: "f-1" },
       });
@@ -247,7 +247,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/accept",
+        url: "/friends/accept",
         headers: authHeader(),
         payload: { friendshipId: "nonexistent" },
       });
@@ -266,7 +266,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/accept",
+        url: "/friends/accept",
         headers: authHeader(),
         payload: { friendshipId: "f-1" },
       });
@@ -285,7 +285,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/accept",
+        url: "/friends/accept",
         headers: authHeader(),
         payload: { friendshipId: "f-1" },
       });
@@ -294,9 +294,9 @@ describe("friendRoutes", () => {
     });
   });
 
-  // ── POST /api/friends/decline ───────────────────────
+  // ── POST /friends/decline ───────────────────────
 
-  describe("POST /api/friends/decline", () => {
+  describe("POST /friends/decline", () => {
     it("declines a friend request", async () => {
       const prisma = getPrisma();
       prisma.friendship.findUnique.mockResolvedValue({
@@ -309,7 +309,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/decline",
+        url: "/friends/decline",
         headers: authHeader(),
         payload: { friendshipId: "f-1" },
       });
@@ -324,7 +324,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/decline",
+        url: "/friends/decline",
         headers: authHeader(),
         payload: { friendshipId: "nonexistent" },
       });
@@ -343,7 +343,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/friends/decline",
+        url: "/friends/decline",
         headers: authHeader(),
         payload: { friendshipId: "f-1" },
       });
@@ -352,9 +352,9 @@ describe("friendRoutes", () => {
     });
   });
 
-  // ── DELETE /api/friends/:friendshipId ───────────────
+  // ── DELETE /friends/:friendshipId ───────────────
 
-  describe("DELETE /api/friends/:friendshipId", () => {
+  describe("DELETE /friends/:friendshipId", () => {
     it("removes a friend successfully", async () => {
       const prisma = getPrisma();
       prisma.friendship.findUnique.mockResolvedValue({
@@ -366,7 +366,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/friends/f-1",
+        url: "/friends/f-1",
         headers: authHeader(),
       });
 
@@ -380,7 +380,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/friends/nonexistent",
+        url: "/friends/nonexistent",
         headers: authHeader(),
       });
 
@@ -397,7 +397,7 @@ describe("friendRoutes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/api/friends/f-1",
+        url: "/friends/f-1",
         headers: authHeader(),
       });
 

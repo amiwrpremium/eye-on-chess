@@ -33,9 +33,9 @@ describe("analysisRoutes", () => {
     (redis as Record<string, unknown>).rpush = vi.fn().mockResolvedValue(1);
   });
 
-  // ── POST /api/games/:id/analyze ─────────────────────
+  // ── POST /games/:id/analyze ─────────────────────
 
-  describe("POST /api/games/:id/analyze", () => {
+  describe("POST /games/:id/analyze", () => {
     it("queues analysis for a completed game", async () => {
       const prisma = getPrisma();
       const redis = getRedis();
@@ -49,7 +49,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/analyze",
+        url: "/games/g-1/analyze",
         headers: authHeader(),
       });
 
@@ -64,7 +64,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/nonexistent/analyze",
+        url: "/games/nonexistent/analyze",
         headers: authHeader(),
       });
 
@@ -81,7 +81,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/analyze",
+        url: "/games/g-1/analyze",
         headers: authHeader(),
       });
 
@@ -99,7 +99,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/analyze",
+        url: "/games/g-1/analyze",
         headers: authHeader(),
       });
 
@@ -118,7 +118,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/analyze",
+        url: "/games/g-1/analyze",
         headers: authHeader(),
       });
 
@@ -140,7 +140,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/analyze",
+        url: "/games/g-1/analyze",
         headers: authHeader(),
       });
 
@@ -151,16 +151,16 @@ describe("analysisRoutes", () => {
     it("returns 401 without auth", async () => {
       const res = await app.inject({
         method: "POST",
-        url: "/api/games/g-1/analyze",
+        url: "/games/g-1/analyze",
       });
 
       expect(res.statusCode).toBe(401);
     });
   });
 
-  // ── GET /api/games/:id/analysis ─────────────────────
+  // ── GET /games/:id/analysis ─────────────────────
 
-  describe("GET /api/games/:id/analysis", () => {
+  describe("GET /games/:id/analysis", () => {
     it("returns analysis results when available", async () => {
       const prisma = getPrisma();
       const redis = getRedis();
@@ -188,7 +188,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1/analysis",
+        url: "/games/g-1/analysis",
         headers: authHeader(),
       });
 
@@ -209,7 +209,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1/analysis",
+        url: "/games/g-1/analysis",
         headers: authHeader(),
       });
 
@@ -227,7 +227,7 @@ describe("analysisRoutes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/api/games/g-1/analysis",
+        url: "/games/g-1/analysis",
         headers: authHeader(),
       });
 

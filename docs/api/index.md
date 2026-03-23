@@ -12,6 +12,15 @@
 - [Notes](notes.md) — Personal game notes
 - [WebSocket Events](websocket.md) — Socket.io real-time events reference
 
+## Request ID Tracing
+
+Every request gets a unique ID (`reqId`) propagated through the entire async call chain via Node.js `AsyncLocalStorage`. This means:
+
+- Fastify logs include `reqId` automatically
+- Child loggers created with `createChildLogger()` auto-attach `reqId`
+- Any code can call `getRequestId()` to get the current request's ID
+- Enables end-to-end tracing: HTTP request → DB query → Redis call → response
+
 ## Redis Reconnect
 
 The Redis client uses an exponential backoff reconnect strategy:

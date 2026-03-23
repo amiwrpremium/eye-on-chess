@@ -7,13 +7,25 @@ Real-time communication via Socket.io on the same port as the API (3001, proxied
 ```typescript
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3001", {
-  auth: { token: accessToken },
+const socket = io("http://localhost", {
+  auth: (cb) => cb({ token: getAccessToken() }),
   withCredentials: true,
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 10000,
 });
 ```
 
 Authentication is required. The server verifies the JWT from `handshake.auth.token`.
+
+### Reconnection Resilience
+
+- **Auth as function**: The `auth` callback is called on every reconnect attempt, fetching a fresh access token. This handles JWT expiry during disconnections (15min token lifetime).
+- **Exponential backoff**: Reconnects with 1s → 10s delay, up to 10 attempts.
+- **Token refresh on error**: If reconnect fails with "Invalid token", the client triggers a token refresh via `/api/auth/refresh` before the next attempt.
+- **Game room re-join**: The game page automatically re-emits `game:join` on reconnect to restore game state.
+- **CORS**: Socket.io CORS matches the API CORS whitelist (SITE_URL in production, localhost in dev).
 
 ## Presence Events
 

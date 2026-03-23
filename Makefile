@@ -191,6 +191,9 @@ format: ## Format all files with Prettier
 format-check: ## Check formatting without changes
 	pnpm format:check
 
+changelog: ## Generate CHANGELOG.md from conventional commits
+	pnpm changelog
+
 # ── Utilities ────────────────────────────────────────────
 install: ## Install dependencies locally (for IDE support)
 	pnpm install

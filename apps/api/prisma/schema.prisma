@@ -300,7 +300,9 @@ model BotProfile {
   queenEarly       Boolean @default(false)
   pawnPusher       Boolean @default(false)
   sortOrder        Int     @default(0)
-  createdAt        DateTime @default(now())
+  messages           Json?
+  preferredOpenings  Json?
+  createdAt          DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@index([elo])

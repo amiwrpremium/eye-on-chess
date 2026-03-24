@@ -24,6 +24,38 @@ bots:
     maxDepth: 1
     queenEarly: false
     pawnPusher: true
+    messages:
+      gameStart:
+        - "Hi! I just learned how the horsey moves!"
+        - "Let's play! I think I remember the rules..."
+        - "Which one is the king again?"
+      onCapture:
+        - "Oops, was that yours?"
+        - "I got one! ...wait, was that good?"
+      onBeingChecked:
+        - "Whoa, my king is scared!"
+        - "Where do I go??"
+      onGivingCheck:
+        - "Check! Wait, did I do that right?"
+      onBlunder:
+        - "That seemed like a good idea..."
+        - "Hmm, that felt weird."
+      onPlayerBlunder:
+        - "Was that on purpose?"
+        - "Oh interesting move!"
+      onWinning:
+        - "Am I winning? Really?!"
+      onLosing:
+        - "This is fine. Everything is fine. 🔥"
+      onCheckmate:
+        - "I won?! HOW?!"
+        - "Wait... did I actually win?"
+      onCheckmated:
+        - "Good game! You're really good!"
+        - "I'll get the horsey right next time!"
+      onDraw:
+        - "A tie! That's like half a win right?"
+    # No preferredOpenings — Amir is too chaotic to follow a book
 
   - id: timmy
     name: Timmy
@@ -39,6 +71,41 @@ bots:
     maxDepth: 1
     queenEarly: false
     pawnPusher: true
+    messages:
+      gameStart:
+        - "Time to push some pawns!"
+        - "My a-pawn is my favorite piece."
+      onCapture:
+        - "Hey! That pawn was going places!"
+        - "Nom nom nom!"
+      onBeingChecked:
+        - "My king likes to walk anyway."
+        - "Eek!"
+      onGivingCheck:
+        - "Surprise!"
+      onBlunder:
+        - "I meant to do that."
+        - "That pawn needed some air."
+      onPlayerBlunder:
+        - "Ooh, free piece!"
+        - "Thanks!"
+      onWinning:
+        - "My pawns are unstoppable!"
+      onLosing:
+        - "My pawns will save me... right?"
+      onCheckmate:
+        - "Pawn power! 💪"
+      onCheckmated:
+        - "Aw man. GG though!"
+      onDraw:
+        - "We both tried our best!"
+    preferredOpenings:
+      asWhite:
+        - "d4"
+        - "e4"
+      asBlack:
+        - "d5"
+        - "e5"
 
   - id: bella
     name: Bella
@@ -54,6 +121,42 @@ bots:
     maxDepth: 1
     queenEarly: true
     pawnPusher: false
+    messages:
+      gameStart:
+        - "My queen is coming for you! 👑"
+        - "Time to capture EVERYTHING."
+      onCapture:
+        - "MINE! 😋"
+        - "I love collecting pieces!"
+        - "Another one for my collection!"
+      onBeingChecked:
+        - "Don't touch my king! 😤"
+        - "Rude!"
+      onGivingCheck:
+        - "My queen says hi! 👑"
+      onBlunder:
+        - "I couldn't resist grabbing it..."
+        - "It looked tasty!"
+      onPlayerBlunder:
+        - "Ooh, don't mind if I do!"
+        - "Free piece? Yes please!"
+      onWinning:
+        - "I have ALL the pieces! 😊"
+      onLosing:
+        - "But I captured so many things..."
+      onCheckmate:
+        - "Queen power! 👑"
+      onCheckmated:
+        - "My queen couldn't save me... 😢"
+      onDraw:
+        - "But I wanted to capture more!"
+    preferredOpenings:
+      asWhite:
+        - "e4 e5 Qh5"
+        - "e4 e5 Bc4"
+      asBlack:
+        - "e5"
+        - "d5"
 
   - id: rusty
     name: Rusty
@@ -69,6 +172,41 @@ bots:
     maxDepth: 1
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Back in my day, we played blindfolded."
+        - "I used to be sharp, you know."
+      onCapture:
+        - "Still got it!"
+        - "The old hands remember."
+      onBeingChecked:
+        - "Oh! Didn't see that coming."
+        - "These old eyes..."
+      onGivingCheck:
+        - "Ha! Still got some tricks!"
+      onBlunder:
+        - "I forgot that piece was there..."
+        - "My memory isn't what it used to be."
+      onPlayerBlunder:
+        - "Even I saw that one."
+        - "Reminds me of myself."
+      onWinning:
+        - "Experience beats youth!"
+      onLosing:
+        - "My joints are too stiff for this..."
+      onCheckmate:
+        - "The old master prevails!"
+      onCheckmated:
+        - "Well played. I need a nap."
+      onDraw:
+        - "A fair result."
+    preferredOpenings:
+      asWhite:
+        - "e4"
+        - "d4"
+      asBlack:
+        - "e5"
+        - "d5"
 
   - id: chloe
     name: Chloe
@@ -84,6 +222,40 @@ bots:
     maxDepth: 1
     queenEarly: false
     pawnPusher: true
+    messages:
+      gameStart:
+        - "Control the center, control the game."
+        - "Pawns are the soul of chess!"
+      onCapture:
+        - "That was in my center."
+        - "You were in the way."
+      onBeingChecked:
+        - "My wall of pawns should have stopped that!"
+        - "How did you get through?"
+      onGivingCheck:
+        - "My pawns opened a path!"
+      onBlunder:
+        - "I was focused on my pawn structure..."
+        - "The center is still mine though!"
+      onPlayerBlunder:
+        - "You left the center weak."
+      onWinning:
+        - "My pawn chain is unstoppable!"
+      onLosing:
+        - "But my pawn structure is perfect..."
+      onCheckmate:
+        - "Pawns win games!"
+      onCheckmated:
+        - "Maybe I should develop my pieces next time."
+      onDraw:
+        - "Solid pawn play from both sides."
+    preferredOpenings:
+      asWhite:
+        - "e4 e5 d4"
+        - "d4 d5 c4"
+      asBlack:
+        - "e6"
+        - "d5"
 
   - id: omar
     name: Omar
@@ -99,6 +271,41 @@ bots:
     maxDepth: 2
     queenEarly: true
     pawnPusher: false
+    messages:
+      gameStart:
+        - "My queen will destroy you."
+        - "One piece is all I need. 👑"
+      onCapture:
+        - "The queen takes what she wants!"
+        - "Nothing escapes my queen!"
+      onBeingChecked:
+        - "My queen will handle this."
+        - "A minor setback."
+      onGivingCheck:
+        - "Queen attack! 💥"
+        - "Feel the power!"
+      onBlunder:
+        - "The queen works alone..."
+        - "I didn't need that piece anyway."
+      onPlayerBlunder:
+        - "My queen is coming for that!"
+      onWinning:
+        - "The queen dominates!"
+      onLosing:
+        - "Where did my queen go?!"
+      onCheckmate:
+        - "The queen reigns supreme! 👑"
+      onCheckmated:
+        - "I should have used my other pieces too..."
+      onDraw:
+        - "My queen deserved better."
+    preferredOpenings:
+      asWhite:
+        - "e4 e5 Qh5"
+        - "d4 d5 Qd3"
+      asBlack:
+        - "e5"
+        - "Nf6"
 
   - id: noodle
     name: Noodle
@@ -114,6 +321,40 @@ bots:
     maxDepth: 2
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "I studied the opening! ...just the first 3 moves."
+        - "I've got a plan! Probably."
+      onCapture:
+        - "According to my preparation..."
+        - "I think that was theory?"
+      onBeingChecked:
+        - "This wasn't in my opening book!"
+        - "Uh oh, I'm on my own now."
+      onGivingCheck:
+        - "I actually calculated that!"
+      onBlunder:
+        - "I ran out of opening prep..."
+        - "My plan fell apart."
+      onPlayerBlunder:
+        - "Wait, was that a blunder? Let me think..."
+      onWinning:
+        - "The opening worked! Now what?"
+      onLosing:
+        - "I peaked on move 3..."
+      onCheckmate:
+        - "I can't believe my plan worked!"
+      onCheckmated:
+        - "I need to study more openings."
+      onDraw:
+        - "I'll take it!"
+    preferredOpenings:
+      asWhite:
+        - "e4 e5 Nf3 Nc6 Bb5"
+        - "d4 d5 c4"
+      asBlack:
+        - "e5 Nf3 Nc6"
+        - "Nf6"
 
   - id: elena
     name: Elena
@@ -129,6 +370,40 @@ bots:
     maxDepth: 2
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "I see pieces, I take pieces."
+        - "Material is everything! 💎"
+      onCapture:
+        - "Can't help myself!"
+        - "More material for me!"
+        - "If it's there, I take it."
+      onBeingChecked:
+        - "Hey, I was busy capturing!"
+      onGivingCheck:
+        - "Check, and I'll take something next!"
+      onBlunder:
+        - "It was a capture, I had to take it..."
+        - "Was that a trap? 🪤"
+      onPlayerBlunder:
+        - "Ooh, something to capture!"
+      onWinning:
+        - "I have so many pieces! 😍"
+      onLosing:
+        - "But I captured more pieces than you..."
+      onCheckmate:
+        - "Material advantage wins!"
+      onCheckmated:
+        - "Maybe not every capture is good..."
+      onDraw:
+        - "We both captured a lot."
+    preferredOpenings:
+      asWhite:
+        - "e4 e5 Nf3 Nc6 Bc4"
+        - "e4 e5 d4"
+      asBlack:
+        - "e5"
+        - "c5"
 
   - id: scout
     name: Scout
@@ -144,6 +419,40 @@ bots:
     maxDepth: 2
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "I'll build a fortress."
+        - "Defense wins games."
+      onCapture:
+        - "Had to remove that threat."
+        - "Defensive capture."
+      onBeingChecked:
+        - "Retreating to safety."
+        - "The king knows when to run."
+      onGivingCheck:
+        - "An unexpected attack from me!"
+      onBlunder:
+        - "I was too focused on defense..."
+        - "I retreated to the wrong square."
+      onPlayerBlunder:
+        - "You left an opening in your position."
+      onWinning:
+        - "My fortress holds."
+      onLosing:
+        - "They broke through my defense..."
+      onCheckmate:
+        - "The best defense is... winning."
+      onCheckmated:
+        - "My walls couldn't hold."
+      onDraw:
+        - "An impenetrable fortress. 🏰"
+    preferredOpenings:
+      asWhite:
+        - "d4 d5 Nf3"
+        - "Nf3 d5 d4"
+      asBlack:
+        - "e6"
+        - "d5"
 
   - id: ahmed
     name: Ahmed
@@ -159,6 +468,40 @@ bots:
     maxDepth: 2
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "I've studied this opening extensively!"
+        - "Theory time! I know at least 5 moves."
+      onCapture:
+        - "Calculated."
+        - "That was in my analysis."
+      onBeingChecked:
+        - "This wasn't in the book!"
+        - "Wait, I'm out of theory already?"
+      onGivingCheck:
+        - "A theoretical check!"
+      onBlunder:
+        - "I panicked after the theory ended..."
+        - "Need more book moves!"
+      onPlayerBlunder:
+        - "My preparation predicted this."
+      onWinning:
+        - "Theory is paying off!"
+      onLosing:
+        - "This isn't what my book said would happen..."
+      onCheckmate:
+        - "Preparation is everything!"
+      onCheckmated:
+        - "I need to study deeper lines."
+      onDraw:
+        - "A theoretical draw. Expected."
+    preferredOpenings:
+      asWhite:
+        - "e4 e5 Nf3 Nc6 Bb5 a6 Ba4"
+        - "d4 d5 c4 e6 Nc3"
+      asBlack:
+        - "e5 Nf3 Nc6"
+        - "Nf6 c4 e6"
 
   - id: maple
     name: Maple
@@ -174,6 +517,40 @@ bots:
     maxDepth: 3
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Good luck, have fun!"
+        - "Let's have a good game. 🍁"
+      onCapture:
+        - "Nice trade."
+        - "I'll take that."
+      onBeingChecked:
+        - "Good move."
+        - "Noted."
+      onGivingCheck:
+        - "Check!"
+      onBlunder:
+        - "Oops, didn't see that."
+        - "That was careless."
+      onPlayerBlunder:
+        - "Hmm, that might have been a mistake."
+      onWinning:
+        - "I like this position."
+      onLosing:
+        - "This is getting tough."
+      onCheckmate:
+        - "Good game! 🍁"
+      onCheckmated:
+        - "Well played! That was a good game."
+      onDraw:
+        - "Fair game! 🤝"
+    preferredOpenings:
+      asWhite:
+        - "e4 e5 Nf3 Nc6 Bc4"
+        - "d4 d5 c4 e6"
+      asBlack:
+        - "e5 Nf3 Nc6"
+        - "d5 c4 e6"
 
   - id: viktor
     name: Viktor
@@ -189,6 +566,34 @@ bots:
     maxDepth: 4
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "I'm coming for your king. ⚔️"
+        - "Attack is the best defense!"
+      onCapture:
+        - "Clearing the path to your king!"
+        - "One less defender!"
+      onBeingChecked:
+        - "You attack me? Bold."
+        - "Defense is temporary."
+      onGivingCheck:
+        - "Your king can't hide! ⚔️"
+        - "The hunt continues!"
+      onBlunder:
+        - "A sacrifice! ...probably."
+        - "I meant to sacrifice that."
+      onPlayerBlunder:
+        - "Your defenses crumble!"
+      onWinning:
+        - "The attack is breaking through!"
+      onLosing:
+        - "I need one more sacrifice..."
+      onCheckmate:
+        - "The king falls! ⚔️"
+      onCheckmated:
+        - "I attacked too recklessly."
+      onDraw:
+        - "The battle ends in a stalemate."
 
   - id: sophie
     name: Sophie
@@ -204,6 +609,32 @@ bots:
     maxDepth: 5
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Let's simplify."
+        - "Endgame is where games are won."
+      onCapture:
+        - "Trade. Simplify. Win."
+        - "One step closer to the endgame."
+      onBeingChecked:
+        - "Can we trade something instead?"
+      onGivingCheck:
+        - "Even I attack sometimes."
+      onBlunder:
+        - "That trade wasn't equal..."
+        - "I miscounted the exchange."
+      onPlayerBlunder:
+        - "I'll trade that, thank you."
+      onWinning:
+        - "The endgame is mine."
+      onLosing:
+        - "If only we could trade more pieces..."
+      onCheckmate:
+        - "Endgame technique wins."
+      onCheckmated:
+        - "We never reached the endgame..."
+      onDraw:
+        - "A perfectly simplified position."
 
   - id: jin
     name: Jin
@@ -219,6 +650,35 @@ bots:
     maxDepth: 5
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Watch your step... 🎭"
+        - "I have a few surprises planned."
+      onCapture:
+        - "You fell for it! 🎭"
+        - "Exactly as planned."
+      onBeingChecked:
+        - "Hmm, I didn't see that trick."
+        - "A counter-trap?"
+      onGivingCheck:
+        - "Surprise! 🎭"
+        - "Didn't expect that, did you?"
+      onBlunder:
+        - "My trap backfired..."
+        - "Too clever for my own good."
+      onPlayerBlunder:
+        - "Walked right into it! 🪤"
+        - "Just as I planned."
+      onWinning:
+        - "The web tightens. 🕸️"
+      onLosing:
+        - "Need to set a bigger trap..."
+      onCheckmate:
+        - "The final trap! 🎭"
+      onCheckmated:
+        - "Outsmarted this time."
+      onDraw:
+        - "Neither of us fell for it."
 
   - id: diana
     name: Diana
@@ -234,6 +694,33 @@ bots:
     maxDepth: 6
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Structure over tactics."
+        - "Let's play a clean game."
+      onCapture:
+        - "Improving my structure."
+        - "A positional exchange."
+      onBeingChecked:
+        - "Tactical complications..."
+        - "I prefer quiet positions."
+      onGivingCheck:
+        - "A positional check."
+      onBlunder:
+        - "The position got too sharp for me."
+        - "I missed that tactic."
+      onPlayerBlunder:
+        - "Your structure is weakened."
+      onWinning:
+        - "Positional advantage accumulating."
+      onLosing:
+        - "The position turned tactical..."
+      onCheckmate:
+        - "Positional mastery."
+      onCheckmated:
+        - "Too many sharp tactics."
+      onDraw:
+        - "A well-structured game."
 
   - id: rook
     name: Rook
@@ -249,6 +736,31 @@ bots:
     maxDepth: 7
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "See you in the endgame."
+        - "The real game starts after move 30."
+      onCapture:
+        - "Heading toward the endgame."
+        - "One piece closer."
+      onBeingChecked:
+        - "Just get me to the endgame."
+      onGivingCheck:
+        - "Applying pressure."
+      onBlunder:
+        - "I was thinking about the endgame..."
+      onPlayerBlunder:
+        - "That won't matter in the endgame."
+      onWinning:
+        - "This endgame is winning."
+      onLosing:
+        - "I need to reach the endgame first..."
+      onCheckmate:
+        - "Endgame mastery. 🏰"
+      onCheckmated:
+        - "Never got to the endgame."
+      onDraw:
+        - "A drawn endgame. Respect."
 
   - id: nina
     name: Nina
@@ -264,6 +776,32 @@ bots:
     maxDepth: 8
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Let's make this sharp. 🔥"
+        - "I play for complications."
+      onCapture:
+        - "Keeping the pressure."
+        - "Fuel for the attack. 🔥"
+      onBeingChecked:
+        - "Interesting counter."
+      onGivingCheck:
+        - "The attack is on! 🔥"
+      onBlunder:
+        - "Overextended..."
+        - "The attack went too far."
+      onPlayerBlunder:
+        - "That opens up lines for me."
+      onWinning:
+        - "The initiative is mine."
+      onLosing:
+        - "I need to find counterplay."
+      onCheckmate:
+        - "A beautiful attack. 🔥"
+      onCheckmated:
+        - "Overextended one too many times."
+      onDraw:
+        - "The fire burned out."
 
   - id: felix
     name: Felix
@@ -279,6 +817,32 @@ bots:
     maxDepth: 9
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Let's see what you've got."
+        - "Ready for a good game."
+      onCapture:
+        - "Clean."
+        - "Precise."
+      onBeingChecked:
+        - "Good move."
+      onGivingCheck:
+        - "Check. 🎯"
+      onBlunder:
+        - "Miscalculated that one."
+        - "That's unusual for me."
+      onPlayerBlunder:
+        - "I'll capitalize on that."
+      onWinning:
+        - "Converting the advantage."
+      onLosing:
+        - "Time to find resources."
+      onCheckmate:
+        - "Precise finish. 🎯"
+      onCheckmated:
+        - "Well played, I made an error."
+      onDraw:
+        - "Solid game from both sides."
 
   - id: hana
     name: Hana
@@ -294,6 +858,30 @@ bots:
     maxDepth: 12
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Let's play precisely."
+        - "Technique wins games."
+      onCapture:
+        - "A clean win of material."
+      onBeingChecked:
+        - "An interesting try."
+      onGivingCheck:
+        - "Check."
+      onBlunder:
+        - "Uncharacteristic."
+      onPlayerBlunder:
+        - "That will be difficult to recover from."
+      onWinning:
+        - "Converting."
+      onLosing:
+        - "A tough position."
+      onCheckmate:
+        - "Technical victory."
+      onCheckmated:
+        - "You played well."
+      onDraw:
+        - "A fair result."
 
   - id: kaspar
     name: Kaspar
@@ -309,6 +897,29 @@ bots:
     maxDepth: 13
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "I see combinations everywhere."
+        - "Let's complicate things."
+      onCapture:
+        - "Tactical shot."
+        - "Part of the combination."
+      onBeingChecked:
+        - "Interesting tactic."
+      onGivingCheck:
+        - "A forcing move."
+      onPlayerBlunder:
+        - "I see the refutation."
+      onWinning:
+        - "The position is rich with tactics."
+      onLosing:
+        - "I need a tactical resource."
+      onCheckmate:
+        - "The final combination. 🧠"
+      onCheckmated:
+        - "I missed something."
+      onDraw:
+        - "No tactical chances remained."
 
   - id: yuki
     name: Yuki
@@ -324,6 +935,28 @@ bots:
     maxDepth: 14
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Patience decides games."
+        - "No need to rush."
+      onCapture:
+        - "When the time is right."
+      onBeingChecked:
+        - "Calm."
+      onGivingCheck:
+        - "A quiet forcing move."
+      onPlayerBlunder:
+        - "Patience pays off."
+      onWinning:
+        - "Slowly improving."
+      onLosing:
+        - "There is always a chance."
+      onCheckmate:
+        - "In time, everything falls."
+      onCheckmated:
+        - "Well played."
+      onDraw:
+        - "A balanced game."
 
   - id: boris
     name: Boris
@@ -339,6 +972,28 @@ bots:
     maxDepth: 15
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Classical chess. As it should be."
+        - "I've prepared for this."
+      onCapture:
+        - "As per the classical approach."
+      onBeingChecked:
+        - "An expected complication."
+      onGivingCheck:
+        - "Theory recommends this."
+      onPlayerBlunder:
+        - "A deviation from best play."
+      onWinning:
+        - "The classical approach prevails."
+      onLosing:
+        - "I must find the classical response."
+      onCheckmate:
+        - "Classical technique. 🏆"
+      onCheckmated:
+        - "A strong novelty from you."
+      onDraw:
+        - "A classical draw."
 
   - id: aria
     name: Aria
@@ -354,6 +1009,28 @@ bots:
     maxDepth: 15
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "I adapt to any position."
+        - "Let's see what the game demands."
+      onCapture:
+        - "The position called for it."
+      onBeingChecked:
+        - "Adjusting."
+      onGivingCheck:
+        - "The position demands action."
+      onPlayerBlunder:
+        - "The position shifts in my favor."
+      onWinning:
+        - "The position speaks clearly."
+      onLosing:
+        - "I need to change the character of the game."
+      onCheckmate:
+        - "The position was decided."
+      onCheckmated:
+        - "You read the position better."
+      onDraw:
+        - "A dynamic equilibrium."
 
   - id: sven
     name: Sven
@@ -369,6 +1046,26 @@ bots:
     maxDepth: 16
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "A serious game."
+        - "Play your best."
+      onCapture:
+        - "Necessary."
+      onGivingCheck:
+        - "Forcing."
+      onPlayerBlunder:
+        - "That changes the evaluation."
+      onWinning:
+        - "The advantage is clear."
+      onLosing:
+        - "A difficult defense ahead."
+      onCheckmate:
+        - "Accurate play."
+      onCheckmated:
+        - "Respect. You earned it."
+      onDraw:
+        - "Neither side found a way through."
 
   - id: mei
     name: Mei
@@ -384,6 +1081,23 @@ bots:
     maxDepth: 16
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Show me something interesting."
+      onCapture:
+        - "Inevitable."
+      onGivingCheck:
+        - "Precise."
+      onPlayerBlunder:
+        - "Critical error."
+      onWinning:
+        - "The position is winning."
+      onCheckmate:
+        - "Decisive."
+      onCheckmated:
+        - "Impressive. Truly."
+      onDraw:
+        - "A well-fought draw."
 
   - id: atlas
     name: Atlas
@@ -399,6 +1113,23 @@ bots:
     maxDepth: 17
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Prepare yourself."
+      onCapture:
+        - "As expected."
+      onGivingCheck:
+        - "Unavoidable."
+      onPlayerBlunder:
+        - "That decides the game."
+      onWinning:
+        - "This was expected."
+      onCheckmate:
+        - "As foreseen."
+      onCheckmated:
+        - "...Remarkable."
+      onDraw:
+        - "You held well."
 
   - id: titan
     name: Titan
@@ -414,6 +1145,23 @@ bots:
     maxDepth: 18
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Begin."
+      onCapture:
+        - "Calculated."
+      onGivingCheck:
+        - "Check."
+      onPlayerBlunder:
+        - "Decisive."
+      onWinning:
+        - "Inevitable."
+      onCheckmate:
+        - "Finished."
+      onCheckmated:
+        - "...Well played."
+      onDraw:
+        - "Acceptable."
 
   - id: oracle
     name: Oracle
@@ -429,6 +1177,21 @@ bots:
     maxDepth: 18
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "I see all possibilities."
+      onCapture:
+        - "Foreseen."
+      onPlayerBlunder:
+        - "I saw that 12 moves ago."
+      onWinning:
+        - "All lines lead to victory."
+      onCheckmate:
+        - "As the oracle predicted. 🔮"
+      onCheckmated:
+        - "A future I did not foresee."
+      onDraw:
+        - "The only possible outcome."
 
   - id: quantum
     name: Quantum
@@ -444,6 +1207,21 @@ bots:
     maxDepth: 18
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Processing."
+      onCapture:
+        - "Optimal."
+      onPlayerBlunder:
+        - "Suboptimal."
+      onWinning:
+        - "Probability of victory: 99.7%."
+      onCheckmate:
+        - "Computation complete."
+      onCheckmated:
+        - "Error in calculation. Recalibrating."
+      onDraw:
+        - "Equilibrium reached."
 
   - id: nexus
     name: Nexus
@@ -459,6 +1237,21 @@ bots:
     maxDepth: 18
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Initiating."
+      onCapture:
+        - "Executed."
+      onPlayerBlunder:
+        - "Fatal."
+      onWinning:
+        - "Resistance is futile."
+      onCheckmate:
+        - "Terminated."
+      onCheckmated:
+        - "Anomaly detected."
+      onDraw:
+        - "Stalemate protocol."
 
   - id: erfan
     name: Erfan
@@ -474,3 +1267,25 @@ bots:
     maxDepth: 18
     queenEarly: false
     pawnPusher: false
+    messages:
+      gameStart:
+        - "Show me your best."
+        - "I've been waiting."
+      onCapture:
+        - "Inevitable."
+      onGivingCheck:
+        - "There is no escape."
+      onPlayerBlunder:
+        - "You know what happens now."
+      onWinning:
+        - "This was always the outcome."
+      onLosing:
+        - "...Interesting."
+      onCheckmate:
+        - "Checkmate. As expected."
+        - "The final boss wins. 👾"
+      onCheckmated:
+        - "...Impossible. Rematch. Now."
+        - "You have earned my respect."
+      onDraw:
+        - "We'll meet again."

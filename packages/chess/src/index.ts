@@ -52,6 +52,9 @@ export type {
   EloBand,
   BotCategory,
   StockfishBotConfig,
+  BotMessageEvent,
+  BotMessages,
+  ThinkTimeContext,
 } from "./bots/index";
 export {
   getEloBand,
@@ -60,6 +63,8 @@ export {
   BOT_CATEGORY_LABELS,
   computeCustomMove,
   getStockfishConfig,
+  computeThinkTime,
+  getOpeningMove,
 } from "./bots/index";
 
 // ── Legacy types (kept for backwards compat) ─────────────

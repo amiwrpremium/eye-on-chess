@@ -85,7 +85,35 @@ export interface BotPersonality {
   queenEarly: boolean;
   /** Pushes random edge pawns */
   pawnPusher: boolean;
+
+  /** Optional chat messages keyed by game event */
+  messages?: BotMessages;
+
+  /** Preferred opening move sequences (SAN). Custom tier only. */
+  preferredOpenings?: {
+    asWhite?: string[];
+    asBlack?: string[];
+  };
 }
+
+// ── Bot chat messages ────────────────────────────────────
+
+/** Game events that can trigger a bot chat message. */
+export type BotMessageEvent =
+  | "gameStart"
+  | "onCapture"
+  | "onBeingChecked"
+  | "onGivingCheck"
+  | "onBlunder"
+  | "onPlayerBlunder"
+  | "onWinning"
+  | "onLosing"
+  | "onCheckmate"
+  | "onCheckmated"
+  | "onDraw";
+
+/** Map of event categories to arrays of possible messages. */
+export type BotMessages = Partial<Record<BotMessageEvent, string[]>>;
 
 /**
  * Configuration returned by `getStockfishConfig` for hybrid and engine tier bots.

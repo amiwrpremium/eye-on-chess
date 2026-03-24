@@ -104,14 +104,54 @@ function minimax(chess: Chess, depth: number, alpha: number, beta: number, isMax
 }
 
 /**
+ * Check if the bot has a preferred opening move for the current position.
+ * Returns the next SAN move from the opening sequence, or null if no match.
+ */
+export function getOpeningMove(
+  personality: BotPersonality,
+  moveHistory: string[],
+  isWhite: boolean
+): string | null {
+  const prefs = personality.preferredOpenings;
+  if (!prefs) return null;
+
+  const pool = isWhite ? prefs.asWhite : prefs.asBlack;
+  if (!pool || pool.length === 0) return null;
+
+  const historyStr = moveHistory.join(" ");
+
+  // Find all openings whose prefix matches the current history
+  const matching = pool.filter((seq) => {
+    if (historyStr.length === 0) return true; // game start, any opening matches
+    return seq.startsWith(historyStr);
+  });
+
+  if (matching.length === 0) return null;
+
+  // Pick one (deterministic within a game by using history length as seed)
+  const pick = matching[moveHistory.length % matching.length];
+  const openingMoves = pick.split(" ");
+
+  // The next move is at index = moveHistory.length
+  if (moveHistory.length >= openingMoves.length) return null;
+
+  return openingMoves[moveHistory.length];
+}
+
+/**
  * Compute a move for a custom-tier bot (200-1200 Elo) using JS minimax
  * with personality quirks applied.
  *
  * @param fen - current board position
  * @param personality - the bot's behavior profile
+ * @param moveHistory - SAN move history for opening book lookup
  * @returns UCI move string (e.g. "e2e4")
  */
-export function computeCustomMove(fen: string, personality: BotPersonality): string | null {
+export function computeCustomMove(
+  fen: string,
+  personality: BotPersonality,
+  moveHistory: string[] = []
+): string | null {
   const chess = new Chess(fen);
   const moves = chess.moves({ verbose: true });
 
@@ -119,6 +159,19 @@ export function computeCustomMove(fen: string, personality: BotPersonality): str
 
   const moveCount = chess.moveNumber();
   const isWhite = chess.turn() === "w";
+
+  // Opening book — check before personality quirks
+  const openingMove = getOpeningMove(personality, moveHistory, isWhite);
+  if (openingMove) {
+    // Verify the opening move is legal
+    const legal = moves.find((m) => m.san === openingMove);
+    if (legal) {
+      // Personality quirks can still override (random/blunder chance)
+      if (Math.random() >= personality.randomMoveChance && Math.random() >= personality.blunderChance) {
+        return `${legal.from}${legal.to}${legal.promotion || ""}`;
+      }
+    }
+  }
 
   // Random move chance
   if (Math.random() < personality.randomMoveChance) {
@@ -219,4 +272,64 @@ export function getStockfishConfig(personality: BotPersonality): StockfishBotCon
     uciElo: 0, // not used for hybrid
     thinkTime: Math.max(300, Math.floor(personality.elo / 4)),
   };
+}
+
+// ── Simulated think time ─────────────────────────────────
+
+/**
+ * Context about the current game state, used to adjust simulated think time.
+ */
+export interface ThinkTimeContext {
+  /** Current half-move count */
+  ply: number;
+  /** Whether the bot is currently in check */
+  isInCheck: boolean;
+  /** Whether the chosen move is a capture */
+  isCapture: boolean;
+  /** Centipawn evaluation from the bot's perspective (positive = bot winning) */
+  evalCp: number | null;
+  /** Whether the player just blundered (cpLoss > 200) */
+  playerBlundered: boolean;
+}
+
+/**
+ * Compute a simulated think time in milliseconds based on the bot's personality
+ * and current game context. Derives timing from existing personality parameters —
+ * no additional configuration needed.
+ */
+export function computeThinkTime(personality: BotPersonality, ctx: ThinkTimeContext): number {
+  const confusionFactor = personality.randomMoveChance + personality.blunderChance;
+
+  let base: number;
+  let variance: number;
+
+  if (personality.tier === "custom") {
+    base = 800 + confusionFactor * 1800;
+    variance = 200 + confusionFactor * 600;
+  } else if (personality.tier === "hybrid") {
+    base = 600 + confusionFactor * 800;
+    variance = 150 + confusionFactor * 300;
+  } else {
+    const eloFactor = Math.max(0, (3200 - personality.elo) / 1200);
+    base = 300 + eloFactor * 400;
+    variance = 50 + eloFactor * 150;
+  }
+
+  let delay = base + (Math.random() * 2 - 1) * variance;
+
+  // Context modifiers
+  if (ctx.isInCheck) delay *= 1.5;
+
+  if (ctx.evalCp !== null) {
+    if (ctx.evalCp < -300) delay *= 1.3;
+    else if (ctx.evalCp > 300) delay *= 0.7;
+  }
+
+  if (ctx.playerBlundered) delay *= 0.6;
+  if (ctx.isCapture) delay *= 0.8;
+
+  if (ctx.ply < 10) delay *= 0.7;
+  else if (ctx.ply > 40) delay *= 1.2;
+
+  return Math.round(Math.max(200, Math.min(4000, delay)));
 }

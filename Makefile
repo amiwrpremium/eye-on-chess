@@ -10,8 +10,8 @@
        install shell-api shell-web shell-worker shell-postgres shell-redis
 
 # ── Config ───────────────────────────────────────────────
-PROD_COMPOSE = docker compose -f deployment/docker-compose.yml
-DEV_COMPOSE  = docker compose -f deployment/docker-compose.dev.yml
+PROD_COMPOSE = docker compose --env-file .env -f deployment/docker-compose.yml
+DEV_COMPOSE  = docker compose --env-file .env -f deployment/docker-compose.dev.yml
 
 # ── Help ─────────────────────────────────────────────────
 help: ## Show this help

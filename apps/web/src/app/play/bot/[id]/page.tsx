@@ -477,7 +477,6 @@ export default function BotGamePage({
     if (moves.length === 0 && playerIsWhite && !gameOver) {
       setTimeout(() => botChat.triggerMessage("gameStart"), 500);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialized, botEngine.ready]);
 
   // --- Save game offline ---

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo, use } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Chess } from "chess.js";
 import api from "../../../../lib/api";
@@ -94,9 +94,9 @@ function buildFallbackPersonality(elo: number): BotPersonality {
 export default function BotGamePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params;
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading, fetchMe } = useAuthStore();

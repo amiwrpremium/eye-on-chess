@@ -42,7 +42,22 @@ All API responses include security headers via `@fastify/helmet`:
 | `X-Permitted-Cross-Domain-Policies` | `none`             | Blocks Flash/PDF cross-domain |
 | `Strict-Transport-Security`         | `max-age=15552000` | HSTS in production            |
 
-Content-Security-Policy is not enabled (requires per-app customization).
+Content-Security-Policy is enabled with pragmatic directives:
+
+| Directive      | Value                              | Reason                                  |
+| -------------- | ---------------------------------- | --------------------------------------- |
+| `default-src`  | `'self'`                           | Only same-origin by default             |
+| `script-src`   | `'self' 'unsafe-inline' 'unsafe-eval'` | Next.js dev + Swagger UI YAML parser |
+| `style-src`    | `'self' 'unsafe-inline'`           | Tailwind CSS + Chessground inline styles |
+| `img-src`      | `'self' data: blob:`               | Data URIs for inline images             |
+| `connect-src`  | `'self' ws: wss:`                  | WebSocket for Socket.IO                 |
+| `worker-src`   | `'self' blob:`                     | Stockfish WASM web worker               |
+| `font-src`     | `'self'`                           | Local fonts only                        |
+| `media-src`    | `'self'`                           | Sound files                             |
+| `object-src`   | `'none'`                           | No plugins                              |
+| `frame-src`    | `'none'`                           | No iframes                              |
+
+`unsafe-inline` and `unsafe-eval` are required for Tailwind, Chessground, Next.js development, and Swagger UI. In production, these could be tightened with nonces.
 
 ## CORS
 
@@ -141,6 +156,18 @@ The Redis client uses an exponential backoff reconnect strategy:
 - Auto-reconnects on READONLY errors (Redis failover)
 
 Brief Redis outages (restart, network blip) are handled transparently without manual intervention.
+
+## Redis Clock Recovery
+
+If Redis restarts and game clock keys (`clock:{gameId}`) are lost, the API automatically recovers from the database. `getClocksRealtime()` calls `recoverClocks(gameId)` which reconstructs clock state from the game's `initialTime` and `increment` fields. Both clocks reset to initial values (elapsed time is lost) but the game continues rather than breaking.
+
+Implementation: `apps/api/src/lib/gameClock.ts`
+
+## Expired Token Cleanup
+
+The API server runs an hourly `setInterval` that deletes expired refresh tokens (`expiresAt < now()`) from the database. This prevents unbounded growth of the `RefreshToken` table from users who never explicitly log out.
+
+Implementation: `apps/api/src/server.ts` (alongside the zombie game cleanup interval)
 
 ## Metrics Endpoints
 

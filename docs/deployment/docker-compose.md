@@ -78,14 +78,15 @@ docker compose -f deployment/docker-compose.dev.yml up --build
 
 ### Services
 
-| Service   | Port     | Notes                       |
-| --------- | -------- | --------------------------- |
-| postgres  | **5432** | Direct access               |
-| pgbouncer | **6432** | Connection pooler           |
-| redis     | **6379** | Direct access               |
-| api       | **3001** | Hot reload via `tsx watch`  |
-| web       | **3000** | Hot reload via Next.js HMR  |
-| worker    | —        | Hot reload via volume mount |
+| Service   | Port               | Notes                                              |
+| --------- | ------------------ | -------------------------------------------------- |
+| nginx     | **80** (exposed)   | Reverse proxy — primary entry point                |
+| postgres  | **5432** (127.0.0.1) | Direct access for debugging                      |
+| pgbouncer | **6432** (127.0.0.1) | Connection pooler                                |
+| redis     | **6379** (127.0.0.1) | Direct access for debugging                      |
+| api       | **3001** (127.0.0.1) | Hot reload via `tsx watch`                        |
+| web       | **3000**           | Hot reload via Next.js HMR (internal to Nginx)     |
+| worker    | —                  | Hot reload via volume mount                        |
 
 ### Volume Mounts
 
@@ -94,7 +95,7 @@ docker compose -f deployment/docker-compose.dev.yml up --build
 - `apps/web/src/` → `/app/apps/web/src/`
 - `packages/chess/src/` → `/app/packages/chess/src/`
 
-No Nginx in development — access services directly by port.
+Nginx is included in development on port 80 as the primary entry point (same routing as production). Service ports are also exposed on `127.0.0.1` for direct debugging access.
 
 ## Environment Variables
 

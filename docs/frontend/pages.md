@@ -23,7 +23,8 @@ Redirects to `/login` if no refresh token cookie.
 | -------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `/play`              | `play/page.tsx`               | Play hub — challenge friend, profile, friends, settings links. Shows admin link for admins.                                   |
 | `/play/friend`       | `play/friend/page.tsx`        | Challenge a friend — online friends list, time control presets + custom picker                                                |
-| `/play/bot`          | `play/bot/page.tsx`           | Bot game — Elo slider, game mode selection, plays against Stockfish WASM engine                                               |
+| `/play/bot`          | `play/bot/page.tsx`           | Bot selection — choose bot, time control, color, game mode. Retries pending syncs on mount.                                   |
+| `/play/bot/[id]`     | `play/bot/[id]/page.tsx`      | Bot game — active gameplay with unique URL per game, config from sessionStorage                                               |
 | `/game/:id`          | `game/[id]/page.tsx`          | Live game — board, clocks, captured pieces, player info, move list, board flip, draw/resign, reactions, reconnection handling |
 | `/game/:id/analysis` | `game/[id]/analysis/page.tsx` | Post-game analysis — replay board, eval bar, eval graph, classifications, accuracy                                            |
 | `/friends`           | `friends/page.tsx`            | Friends list (online indicators), incoming requests, user search                                                              |

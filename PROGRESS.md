@@ -373,8 +373,20 @@ Self-hostable chess platform built with Next.js 14, Fastify, PostgreSQL, Redis, 
   - Game-over detection before Stockfish eval (prevents crash)
   - Login form autoComplete attributes added
 
+### v1.1.4 — Hardening & PWA (Complete)
+
+- **Input sanitization:** `sanitizeString()` applied to username on register and collection names on create/rename.
+- **Expired token cleanup:** Hourly `setInterval` in server.ts deletes refresh tokens with `expiresAt < now()`.
+- **Redis clock recovery:** `recoverClocks()` in gameClock.ts reconstructs clock state from DB when Redis keys are missing. Called automatically by `getClocksRealtime()`.
+- **Content Security Policy:** Replaced `contentSecurityPolicy: false` with full directive set in Helmet config (self + unsafe-inline/eval for Next.js/Swagger compatibility).
+- **Abandoned game filtering:** Game history excludes bot games stuck in ACTIVE/ABORTED without moves.
+- **Bot post-game quote:** Game-over modal shows a contextual quote from the bot after bot games.
+- **Client-side PGN export:** Offline bot games generate PGN locally without requiring server sync.
+- **Error handling:** Bot game page wraps makeBotMove/handleMove in try-catch with 30s Stockfish timeout.
+- **PWA update notification:** `useUpdateNotification` hook detects service worker updates via `controllerchange` event. Game-aware: defers reload during active bot games, auto-reloads otherwise. Deferred updates stored in sessionStorage, applied on next navigation. Integrated via `ClientProviders.tsx`.
+
 ## Current Status
 
-- All phases complete: 1, 2, 3, 4, 5, 7, 8, 9 + release prep + admin panel + technical improvements + bot personality system + security hardening
-- Ready for open source release
+- All phases complete: 1, 2, 3, 4, 5, 7, 8, 9 + release prep + admin panel + technical improvements + bot personality system + security hardening + v1.1.4 hardening & PWA
+- Version 1.1.4 (packages), with 2 additional untagged commits (PWA update notification + hardening fixes)
 - Note: Phase 6 was skipped (user jumped from Phase 5 to Phase 7)

@@ -62,6 +62,17 @@ When connectivity resumes:
 - Games that fail to sync remain in localStorage for the next attempt.
 - The sync process runs automatically without user intervention.
 
+## Update Notification
+
+When a new service worker is installed (after a deployment), the app detects it and notifies the user:
+
+- **`useUpdateNotification`** hook in `src/lib/useUpdateNotification.ts` listens for the `controllerchange` event on `navigator.serviceWorker`
+- **Game-aware reload**: If a bot game is in progress, the reload is deferred to avoid data loss. Otherwise, the page reloads automatically to activate the new service worker.
+- **Deferred updates**: Stored in `sessionStorage` (`eyeonchess-deferred-update`). On next navigation or page load, `checkDeferredUpdate()` applies the pending reload.
+- **Integration**: The hook is called in `ClientProviders.tsx`, which wraps the entire app.
+
+This ensures users always get the latest version without interrupting active gameplay.
+
 ## Install Prompt (Add to Home Screen)
 
 The app meets PWA installability criteria and can be installed on supported devices:

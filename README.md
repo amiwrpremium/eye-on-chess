@@ -51,28 +51,6 @@
 
 ---
 
-## Why?
-
-> _"Self-hosted chess? Really? Magnus Carlsen uses Chess.com. Hikaru streams on it. 100 million players trust it with their games. But sure, you — random developer with a coffee addiction and a localhost obsession — you need to run your own chess server. What, is your 800 Elo blunder collection classified information? Are your opening prep secrets so groundbreaking that they need to be stored on a Raspberry Pi under your desk? Do you really think your data is more important than the world champion's?"_
-
-No.
-
-I live in a country where the government looked at the entire internet and thought, "You know what's too dangerous for our citizens? A 1,500-year-old board game where wooden horses jump over pawns."
-
-Chess.com? Blocked. Lichess? Blocked. The game that literally every civilization in history has managed to tolerate? Apparently too radical for my government's firewall. Though I have to admit, their internet policy does remind me of the Bongcloud — bold, completely unjustifiable, and only works if your opponent has no idea what they're doing.
-
-So I did what any reasonable person would do when their country declares war on the King's Indian Defense — I built an entire distributed chess platform from scratch. WebSockets, Stockfish engine, Elo ratings, Docker containers, the whole thing. Hundreds of hours of engineering because someone in a government office decided that online chess is a national security threat.
-
-Self-hosted. On my own server. In my own home. Where no firewall committee gets to have an opinion about my Sicilian Defense.
-
-This is what happens when you ban chess. You don't get fewer chess players. You get a chess player who now knows how to build a production-grade real-time multiplayer platform out of pure spite.
-
-No VPN needed. No permission asked.
-
-Checkmate.
-
----
-
 ## Screenshots
 
 See the full step-by-step walkthrough in the [`screenshots/`](screenshots/README.md) directory.

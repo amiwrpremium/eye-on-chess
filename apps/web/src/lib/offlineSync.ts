@@ -64,9 +64,9 @@ export function getPendingCount(): number {
  *
  * @returns The number of games successfully synced.
  */
-export async function syncOfflineGames(): Promise<number> {
+export async function syncOfflineGames(): Promise<{ synced: number; failed: number }> {
   const pending = loadPending();
-  if (pending.length === 0) return 0;
+  if (pending.length === 0) return { synced: 0, failed: 0 };
 
   let synced = 0;
   const remaining: OfflineGame[] = [];
@@ -84,13 +84,12 @@ export async function syncOfflineGames(): Promise<number> {
       });
       synced++;
     } catch {
-      // Keep in pending if sync fails
       remaining.push(game);
     }
   }
 
   savePending(remaining);
-  return synced;
+  return { synced, failed: remaining.length };
 }
 
 /**
@@ -100,4 +99,70 @@ export async function syncOfflineGames(): Promise<number> {
  */
 export function generateOfflineGameId(): string {
   return `offline-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// ── Pending sync queue (for online games that failed to sync moves) ──
+
+interface PendingSync {
+  gameId: string;
+  moves: { ply: number; san: string; uci: string; fen: string }[];
+  result: string | null;
+  termination: string | null;
+}
+
+const PENDING_SYNC_KEY = "eyeonchess-pending-syncs";
+
+function loadPendingSyncs(): PendingSync[] {
+  try {
+    const raw = localStorage.getItem(PENDING_SYNC_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function savePendingSyncs(syncs: PendingSync[]) {
+  try {
+    localStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(syncs));
+  } catch {}
+}
+
+export function savePendingSync(sync: PendingSync) {
+  const pending = loadPendingSyncs();
+  const idx = pending.findIndex((s) => s.gameId === sync.gameId);
+  if (idx >= 0) {
+    pending[idx] = sync;
+  } else {
+    pending.push(sync);
+  }
+  savePendingSyncs(pending);
+}
+
+export function getPendingSyncCount(): number {
+  return loadPendingSyncs().length;
+}
+
+export async function retryPendingSyncs(): Promise<{ synced: number; failed: number }> {
+  const pending = loadPendingSyncs();
+  if (pending.length === 0) return { synced: 0, failed: 0 };
+
+  let synced = 0;
+  const remaining: PendingSync[] = [];
+
+  for (const sync of pending) {
+    try {
+      await api.post(`/api/v1/games/${sync.gameId}/sync-moves`, {
+        moves: sync.moves,
+        fen: "",
+        result: sync.result,
+        termination: sync.termination,
+      });
+      synced++;
+    } catch {
+      remaining.push(sync);
+    }
+  }
+
+  savePendingSyncs(remaining);
+  return { synced, failed: remaining.length };
 }

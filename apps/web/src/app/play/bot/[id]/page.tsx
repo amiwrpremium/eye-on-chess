@@ -19,6 +19,7 @@ import {
   saveOfflineGame,
   generateOfflineGameId,
   getPendingCount,
+  savePendingSync,
 } from "../../../../lib/offlineSync";
 import { useSound } from "../../../../lib/useSound";
 import { useKeyboardShortcuts } from "../../../../lib/useKeyboardShortcuts";
@@ -152,25 +153,31 @@ export default function BotGamePage({
   async function syncGameToServer(
     gameMoves: MoveRecord[],
     uciMoves: string[],
-    finalFen: string,
+    _finalFen: string,
     result: string | null,
     termination: string | null
   ) {
     if (!gameId || !isOnline) return;
+    const syncMoves = gameMoves.map((m, i) => ({
+      ply: m.ply,
+      san: m.san,
+      uci: uciMoves[i] || "",
+      fen: m.fen,
+    }));
     try {
       await api.post(`/api/v1/games/${gameId}/sync-moves`, {
-        moves: gameMoves.map((m, i) => ({
-          ply: m.ply,
-          san: m.san,
-          uci: uciMoves[i] || "",
-          fen: m.fen,
-        })),
-        fen: finalFen,
+        moves: syncMoves,
+        fen: "",
         result,
         termination,
       });
     } catch {
-      // Silent fail — game still playable, just won't have server moves for analysis
+      // Save to pending queue for retry on next page load
+      savePendingSync({ gameId, moves: syncMoves, result, termination });
+      try {
+        const { useToast } = await import("../../../../components/Toast");
+        useToast.getState().show("Game sync failed — will retry later", "error");
+      } catch {}
     }
   }
 

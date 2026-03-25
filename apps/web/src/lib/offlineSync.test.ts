@@ -109,9 +109,10 @@ describe("offlineSync", () => {
 
       vi.mocked(api.post).mockResolvedValue({ data: {} });
 
-      const synced = await syncOfflineGames();
+      const result = await syncOfflineGames();
 
-      expect(synced).toBe(2);
+      expect(result.synced).toBe(2);
+      expect(result.failed).toBe(0);
       expect(api.post).toHaveBeenCalledTimes(2);
       expect(api.post).toHaveBeenCalledWith(
         "/api/v1/games/sync",
@@ -128,17 +129,19 @@ describe("offlineSync", () => {
         .mockResolvedValueOnce({ data: {} })
         .mockRejectedValueOnce(new Error("Network error"));
 
-      const synced = await syncOfflineGames();
+      const result = await syncOfflineGames();
 
-      expect(synced).toBe(1);
+      expect(result.synced).toBe(1);
+      expect(result.failed).toBe(1);
       expect(getPendingCount()).toBe(1);
       const remaining = JSON.parse(store["eyeonchess-offline-games"]);
       expect(remaining[0].id).toBe("offline-2");
     });
 
-    it("returns 0 when no pending games", async () => {
-      const synced = await syncOfflineGames();
-      expect(synced).toBe(0);
+    it("returns zeros when no pending games", async () => {
+      const result = await syncOfflineGames();
+      expect(result.synced).toBe(0);
+      expect(result.failed).toBe(0);
       expect(api.post).not.toHaveBeenCalled();
     });
   });

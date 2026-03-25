@@ -18,8 +18,10 @@ import {
   syncOfflineGames,
   generateOfflineGameId,
   getPendingCount,
+  retryPendingSyncs,
 } from "../../../lib/offlineSync";
 import ConfirmModal from "../../../components/ConfirmModal";
+import { useToast } from "../../../components/Toast";
 import type { BotPersonality } from "@eyeonchess/chess";
 import BotSelector from "../../../components/BotSelector";
 
@@ -102,12 +104,24 @@ export default function PlayBotPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
   }, [isLoading, user, router]);
+  const toast = useToast();
   useEffect(() => {
     setPendingSyncCount(getPendingCount());
-    if (isOnline)
-      syncOfflineGames().then((s) => {
-        if (s > 0) setPendingSyncCount(getPendingCount());
+    if (isOnline) {
+      // Sync offline games
+      syncOfflineGames().then(({ synced, failed }) => {
+        setPendingSyncCount(getPendingCount());
+        if (failed > 0) {
+          toast.show(`${failed} game(s) failed to sync — will retry`, "error");
+        }
       });
+      // Retry any online games that failed to sync moves
+      retryPendingSyncs().then(({ synced }) => {
+        if (synced > 0) {
+          toast.show(`${synced} game(s) synced successfully`, "success");
+        }
+      });
+    }
   }, [isOnline]);
   useEffect(() => {
     if (!user || !isOnline) return;

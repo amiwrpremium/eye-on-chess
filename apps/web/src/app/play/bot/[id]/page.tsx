@@ -20,6 +20,9 @@ import {
   generateOfflineGameId,
   getPendingCount,
   savePendingSync,
+  saveInProgress,
+  loadInProgress,
+  clearInProgress,
 } from "../../../../lib/offlineSync";
 import { useSound } from "../../../../lib/useSound";
 import { useKeyboardShortcuts } from "../../../../lib/useKeyboardShortcuts";
@@ -203,6 +206,53 @@ export default function BotGamePage({
     "?": () => setShowShortcuts((s) => !s),
   });
 
+  // --- Auto-save game state to localStorage every move ---
+  useEffect(() => {
+    if (moves.length === 0 || gameOver || !initialized) return;
+    saveInProgress(id, {
+      id,
+      botElo,
+      playerIsWhite,
+      moves: moves.map((m, i) => ({
+        ply: m.ply,
+        san: m.san,
+        uci: allUciMoves[i] || "",
+        fen: m.fen,
+      })),
+      gameStartTime: gameStartTime || new Date().toISOString(),
+      activeSettings: activeSettings as unknown as Record<string, boolean>,
+      botId: bot?.id || null,
+      isOnline: !!gameId,
+      savedAt: new Date().toISOString(),
+    });
+  }, [moves, gameOver, initialized]);
+
+  // --- Save on tab close ---
+  useEffect(() => {
+    const handler = () => {
+      if (moves.length > 0 && !gameOver && initialized) {
+        saveInProgress(id, {
+          id,
+          botElo,
+          playerIsWhite,
+          moves: moves.map((m, i) => ({
+            ply: m.ply,
+            san: m.san,
+            uci: allUciMoves[i] || "",
+            fen: m.fen,
+          })),
+          gameStartTime: gameStartTime || new Date().toISOString(),
+          activeSettings: activeSettings as unknown as Record<string, boolean>,
+          botId: bot?.id || null,
+          isOnline: !!gameId,
+          savedAt: new Date().toISOString(),
+        });
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [moves, gameOver, initialized, id, botElo, playerIsWhite, allUciMoves, gameStartTime, activeSettings, bot, gameId]);
+
   // --- Auth guard ---
   useEffect(() => {
     if (!user) fetchMe();
@@ -272,6 +322,42 @@ export default function BotGamePage({
     if (initialized || !user) return;
 
     const config = readGameConfig();
+
+    // Check for saved in-progress game (browser crash / refresh recovery)
+    const saved = loadInProgress(id);
+    if (saved && saved.moves.length > 0) {
+      const lastFen = saved.moves[saved.moves.length - 1].fen;
+      const chess = new Chess(lastFen);
+      setGame(chess);
+      setMoves(saved.moves.map((m) => ({ ply: m.ply, san: m.san, fen: m.fen })));
+      setAllSans(saved.moves.map((m) => m.san));
+      setAllUciMoves(saved.moves.map((m) => m.uci));
+      setCurrentPly(saved.moves.length);
+      const last = saved.moves[saved.moves.length - 1];
+      if (last.uci?.length >= 4) {
+        setLastMove([last.uci.slice(0, 2), last.uci.slice(2, 4)]);
+      }
+      setBotElo(saved.botElo);
+      setPlayerIsWhite(saved.playerIsWhite);
+      setGameStartTime(saved.gameStartTime);
+      if (saved.activeSettings) {
+        setActiveSettings(saved.activeSettings as unknown as GameModeSettings);
+      }
+      if (saved.isOnline) {
+        setGameId(id);
+        setOfflineGameId(null);
+      } else {
+        setGameId(null);
+        setOfflineGameId(id);
+      }
+      // Load bot from cache
+      const cachedBot = loadBotFromCache(saved.botId, saved.botElo);
+      if (cachedBot) setBot(cachedBot);
+      clearGameConfig();
+      setInitialized(true);
+      return;
+    }
+
     const isOffline = id.startsWith("offline-");
 
     if (isOffline) {
@@ -457,6 +543,7 @@ export default function BotGamePage({
         else botChat.triggerMessage("onDraw");
         botReactions.triggerReaction("gameEnd", personality);
         setGameOver(result);
+        clearInProgress(id);
         sound.playGameOver();
         setThreatArrows([]);
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, moveUci], result);
@@ -551,6 +638,7 @@ export default function BotGamePage({
         else botChat.triggerMessage("onDraw");
         botReactions.triggerReaction("gameEnd", pEnd);
         setGameOver(result);
+        clearInProgress(id);
         sound.playGameOver();
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, playerUci], result);
         const term = chess.isCheckmate() ? "CHECKMATE" : "AGREEMENT";
@@ -656,6 +744,7 @@ export default function BotGamePage({
   async function resign() {
     const result = playerIsWhite ? "Black wins by resignation" : "White wins by resignation";
     setGameOver(result);
+    clearInProgress(id);
     setConfirmResign(false);
     if (gameId && isOnline) {
       try {
@@ -669,6 +758,7 @@ export default function BotGamePage({
 
   // --- Play Again (go back to selection) ---
   function playAgain() {
+    clearInProgress(id);
     botChat.clearMessage();
     botReactions.clearReactions();
     router.push("/play/bot");

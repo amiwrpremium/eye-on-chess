@@ -166,3 +166,40 @@ export async function retryPendingSyncs(): Promise<{ synced: number; failed: num
   savePendingSyncs(remaining);
   return { synced, failed: remaining.length };
 }
+
+// ── In-progress game persistence (prevents mid-game data loss) ──
+
+export interface InProgressGame {
+  id: string;
+  botElo: number;
+  playerIsWhite: boolean;
+  moves: { ply: number; san: string; uci: string; fen: string }[];
+  gameStartTime: string;
+  activeSettings: Record<string, boolean>;
+  botId: string | null;
+  isOnline: boolean;
+  savedAt: string;
+}
+
+const IN_PROGRESS_PREFIX = "eyeonchess-game-";
+
+export function saveInProgress(id: string, data: InProgressGame) {
+  try {
+    localStorage.setItem(IN_PROGRESS_PREFIX + id, JSON.stringify(data));
+  } catch {}
+}
+
+export function loadInProgress(id: string): InProgressGame | null {
+  try {
+    const raw = localStorage.getItem(IN_PROGRESS_PREFIX + id);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearInProgress(id: string) {
+  try {
+    localStorage.removeItem(IN_PROGRESS_PREFIX + id);
+  } catch {}
+}

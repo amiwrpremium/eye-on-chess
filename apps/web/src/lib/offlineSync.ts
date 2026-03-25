@@ -67,7 +67,19 @@ export function getPendingCount(): number {
  *
  * @returns The number of games successfully synced.
  */
+let syncLock = false;
+
 export async function syncOfflineGames(): Promise<{ synced: number; failed: number }> {
+  if (syncLock) return { synced: 0, failed: 0 };
+  syncLock = true;
+  try {
+    return await _doSyncOfflineGames();
+  } finally {
+    syncLock = false;
+  }
+}
+
+async function _doSyncOfflineGames(): Promise<{ synced: number; failed: number }> {
   const pending = loadPending();
   if (pending.length === 0) return { synced: 0, failed: 0 };
 
@@ -77,6 +89,7 @@ export async function syncOfflineGames(): Promise<{ synced: number; failed: numb
   for (const game of pending) {
     try {
       await api.post("/api/v1/games/sync", {
+        offlineId: game.id,
         botElo: game.botElo,
         playerIsWhite: game.playerIsWhite,
         moves: game.moves,
@@ -148,7 +161,19 @@ export function getPendingSyncCount(): number {
   return loadPendingSyncs().length;
 }
 
+let retrySyncLock = false;
+
 export async function retryPendingSyncs(): Promise<{ synced: number; failed: number }> {
+  if (retrySyncLock) return { synced: 0, failed: 0 };
+  retrySyncLock = true;
+  try {
+    return await _doRetryPendingSyncs();
+  } finally {
+    retrySyncLock = false;
+  }
+}
+
+async function _doRetryPendingSyncs(): Promise<{ synced: number; failed: number }> {
   const pending = loadPendingSyncs();
   if (pending.length === 0) return { synced: 0, failed: 0 };
 

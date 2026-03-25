@@ -74,6 +74,7 @@ export const makeMoveBodySchema = z.object({
 });
 
 export const syncOfflineGameBodySchema = z.object({
+  offlineId: z.string().optional(),
   botElo: z.number().int().min(200).max(3200),
   playerIsWhite: z.boolean(),
   moves: z

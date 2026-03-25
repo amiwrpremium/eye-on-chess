@@ -721,13 +721,30 @@ export async function gameRoutes(app: FastifyInstance) {
     };
   }>("/games/sync", { schema: { body: syncOfflineGameBodySchema } }, async (request, reply) => {
     const userId = request.user.userId;
-    const { botElo, playerIsWhite, moves, result, termination, startedAt, endedAt, timeControl, initialTime, increment } = request.body as Record<string, unknown> & {
-      botElo: number; playerIsWhite: boolean;
+    const { offlineId, botElo, playerIsWhite, moves, result, termination, startedAt, endedAt, timeControl, initialTime, increment } = request.body as Record<string, unknown> & {
+      offlineId?: string; botElo: number; playerIsWhite: boolean;
       moves: { ply: number; san: string; uci: string; fen: string }[];
       result: string | null; termination: string | null;
       startedAt: string; endedAt: string | null;
       timeControl?: string; initialTime?: number; increment?: number;
     };
+
+    // Idempotency: check if this offline game was already synced
+    if (offlineId) {
+      const existing = await prisma.game.findFirst({
+        where: {
+          isVsBot: true,
+          startedAt: new Date(startedAt),
+          botElo,
+          whiteId: playerIsWhite ? userId : null,
+          blackId: playerIsWhite ? null : userId,
+        },
+        select: { id: true },
+      });
+      if (existing) {
+        return { gameId: existing.id, alreadySynced: true };
+      }
+    }
 
     // Validate moves by replaying
     const chess = new Chess();

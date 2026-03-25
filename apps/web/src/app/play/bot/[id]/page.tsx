@@ -124,6 +124,7 @@ export default function BotGamePage({
   const [lastMove, setLastMove] = useState<[string, string] | undefined>();
   const [playerIsWhite, setPlayerIsWhite] = useState(true);
   const [gameOver, setGameOver] = useState<string | null>(null);
+  const [gameOverQuote, setGameOverQuote] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [evalScore, setEvalScore] = useState(0);
@@ -151,6 +152,18 @@ export default function BotGamePage({
 
   // Mode preset label (for display)
   const [modePreset, setModePreset] = useState<GameModePreset>("friendly");
+
+  function pickGameOverQuote(result: string) {
+    const msgs = bot?.messages;
+    if (!msgs) return;
+    const playerWon = result.includes("White wins") ? playerIsWhite : result.includes("Black wins") ? !playerIsWhite : false;
+    const playerLost = result.includes("White wins") ? !playerIsWhite : result.includes("Black wins") ? playerIsWhite : false;
+    // Bot's perspective: if player won, bot was checkmated; if player lost, bot won
+    const pool = playerWon ? msgs.onCheckmated : playerLost ? msgs.onCheckmate : msgs.onDraw;
+    if (pool && pool.length > 0) {
+      setGameOverQuote(pool[Math.floor(Math.random() * pool.length)]);
+    }
+  }
 
   // --- Sync completed game to server ---
   async function syncGameToServer(
@@ -553,7 +566,7 @@ export default function BotGamePage({
         if (chess.isCheckmate()) botChat.triggerMessage("onCheckmate");
         else botChat.triggerMessage("onDraw");
         botReactions.triggerReaction("gameEnd", personality);
-        setGameOver(result);
+        setGameOver(result);\n        pickGameOverQuote(result);
         clearInProgress(id);
         sound.playGameOver();
         setThreatArrows([]);
@@ -1068,9 +1081,16 @@ export default function BotGamePage({
           <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
             <h2 className="text-xl font-bold mb-2">Game Over</h2>
             <p className="text-gray-300 mb-1">{gameOver}</p>
-            <p className="text-gray-500 text-sm mb-4">
+            <p className="text-gray-500 text-sm mb-2">
               vs {bot ? `${bot.avatar} ${bot.name}` : "Bot"} ({botElo})
             </p>
+            {gameOverQuote ? (
+              <p className="text-blue-400 text-sm italic mb-4">
+                &ldquo;{gameOverQuote}&rdquo;
+              </p>
+            ) : (
+              <div className="mb-2" />
+            )}
             <div className="flex gap-3">
               <button
                 onClick={rematch}

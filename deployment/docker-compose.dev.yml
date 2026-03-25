@@ -63,7 +63,12 @@ services:
       - "127.0.0.1:6432:6432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    entrypoint: ["/bin/sh", "-c", "echo '\"postgres\" \"'$$POSTGRES_PASSWORD'\"' > /etc/pgbouncer/userlist.txt && exec /entrypoint.sh /usr/bin/pgbouncer /etc/pgbouncer/pgbouncer.ini"]
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        'echo ''"postgres" "''$$POSTGRES_PASSWORD''"'' > /etc/pgbouncer/userlist.txt && exec /entrypoint.sh /usr/bin/pgbouncer /etc/pgbouncer/pgbouncer.ini',
+      ]
     volumes:
       - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
     depends_on:

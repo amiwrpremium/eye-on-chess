@@ -19,8 +19,7 @@ export function useUpdateNotification() {
     if (process.env.NODE_ENV === "development") return;
 
     const handleControllerChange = () => {
-      const isInGame =
-        pathname.startsWith("/play/bot/") && pathname !== "/play/bot";
+      const isInGame = pathname.startsWith("/play/bot/") && pathname !== "/play/bot";
 
       if (isInGame) {
         // Don't interrupt active game — defer reload
@@ -29,9 +28,7 @@ export function useUpdateNotification() {
         } catch {}
         // Show a non-intrusive message via dynamic import to avoid circular deps
         import("../components/Toast").then(({ useToast }) => {
-          useToast
-            .getState()
-            .show("Update available — will apply after your game");
+          useToast.getState().show("Update available — will apply after your game");
         });
       } else {
         // Safe to reload
@@ -42,16 +39,10 @@ export function useUpdateNotification() {
       }
     };
 
-    navigator.serviceWorker.addEventListener(
-      "controllerchange",
-      handleControllerChange
-    );
+    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
 
     return () => {
-      navigator.serviceWorker.removeEventListener(
-        "controllerchange",
-        handleControllerChange
-      );
+      navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
     };
   }, [pathname]);
 }

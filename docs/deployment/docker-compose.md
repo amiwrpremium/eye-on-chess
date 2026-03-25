@@ -78,15 +78,15 @@ docker compose -f deployment/docker-compose.dev.yml up --build
 
 ### Services
 
-| Service   | Port               | Notes                                              |
-| --------- | ------------------ | -------------------------------------------------- |
-| nginx     | **80** (exposed)   | Reverse proxy — primary entry point                |
-| postgres  | **5432** (127.0.0.1) | Direct access for debugging                      |
-| pgbouncer | **6432** (127.0.0.1) | Connection pooler                                |
-| redis     | **6379** (127.0.0.1) | Direct access for debugging                      |
-| api       | **3001** (127.0.0.1) | Hot reload via `tsx watch`                        |
-| web       | **3000**           | Hot reload via Next.js HMR (internal to Nginx)     |
-| worker    | —                  | Hot reload via volume mount                        |
+| Service   | Port                 | Notes                                          |
+| --------- | -------------------- | ---------------------------------------------- |
+| nginx     | **80** (exposed)     | Reverse proxy — primary entry point            |
+| postgres  | **5432** (127.0.0.1) | Direct access for debugging                    |
+| pgbouncer | **6432** (127.0.0.1) | Connection pooler                              |
+| redis     | **6379** (127.0.0.1) | Direct access for debugging                    |
+| api       | **3001** (127.0.0.1) | Hot reload via `tsx watch`                     |
+| web       | **3000**             | Hot reload via Next.js HMR (internal to Nginx) |
+| worker    | —                    | Hot reload via volume mount                    |
 
 ### Volume Mounts
 

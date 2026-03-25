@@ -46,15 +46,15 @@ deployment/config/bots.yml     <- Seed template (initial data only)
 
 ## Behavior Parameters
 
-| Parameter          | Range   | Effect                                                   |
-| ------------------ | ------- | -------------------------------------------------------- |
-| `randomMoveChance` | 0-0.5   | Chance to play a completely random legal move            |
-| `blunderChance`    | 0-0.3   | Chance to deliberately miss the best move                |
-| `captureGreed`     | 0-1     | Bias toward capturing pieces even when it's a bad trade  |
-| `aggressionBias`   | -1 to 1 | Preference for attacking (+) vs defensive (-) moves      |
-| `maxDepth`         | 1-18    | How many moves ahead the bot can "see"                   |
-| `queenEarly`       | bool    | Brings queen out in the first 5 moves                    |
-| `pawnPusher`       | bool    | Pushes random edge pawns                                 |
+| Parameter          | Range   | Effect                                                  |
+| ------------------ | ------- | ------------------------------------------------------- |
+| `randomMoveChance` | 0-0.5   | Chance to play a completely random legal move           |
+| `blunderChance`    | 0-0.3   | Chance to deliberately miss the best move               |
+| `captureGreed`     | 0-1     | Bias toward capturing pieces even when it's a bad trade |
+| `aggressionBias`   | -1 to 1 | Preference for attacking (+) vs defensive (-) moves     |
+| `maxDepth`         | 1-18    | How many moves ahead the bot can "see"                  |
+| `queenEarly`       | bool    | Brings queen out in the first 5 moves                   |
+| `pawnPusher`       | bool    | Pushes random edge pawns                                |
 
 ## Bot Chat Messages
 
@@ -64,6 +64,7 @@ Bots send contextual chat messages during games based on their personality. Mess
 gameStart, onCapture, onBeingChecked, onGivingCheck, onBlunder, onPlayerBlunder, onWinning, onLosing, onCheckmate, onCheckmated, onDraw
 
 **Behavior:**
+
 - Messages are randomly selected from the event's pool
 - 60% probability gate (gameStart/checkmate always show)
 - Rate limited: max 1 message per 5 seconds
@@ -71,6 +72,7 @@ gameStart, onCapture, onBeingChecked, onGivingCheck, onBlunder, onPlayerBlunder,
 - Stored as `messages` JSON field on BotProfile
 
 **Personality examples:**
+
 - Amir (200): "Hi! I just learned how the horsey moves!", "Was that yours?"
 - Erfan (3200): "Show me your best.", "Inevitable."
 
@@ -79,6 +81,7 @@ gameStart, onCapture, onBeingChecked, onGivingCheck, onBlunder, onPlayerBlunder,
 Bots pause before moving to simulate human-like thinking. The delay is derived from existing personality parameters — no additional config needed.
 
 **Formula:**
+
 - Custom tier: base 800 + confusionFactor × 1800 (±variance)
 - Hybrid tier: base 600 + confusionFactor × 800
 - Engine tier: base 300 + (3200-elo)/1200 × 400
@@ -91,15 +94,15 @@ Bots pause before moving to simulate human-like thinking. The delay is derived f
 
 Bots send floating emoji reactions during games based on their personality:
 
-| Event | Reaction | Probability |
-|-------|----------|-------------|
-| Bot captures | ✨ brilliant | captureGreed × 0.5 |
-| Bot gives check | ✨ brilliant | aggressionBias × 0.4 |
-| Bot in check | 🤔 thinking | confusionFactor × 0.6 |
-| Player good move | 👍 good_move | 15% |
-| Player blunder | 🤦 blunder | 30% (beginners) / 10% (masters) |
-| During thinking | 🤔 thinking | confusionFactor × 0.3 |
-| Game ends | 🤝 gg | 80% |
+| Event            | Reaction     | Probability                     |
+| ---------------- | ------------ | ------------------------------- |
+| Bot captures     | ✨ brilliant | captureGreed × 0.5              |
+| Bot gives check  | ✨ brilliant | aggressionBias × 0.4            |
+| Bot in check     | 🤔 thinking  | confusionFactor × 0.6           |
+| Player good move | 👍 good_move | 15%                             |
+| Player blunder   | 🤦 blunder   | 30% (beginners) / 10% (masters) |
+| During thinking  | 🤔 thinking  | confusionFactor × 0.3           |
+| Game ends        | 🤝 gg        | 80%                             |
 
 Rate limited: 1 per 8 seconds, max 5 on screen. Reuses the existing `ReactionOverlay` component.
 
@@ -108,6 +111,7 @@ Rate limited: 1 per 8 seconds, max 5 on screen. Reuses the existing `ReactionOve
 Custom-tier bots (200-1200) follow preferred opening move sequences before falling back to minimax.
 
 **Format:** SAN move sequences split by color:
+
 ```json
 {
   "asWhite": ["e4 e5 Nf3 Nc6 Bc4", "e4 e5 f4"],
@@ -116,12 +120,14 @@ Custom-tier bots (200-1200) follow preferred opening move sequences before falli
 ```
 
 **Behavior:**
+
 - Bot picks a random opening from its pool at game start
 - Follows the sequence move-by-move
 - Falls back to minimax if opponent deviates or sequence exhausts
 - Personality quirks (randomMoveChance, blunderChance) can still override
 
 **Examples:**
+
 - Bella (400): Attempts Scholar's Mate (Qh5) or Italian Game (Bc4)
 - Ahmed (1100): Plays Ruy Lopez (Bb5 a6 Ba4) or Queen's Gambit (d4 d5 c4)
 - Amir (200): No openings — too chaotic to follow a book
@@ -136,12 +142,14 @@ Bot games auto-save state to prevent data loss from accidental tab closure or na
 - **Cleanup:** Saved state cleared on game completion
 
 **Sync after completion:**
+
 - Completed offline games are synced via `POST /api/v1/games/sync` (game creation) or `POST /api/v1/games/:id/sync-moves` (move batch sync to existing game)
 - If sync fails, the game is added to a pending queue (`eyeonchess-pending-syncs` in localStorage) and retried on next page load via `retryPendingSyncs()`
 - Error toast shown to user: "Game sync failed — will retry later"
 - `syncOfflineGames` returns `{ synced, failed }` counts for reporting
 
 **Key functions** in `src/lib/offlineSync.ts`:
+
 - `saveInProgress(id, state)` — save current game state
 - `loadInProgress(id)` — restore saved game
 - `clearInProgress(id)` — remove saved state after completion

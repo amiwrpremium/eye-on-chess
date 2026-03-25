@@ -47,7 +47,12 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-function StatCard({ label, value, sub, color = "text-white" }: {
+function StatCard({
+  label,
+  value,
+  sub,
+  color = "text-white",
+}: {
   label: string;
   value: number | string;
   sub?: string;
@@ -62,7 +67,12 @@ function StatCard({ label, value, sub, color = "text-white" }: {
   );
 }
 
-function BarSegment({ label, value, total, color }: {
+function BarSegment({
+  label,
+  value,
+  total,
+  color,
+}: {
   label: string;
   value: number;
   total: number;
@@ -73,12 +83,11 @@ function BarSegment({ label, value, total, color }: {
     <div className="flex items-center gap-2 text-sm">
       <span className="w-24 text-gray-400 text-xs">{label}</span>
       <div className="flex-1 bg-gray-800 rounded-full h-4 overflow-hidden">
-        <div
-          className={`h-full rounded-full ${color}`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="w-16 text-right text-xs text-gray-400">{value} ({pct}%)</span>
+      <span className="w-16 text-right text-xs text-gray-400">
+        {value} ({pct}%)
+      </span>
     </div>
   );
 }
@@ -147,8 +156,10 @@ export default function AdminDashboard() {
 
   if (!data) return <p className="text-red-400">Failed to load dashboard.</p>;
 
-  const { stats, resultDistribution, timeControlDistribution, topBots, recentAudit, settings } = data;
-  const verifiedPct = stats.totalUsers > 0 ? ((stats.verifiedUsers / stats.totalUsers) * 100).toFixed(0) : "0";
+  const { stats, resultDistribution, timeControlDistribution, topBots, recentAudit, settings } =
+    data;
+  const verifiedPct =
+    stats.totalUsers > 0 ? ((stats.verifiedUsers / stats.totalUsers) * 100).toFixed(0) : "0";
   const totalCompleted = resultDistribution.reduce((s, r) => s + r.count, 0);
   const totalTC = timeControlDistribution.reduce((s, t) => s + t.count, 0);
 
@@ -158,8 +169,18 @@ export default function AdminDashboard() {
 
       {/* Section 1: Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <StatCard label="Total Users" value={stats.totalUsers} color="text-blue-400" sub={`${verifiedPct}% verified`} />
-        <StatCard label="Active Users" value={stats.activeUsers} color="text-green-400" sub={`of ${stats.totalUsers}`} />
+        <StatCard
+          label="Total Users"
+          value={stats.totalUsers}
+          color="text-blue-400"
+          sub={`${verifiedPct}% verified`}
+        />
+        <StatCard
+          label="Active Users"
+          value={stats.activeUsers}
+          color="text-green-400"
+          sub={`of ${stats.totalUsers}`}
+        />
         <StatCard label="Online Now" value={stats.onlineCount} color="text-emerald-400" />
         <StatCard label="Active Games" value={stats.activeGames} color="text-yellow-400" />
         <div className="bg-gray-900 rounded-lg p-4">
@@ -246,13 +267,25 @@ export default function AdminDashboard() {
             <p className="text-gray-500 text-sm">No games yet</p>
           ) : (
             <>
-              <BarSegment label="vs Bot" value={stats.botGames} total={stats.totalGames} color="bg-cyan-500" />
+              <BarSegment
+                label="vs Bot"
+                value={stats.botGames}
+                total={stats.totalGames}
+                color="bg-cyan-500"
+              />
               <div className="mt-2">
-                <BarSegment label="vs Human" value={stats.humanGames} total={stats.totalGames} color="bg-green-500" />
+                <BarSegment
+                  label="vs Human"
+                  value={stats.humanGames}
+                  total={stats.totalGames}
+                  color="bg-green-500"
+                />
               </div>
             </>
           )}
-          <p className="text-xs text-gray-500 mt-3">{stats.enabledBots}/{stats.totalBots} bots enabled</p>
+          <p className="text-xs text-gray-500 mt-3">
+            {stats.enabledBots}/{stats.totalBots} bots enabled
+          </p>
         </div>
 
         {/* Top Bots */}
@@ -284,7 +317,10 @@ export default function AdminDashboard() {
               {recentAudit.map((entry, i) => (
                 <div key={i} className="text-xs">
                   <span className="text-gray-300">{entry.action}</span>
-                  <span className="text-gray-500"> by {entry.admin} &middot; {timeAgo(entry.createdAt)}</span>
+                  <span className="text-gray-500">
+                    {" "}
+                    by {entry.admin} &middot; {timeAgo(entry.createdAt)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -297,13 +333,17 @@ export default function AdminDashboard() {
         <div className="bg-gray-900 rounded-lg p-4">
           <h3 className="text-sm font-semibold text-gray-400 mb-3">Site Status</h3>
           <div className="flex flex-wrap gap-3">
-            <span className={`px-3 py-1 rounded text-xs font-medium ${settings.registrationOpen ? "bg-green-900 text-green-300" : "bg-red-900 text-red-300"}`}>
+            <span
+              className={`px-3 py-1 rounded text-xs font-medium ${settings.registrationOpen ? "bg-green-900 text-green-300" : "bg-red-900 text-red-300"}`}
+            >
               Registration: {settings.registrationOpen ? "Open" : "Closed"}
             </span>
             <span className="px-3 py-1 rounded text-xs font-medium bg-gray-800 text-gray-300">
               Max Users: {settings.maxUsers === 0 ? "Unlimited" : settings.maxUsers}
             </span>
-            <span className={`px-3 py-1 rounded text-xs font-medium ${settings.requireEmailVerification ? "bg-yellow-900 text-yellow-300" : "bg-gray-800 text-gray-300"}`}>
+            <span
+              className={`px-3 py-1 rounded text-xs font-medium ${settings.requireEmailVerification ? "bg-yellow-900 text-yellow-300" : "bg-gray-800 text-gray-300"}`}
+            >
               Email Verification: {settings.requireEmailVerification ? "Required" : "Off"}
             </span>
           </div>

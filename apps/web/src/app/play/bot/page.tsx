@@ -231,9 +231,7 @@ export default function PlayBotPage() {
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
         {showActivePrompt && activeGame && (
           <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 text-center">
-            <p className="text-sm text-yellow-300 mb-3">
-              Active game vs Bot ({activeGame.botElo})
-            </p>
+            <p className="text-sm text-yellow-300 mb-3">Active game vs Bot ({activeGame.botElo})</p>
             <div className="flex gap-3">
               <button
                 onClick={resumeGame}

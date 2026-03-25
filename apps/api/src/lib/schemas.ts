@@ -196,7 +196,11 @@ const botCategoryEnum = z.enum([
 ]);
 
 export const createBotBodySchema = z.object({
-  botId: z.string().min(1).max(50).regex(/^[a-z0-9_]+$/),
+  botId: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-z0-9_]+$/),
   name: z.string().min(1).max(50),
   elo: z.number().int().min(100).max(3200),
   description: z.string().min(1).max(500),

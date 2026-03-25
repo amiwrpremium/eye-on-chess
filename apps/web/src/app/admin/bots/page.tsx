@@ -263,10 +263,7 @@ export default function AdminBotsPage() {
               </thead>
               <tbody>
                 {bots.map((bot) => (
-                  <tr
-                    key={bot.id}
-                    className="border-b border-gray-800 hover:bg-gray-800/50"
-                  >
+                  <tr key={bot.id} className="border-b border-gray-800 hover:bg-gray-800/50">
                     <td className="py-2 px-3">
                       <span className="mr-2">{bot.avatar}</span>
                       <span className="font-medium">{bot.name}</span>
@@ -274,9 +271,7 @@ export default function AdminBotsPage() {
                     </td>
                     <td className="py-2 px-3">{bot.elo}</td>
                     <td className="py-2 px-3">
-                      <span className="px-2 py-0.5 rounded text-xs bg-gray-700">
-                        {bot.tier}
-                      </span>
+                      <span className="px-2 py-0.5 rounded text-xs bg-gray-700">{bot.tier}</span>
                     </td>
                     <td className="py-2 px-3 capitalize">{bot.category}</td>
                     <td className="py-2 px-3">

@@ -24,7 +24,9 @@ export default function ClientProviders({ children }: { children: React.ReactNod
 
   // PWA update detection
   useUpdateNotification();
-  useEffect(() => { checkDeferredUpdate(); }, []);
+  useEffect(() => {
+    checkDeferredUpdate();
+  }, []);
 
   return (
     <ThemeProvider>

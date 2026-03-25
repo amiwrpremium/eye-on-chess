@@ -18,7 +18,6 @@ import {
 import {
   saveOfflineGame,
   generateOfflineGameId,
-  getPendingCount,
   savePendingSync,
   saveInProgress,
   loadInProgress,
@@ -95,11 +94,7 @@ function buildFallbackPersonality(elo: number): BotPersonality {
   };
 }
 
-export default function BotGamePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function BotGamePage({ params }: { params: { id: string } }) {
   const { id } = params;
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
@@ -156,8 +151,16 @@ export default function BotGamePage({
   function pickGameOverQuote(result: string) {
     const msgs = bot?.messages;
     if (!msgs) return;
-    const playerWon = result.includes("White wins") ? playerIsWhite : result.includes("Black wins") ? !playerIsWhite : false;
-    const playerLost = result.includes("White wins") ? !playerIsWhite : result.includes("Black wins") ? playerIsWhite : false;
+    const playerWon = result.includes("White wins")
+      ? playerIsWhite
+      : result.includes("Black wins")
+        ? !playerIsWhite
+        : false;
+    const playerLost = result.includes("White wins")
+      ? !playerIsWhite
+      : result.includes("Black wins")
+        ? playerIsWhite
+        : false;
     // Bot's perspective: if player won, bot was checkmated; if player lost, bot won
     const pool = playerWon ? msgs.onCheckmated : playerLost ? msgs.onCheckmate : msgs.onDraw;
     if (pool && pool.length > 0) {
@@ -264,7 +267,19 @@ export default function BotGamePage({
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
-  }, [moves, gameOver, initialized, id, botElo, playerIsWhite, allUciMoves, gameStartTime, activeSettings, bot, gameId]);
+  }, [
+    moves,
+    gameOver,
+    initialized,
+    id,
+    botElo,
+    playerIsWhite,
+    allUciMoves,
+    gameStartTime,
+    activeSettings,
+    bot,
+    gameId,
+  ]);
 
   // --- Stockfish load timeout ---
   useEffect(() => {
@@ -432,19 +447,15 @@ export default function BotGamePage({
 
           // Restore moves
           if (g.moves?.length > 0) {
-            const records = g.moves.map(
-              (m: { ply: number; san: string; fen: string }) => ({
-                ply: m.ply,
-                san: m.san,
-                fen: m.fen,
-              })
-            );
+            const records = g.moves.map((m: { ply: number; san: string; fen: string }) => ({
+              ply: m.ply,
+              san: m.san,
+              fen: m.fen,
+            }));
             setMoves(records);
             setAllSans(g.moves.map((m: { san: string }) => m.san));
             setAllUciMoves(
-              g.moves
-                .filter((m: { uci?: string }) => m.uci)
-                .map((m: { uci: string }) => m.uci)
+              g.moves.filter((m: { uci?: string }) => m.uci).map((m: { uci: string }) => m.uci)
             );
             setCurrentPly(records.length);
             const last = g.moves[g.moves.length - 1];
@@ -572,7 +583,11 @@ export default function BotGamePage({
         setThreatArrows([]);
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, moveUci], result);
         const term = chess.isCheckmate() ? "CHECKMATE" : "AGREEMENT";
-        const dbResult = result.includes("White wins") ? "WHITE_WIN" : result.includes("Black wins") ? "BLACK_WIN" : "DRAW";
+        const dbResult = result.includes("White wins")
+          ? "WHITE_WIN"
+          : result.includes("Black wins")
+            ? "BLACK_WIN"
+            : "DRAW";
         syncGameToServer(newMoves, [...allUciMoves, moveUci], chess.fen(), dbResult, term);
       } else {
         // Single eval call for all features (evalBar, threats, suggestions, engine)
@@ -615,7 +630,9 @@ export default function BotGamePage({
         }
       }
     } catch (err) {
-      setError(`Bot move failed: ${err instanceof Error ? err.message : "Unknown error"}. Try refreshing.`);
+      setError(
+        `Bot move failed: ${err instanceof Error ? err.message : "Unknown error"}. Try refreshing.`
+      );
     } finally {
       setThinking(false);
     }
@@ -668,7 +685,11 @@ export default function BotGamePage({
         sound.playGameOver();
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, playerUci], result);
         const term = chess.isCheckmate() ? "CHECKMATE" : "AGREEMENT";
-        const dbResult = result.includes("White wins") ? "WHITE_WIN" : result.includes("Black wins") ? "BLACK_WIN" : "DRAW";
+        const dbResult = result.includes("White wins")
+          ? "WHITE_WIN"
+          : result.includes("Black wins")
+            ? "BLACK_WIN"
+            : "DRAW";
         syncGameToServer(newMoves, [...allUciMoves, playerUci], chess.fen(), dbResult, term);
         return;
       }
@@ -958,7 +979,10 @@ export default function BotGamePage({
                   }
                 />
                 {activeSettings.moveFeedback && <MoveFeedbackPopup classification={feedback} />}
-                <ReactionOverlay reactions={botReactions.activeReactions} onExpired={botReactions.removeReaction} />
+                <ReactionOverlay
+                  reactions={botReactions.activeReactions}
+                  onExpired={botReactions.removeReaction}
+                />
                 {activeSettings.engine && engineLine && (
                   <div className="absolute top-2 left-2 bg-gray-900/80 px-2 py-1 rounded text-xs text-blue-400 font-mono">
                     {engineLine}
@@ -1085,9 +1109,7 @@ export default function BotGamePage({
               vs {bot ? `${bot.avatar} ${bot.name}` : "Bot"} ({botElo})
             </p>
             {gameOverQuote ? (
-              <p className="text-blue-400 text-sm italic mb-4">
-                &ldquo;{gameOverQuote}&rdquo;
-              </p>
+              <p className="text-blue-400 text-sm italic mb-4">&ldquo;{gameOverQuote}&rdquo;</p>
             ) : (
               <div className="mb-2" />
             )}

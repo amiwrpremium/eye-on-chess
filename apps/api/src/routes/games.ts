@@ -655,10 +655,14 @@ export async function gameRoutes(app: FastifyInstance) {
     const { id } = request.params;
     const { moves: movesData, result, termination } = request.body;
 
-    const game = await prisma.game.findUnique({ where: { id }, select: { id: true, whiteId: true, blackId: true, isVsBot: true } });
+    const game = await prisma.game.findUnique({
+      where: { id },
+      select: { id: true, whiteId: true, blackId: true, isVsBot: true },
+    });
     if (!game) return apiError(reply, 404, GAME_NOT_FOUND, "Game not found");
     if (!game.isVsBot) return apiError(reply, 400, GAME_NOT_BOT, "Only bot games can sync moves");
-    if (game.whiteId !== userId && game.blackId !== userId) return apiError(reply, 403, GAME_NOT_PARTICIPANT, "Not a participant");
+    if (game.whiteId !== userId && game.blackId !== userId)
+      return apiError(reply, 403, GAME_NOT_PARTICIPANT, "Not a participant");
 
     // Validate result/termination values
     const validResults = ["WHITE_WIN", "BLACK_WIN", "DRAW"];
@@ -676,7 +680,12 @@ export async function gameRoutes(app: FastifyInstance) {
     for (const m of movesData) {
       const move = chess.move(m.san);
       if (!move) {
-        return apiError(reply, 400, GAME_INVALID_MOVE, `Invalid move at ply ${validatedMoves.length + 1}: ${m.san}`);
+        return apiError(
+          reply,
+          400,
+          GAME_INVALID_MOVE,
+          `Invalid move at ply ${validatedMoves.length + 1}: ${m.san}`
+        );
       }
       validatedMoves.push({
         ply: validatedMoves.length + 1,
@@ -725,12 +734,30 @@ export async function gameRoutes(app: FastifyInstance) {
     };
   }>("/games/sync", { schema: { body: syncOfflineGameBodySchema } }, async (request, reply) => {
     const userId = request.user.userId;
-    const { offlineId, botElo, playerIsWhite, moves, result, termination, startedAt, endedAt, timeControl, initialTime, increment } = request.body as Record<string, unknown> & {
-      offlineId?: string; botElo: number; playerIsWhite: boolean;
+    const {
+      offlineId,
+      botElo,
+      playerIsWhite,
+      moves,
+      result,
+      termination,
+      startedAt,
+      endedAt,
+      timeControl,
+      initialTime,
+      increment,
+    } = request.body as Record<string, unknown> & {
+      offlineId?: string;
+      botElo: number;
+      playerIsWhite: boolean;
       moves: { ply: number; san: string; uci: string; fen: string }[];
-      result: string | null; termination: string | null;
-      startedAt: string; endedAt: string | null;
-      timeControl?: string; initialTime?: number; increment?: number;
+      result: string | null;
+      termination: string | null;
+      startedAt: string;
+      endedAt: string | null;
+      timeControl?: string;
+      initialTime?: number;
+      increment?: number;
     };
 
     // Idempotency: check if this offline game was already synced

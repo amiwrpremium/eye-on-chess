@@ -167,7 +167,10 @@ export function computeCustomMove(
     const legal = moves.find((m) => m.san === openingMove);
     if (legal) {
       // Personality quirks can still override (random/blunder chance)
-      if (Math.random() >= personality.randomMoveChance && Math.random() >= personality.blunderChance) {
+      if (
+        Math.random() >= personality.randomMoveChance &&
+        Math.random() >= personality.blunderChance
+      ) {
         return `${legal.from}${legal.to}${legal.promotion || ""}`;
       }
     }

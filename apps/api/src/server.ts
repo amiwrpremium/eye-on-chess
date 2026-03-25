@@ -231,42 +231,48 @@ async function main() {
     updateMetrics();
 
     // Abort stale ACTIVE bot games (no activity in 24 hours)
-    setInterval(async () => {
-      try {
-        const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        const stale = await prisma.game.updateMany({
-          where: {
-            status: "ACTIVE",
-            isVsBot: true,
-            startedAt: { lt: cutoff },
-          },
-          data: {
-            status: "ABORTED",
-            result: "ABORTED",
-            endedAt: new Date(),
-          },
-        });
-        if (stale.count > 0) {
-          fastify.log.info(`Cleaned up ${stale.count} stale bot game(s)`);
+    setInterval(
+      async () => {
+        try {
+          const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+          const stale = await prisma.game.updateMany({
+            where: {
+              status: "ACTIVE",
+              isVsBot: true,
+              startedAt: { lt: cutoff },
+            },
+            data: {
+              status: "ABORTED",
+              result: "ABORTED",
+              endedAt: new Date(),
+            },
+          });
+          if (stale.count > 0) {
+            fastify.log.info(`Cleaned up ${stale.count} stale bot game(s)`);
+          }
+        } catch (err) {
+          fastify.log.error({ err }, "Stale game cleanup error");
         }
-      } catch (err) {
-        fastify.log.error({ err }, "Stale game cleanup error");
-      }
-    }, 5 * 60 * 1000);
+      },
+      5 * 60 * 1000
+    );
 
     // Clean up expired refresh tokens every hour
-    setInterval(async () => {
-      try {
-        const deleted = await prisma.refreshToken.deleteMany({
-          where: { expiresAt: { lt: new Date() } },
-        });
-        if (deleted.count > 0) {
-          fastify.log.info(`Cleaned up ${deleted.count} expired refresh token(s)`);
+    setInterval(
+      async () => {
+        try {
+          const deleted = await prisma.refreshToken.deleteMany({
+            where: { expiresAt: { lt: new Date() } },
+          });
+          if (deleted.count > 0) {
+            fastify.log.info(`Cleaned up ${deleted.count} expired refresh token(s)`);
+          }
+        } catch (err) {
+          fastify.log.error({ err }, "Refresh token cleanup error");
         }
-      } catch (err) {
-        fastify.log.error({ err }, "Refresh token cleanup error");
-      }
-    }, 60 * 60 * 1000);
+      },
+      60 * 60 * 1000
+    );
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

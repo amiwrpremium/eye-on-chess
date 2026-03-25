@@ -51,32 +51,29 @@ export function useBotReactions() {
   const [activeReactions, setActiveReactions] = useState<ActiveReaction[]>([]);
   const lastReactionTime = useRef(0);
 
-  const triggerReaction = useCallback(
-    (event: BotReactionEvent, personality: BotPersonality) => {
-      const mapping = getReaction(event, personality);
-      if (!mapping) return;
+  const triggerReaction = useCallback((event: BotReactionEvent, personality: BotPersonality) => {
+    const mapping = getReaction(event, personality);
+    if (!mapping) return;
 
-      // Rate limit (gameEnd bypasses cooldown)
-      const now = Date.now();
-      if (event !== "gameEnd" && now - lastReactionTime.current < COOLDOWN_MS) return;
+    // Rate limit (gameEnd bypasses cooldown)
+    const now = Date.now();
+    if (event !== "gameEnd" && now - lastReactionTime.current < COOLDOWN_MS) return;
 
-      // Probability gate
-      if (Math.random() > mapping.probability) return;
+    // Probability gate
+    if (Math.random() > mapping.probability) return;
 
-      lastReactionTime.current = now;
-      setActiveReactions((prev) => [
-        ...prev.slice(-(MAX_ACTIVE - 1)),
-        {
-          id: Math.random().toString(36).slice(2) + Date.now().toString(36),
-          reaction: mapping.reaction,
-          fromOpponent: true,
-          timestamp: now,
-          xOffset: 15 + Math.random() * 70,
-        },
-      ]);
-    },
-    []
-  );
+    lastReactionTime.current = now;
+    setActiveReactions((prev) => [
+      ...prev.slice(-(MAX_ACTIVE - 1)),
+      {
+        id: Math.random().toString(36).slice(2) + Date.now().toString(36),
+        reaction: mapping.reaction,
+        fromOpponent: true,
+        timestamp: now,
+        xOffset: 15 + Math.random() * 70,
+      },
+    ]);
+  }, []);
 
   const removeReaction = useCallback((id: string) => {
     setActiveReactions((prev) => prev.filter((r) => r.id !== id));

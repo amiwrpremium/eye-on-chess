@@ -39,9 +39,7 @@ describe("useBotChat", () => {
   });
 
   it("respects cooldown", () => {
-    const { result } = renderHook(() =>
-      useBotChat({ messages, probability: 1, cooldownMs: 5000 })
-    );
+    const { result } = renderHook(() => useBotChat({ messages, probability: 1, cooldownMs: 5000 }));
     act(() => result.current.triggerMessage("gameStart"));
     const first = result.current.currentMessage;
     expect(first).not.toBeNull();
@@ -71,17 +69,13 @@ describe("useBotChat", () => {
   });
 
   it("always shows onCheckmate regardless of probability", () => {
-    const { result } = renderHook(() =>
-      useBotChat({ messages, probability: 0, cooldownMs: 0 })
-    );
+    const { result } = renderHook(() => useBotChat({ messages, probability: 0, cooldownMs: 0 }));
     act(() => result.current.triggerMessage("onCheckmate"));
     expect(result.current.currentMessage).toBe("I win!");
   });
 
   it("always shows onCheckmated regardless of probability", () => {
-    const { result } = renderHook(() =>
-      useBotChat({ messages, probability: 0, cooldownMs: 0 })
-    );
+    const { result } = renderHook(() => useBotChat({ messages, probability: 0, cooldownMs: 0 }));
     act(() => result.current.triggerMessage("onCheckmated"));
     expect(result.current.currentMessage).toBe("GG!");
   });

@@ -117,12 +117,13 @@ export async function adminRoutes(app: FastifyInstance) {
 
     // Map top bot Elos to bot names
     const topBotElos = topBotGames.map((g) => g.botElo as number);
-    const botProfiles = topBotElos.length > 0
-      ? await prisma.botProfile.findMany({
-          where: { elo: { in: topBotElos } },
-          select: { name: true, avatar: true, elo: true },
-        })
-      : [];
+    const botProfiles =
+      topBotElos.length > 0
+        ? await prisma.botProfile.findMany({
+            where: { elo: { in: topBotElos } },
+            select: { name: true, avatar: true, elo: true },
+          })
+        : [];
     const botByElo = new Map(botProfiles.map((b) => [b.elo, b]));
     const topBots = topBotGames.map((g) => {
       const bot = botByElo.get(g.botElo as number);
@@ -549,10 +550,13 @@ export async function adminRoutes(app: FastifyInstance) {
   // ── Bots ────────────────────────────────────────────────
 
   app.get("/admin/bots", async (request) => {
-    const { page: pageStr, limit: limitStr, search, sort, order } = request.query as Record<
-      string,
-      string | undefined
-    >;
+    const {
+      page: pageStr,
+      limit: limitStr,
+      search,
+      sort,
+      order,
+    } = request.query as Record<string, string | undefined>;
     const page = Math.max(1, parseInt(pageStr || "1"));
     const limit = Math.min(100, Math.max(1, parseInt(limitStr || "20")));
     const sortField = ["elo", "name", "category", "sortOrder", "createdAt"].includes(sort || "")
@@ -608,45 +612,48 @@ export async function adminRoutes(app: FastifyInstance) {
     };
   });
 
-  app.post(
-    "/admin/bots",
-    { schema: { body: createBotBodySchema } },
-    async (request, reply) => {
-      const body = request.body as Record<string, unknown>;
-      const botId = body.botId as string;
+  app.post("/admin/bots", { schema: { body: createBotBodySchema } }, async (request, reply) => {
+    const body = request.body as Record<string, unknown>;
+    const botId = body.botId as string;
 
-      const existing = await prisma.botProfile.findUnique({ where: { botId } });
-      if (existing) return apiError(reply, 409, ADMIN_BOT_ID_EXISTS, "Bot ID already exists");
+    const existing = await prisma.botProfile.findUnique({ where: { botId } });
+    if (existing) return apiError(reply, 409, ADMIN_BOT_ID_EXISTS, "Bot ID already exists");
 
-      const maxSort = await prisma.botProfile.aggregate({ _max: { sortOrder: true } });
-      const bot = await prisma.botProfile.create({
-        data: {
-          botId,
-          name: sanitizeString(body.name as string),
-          elo: body.elo as number,
-          description: sanitizeString(body.description as string),
-          avatar: body.avatar as string,
-          tier: body.tier as string,
-          category: body.category as string,
-          enabled: (body.enabled as boolean) ?? true,
-          randomMoveChance: (body.randomMoveChance as number) ?? 0,
-          blunderChance: (body.blunderChance as number) ?? 0,
-          captureGreed: (body.captureGreed as number) ?? 0,
-          aggressionBias: (body.aggressionBias as number) ?? 0,
-          maxDepth: (body.maxDepth as number) ?? 3,
-          queenEarly: (body.queenEarly as boolean) ?? false,
-          pawnPusher: (body.pawnPusher as boolean) ?? false,
-          sortOrder: (maxSort._max.sortOrder ?? 0) + 1,
-          messages: body.messages as object | undefined,
-          preferredOpenings: body.preferredOpenings as object | undefined,
-        },
-      });
+    const maxSort = await prisma.botProfile.aggregate({ _max: { sortOrder: true } });
+    const bot = await prisma.botProfile.create({
+      data: {
+        botId,
+        name: sanitizeString(body.name as string),
+        elo: body.elo as number,
+        description: sanitizeString(body.description as string),
+        avatar: body.avatar as string,
+        tier: body.tier as string,
+        category: body.category as string,
+        enabled: (body.enabled as boolean) ?? true,
+        randomMoveChance: (body.randomMoveChance as number) ?? 0,
+        blunderChance: (body.blunderChance as number) ?? 0,
+        captureGreed: (body.captureGreed as number) ?? 0,
+        aggressionBias: (body.aggressionBias as number) ?? 0,
+        maxDepth: (body.maxDepth as number) ?? 3,
+        queenEarly: (body.queenEarly as boolean) ?? false,
+        pawnPusher: (body.pawnPusher as boolean) ?? false,
+        sortOrder: (maxSort._max.sortOrder ?? 0) + 1,
+        messages: body.messages as object | undefined,
+        preferredOpenings: body.preferredOpenings as object | undefined,
+      },
+    });
 
-      await auditLog(request.user.userId, "bot.create", "BotProfile", bot.id, { botId, name: bot.name, elo: bot.elo }, request.ip);
+    await auditLog(
+      request.user.userId,
+      "bot.create",
+      "BotProfile",
+      bot.id,
+      { botId, name: bot.name, elo: bot.elo },
+      request.ip
+    );
 
-      return { bot };
-    }
-  );
+    return { bot };
+  });
 
   app.patch<{ Params: { id: string } }>(
     "/admin/bots/:id",
@@ -700,7 +707,14 @@ export async function adminRoutes(app: FastifyInstance) {
 
     await prisma.botProfile.delete({ where: { id } });
 
-    await auditLog(request.user.userId, "bot.delete", "BotProfile", id, { botId: existing.botId, name: existing.name }, request.ip);
+    await auditLog(
+      request.user.userId,
+      "bot.delete",
+      "BotProfile",
+      id,
+      { botId: existing.botId, name: existing.name },
+      request.ip
+    );
 
     return { success: true };
   });
@@ -748,7 +762,14 @@ export async function adminRoutes(app: FastifyInstance) {
       }
     }
 
-    await auditLog(request.user.userId, "bot.reseed", "BotProfile", "all", { created, updated, total: bots.length }, request.ip);
+    await auditLog(
+      request.user.userId,
+      "bot.reseed",
+      "BotProfile",
+      "all",
+      { created, updated, total: bots.length },
+      request.ip
+    );
 
     return { created, updated };
   });

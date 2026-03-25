@@ -109,7 +109,7 @@ export default function PlayBotPage() {
     setPendingSyncCount(getPendingCount());
     if (isOnline) {
       // Sync offline games
-      syncOfflineGames().then(({ synced, failed }) => {
+      syncOfflineGames().then(({ failed }) => {
         setPendingSyncCount(getPendingCount());
         if (failed > 0) {
           toast.show(`${failed} game(s) failed to sync — will retry`, "error");

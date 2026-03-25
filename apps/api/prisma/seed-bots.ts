@@ -135,9 +135,14 @@ async function main() {
   console.log(`\nBot seed complete: ${toCreate.length} created, ${updated} updated.`);
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+// Only run when executed directly (not when imported by admin routes)
+const isDirectRun =
+  process.argv[1]?.endsWith("seed-bots.ts") || process.argv[1]?.endsWith("seed-bots.js");
+if (isDirectRun) {
+  main()
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(() => prisma.$disconnect());
+}

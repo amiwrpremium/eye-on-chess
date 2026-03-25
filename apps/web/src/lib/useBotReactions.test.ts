@@ -22,7 +22,7 @@ const AMIR: BotPersonality = {
   pawnPusher: true,
 };
 
-const ERFAN: BotPersonality = {
+const _ERFAN: BotPersonality = {
   id: "erfan",
   name: "Erfan",
   elo: 3200,

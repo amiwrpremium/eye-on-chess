@@ -207,11 +207,16 @@ export default function BotGamePage({
     try {
       const raw = sessionStorage.getItem("botGameConfig");
       if (raw) {
-        sessionStorage.removeItem("botGameConfig");
         return JSON.parse(raw);
       }
     } catch {}
     return null;
+  }
+
+  function clearGameConfig() {
+    try {
+      sessionStorage.removeItem("botGameConfig");
+    } catch {}
   }
 
   function applyConfig(config: ReturnType<typeof readGameConfig>) {
@@ -258,6 +263,7 @@ export default function BotGamePage({
       setGameStartTime(new Date().toISOString());
       setGameId(null);
 
+      clearGameConfig();
       setInitialized(true);
     } else {
       // Online game: fetch from API
@@ -306,6 +312,7 @@ export default function BotGamePage({
 
           setOfflineGameId(null);
           setGameStartTime(g.startedAt || new Date().toISOString());
+          clearGameConfig();
           setInitialized(true);
         })
         .catch(() => {

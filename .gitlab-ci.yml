@@ -1,0 +1,232 @@
+# ──────────────────────────────────────────────────────────
+# EyeOnChess — GitLab CI/CD Pipeline
+#
+# Works on both gitlab.com and self-hosted GitLab instances.
+# Uses GitLab Container Registry for Docker images.
+#
+# Pipeline:
+#   push to default branch → lint + test
+#   push v* tag            → lint + test + build + deploy
+# ──────────────────────────────────────────────────────────
+
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+variables:
+  PNPM_VERSION: "10.32.1"
+  NODE_VERSION: "22"
+  # GitLab Container Registry (auto-configured per instance)
+  REGISTRY: ${CI_REGISTRY}
+  IMAGE_PREFIX: ${CI_REGISTRY_IMAGE}
+
+# ── Cache & Templates ──────────────────────────────────
+
+.node-setup: &node-setup
+  image: node:${NODE_VERSION}-bookworm-slim
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@${PNPM_VERSION} --activate
+    - pnpm install --frozen-lockfile
+    - pnpm --filter @eyeonchess/api run db:generate
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store/
+    policy: pull-push
+
+# ── Lint ───────────────────────────────────────────────
+
+eslint:
+  stage: lint
+  <<: *node-setup
+  script:
+    - pnpm lint:eslint
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+prettier:
+  stage: lint
+  <<: *node-setup
+  script:
+    - pnpm format:check
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+typescript:
+  stage: lint
+  <<: *node-setup
+  script:
+    - pnpm --filter @eyeonchess/api lint
+    - pnpm --filter @eyeonchess/chess lint
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+# ── Test ───────────────────────────────────────────────
+
+test-chess:
+  stage: test
+  <<: *node-setup
+  variables:
+    JWT_SECRET: ci-test-secret
+  script:
+    - pnpm --filter @eyeonchess/chess exec vitest run --coverage
+  artifacts:
+    paths:
+      - packages/chess/coverage/
+    expire_in: 1 day
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+test-api:
+  stage: test
+  <<: *node-setup
+  variables:
+    JWT_SECRET: ci-test-secret
+  script:
+    - pnpm --filter @eyeonchess/api exec vitest run --coverage
+  artifacts:
+    paths:
+      - apps/api/coverage/
+    expire_in: 1 day
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+test-web:
+  stage: test
+  <<: *node-setup
+  variables:
+    JWT_SECRET: ci-test-secret
+  script:
+    - pnpm --filter @eyeonchess/web exec vitest run --coverage
+  artifacts:
+    paths:
+      - apps/web/coverage/
+    expire_in: 1 day
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+# ── Build & Push Images ───────────────────────────────
+# Only runs on v* tags
+
+.build-template: &build-template
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - export VERSION=${CI_COMMIT_TAG#v}
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+build-api:
+  <<: *build-template
+  script:
+    - docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+    - docker build -f apps/api/Dockerfile.prod
+      -t ${IMAGE_PREFIX}/api:${VERSION}
+      -t ${IMAGE_PREFIX}/api:latest .
+    - docker push ${IMAGE_PREFIX}/api:${VERSION}
+    - docker push ${IMAGE_PREFIX}/api:latest
+
+build-web:
+  <<: *build-template
+  script:
+    - docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+    - docker build -f apps/web/Dockerfile
+      -t ${IMAGE_PREFIX}/web:${VERSION}
+      -t ${IMAGE_PREFIX}/web:latest .
+    - docker push ${IMAGE_PREFIX}/web:${VERSION}
+    - docker push ${IMAGE_PREFIX}/web:latest
+
+build-worker:
+  <<: *build-template
+  script:
+    - docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+    - docker build -f apps/api/Dockerfile.worker
+      -t ${IMAGE_PREFIX}/worker:${VERSION}
+      -t ${IMAGE_PREFIX}/worker:latest .
+    - docker push ${IMAGE_PREFIX}/worker:${VERSION}
+    - docker push ${IMAGE_PREFIX}/worker:latest
+
+# ── Deploy ─────────────────────────────────────────────
+# Only runs on v* tags, after build succeeds
+
+deploy-production:
+  stage: deploy
+  image: alpine:latest
+  environment:
+    name: production
+    url: ${SITE_URL}
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
+  script:
+    - export VERSION=${CI_COMMIT_TAG#v}
+    - |
+      ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} << DEPLOY
+        set -e
+        cd /opt/eyeonchess
+
+        export IMAGE_TAG=${VERSION}
+        # Update registry to point to this GitLab instance
+        export CI_REGISTRY=${CI_REGISTRY}
+        export CI_REGISTRY_IMAGE=${CI_REGISTRY_IMAGE}
+
+        COMPOSE="docker compose --env-file .env -f deployment/docker-compose.cd.yml"
+
+        echo "Pulling images (tag: \$IMAGE_TAG)..."
+        \$COMPOSE pull api web worker
+
+        echo "Restarting API..."
+        \$COMPOSE up -d --no-deps api
+        sleep 10
+
+        echo "Restarting Web..."
+        \$COMPOSE up -d --no-deps web
+        sleep 5
+
+        echo "Restarting Worker..."
+        \$COMPOSE up -d --no-deps worker
+
+        echo "Verifying health..."
+        for i in \$(seq 1 30); do
+          if curl -sf http://localhost/health > /dev/null 2>&1; then
+            echo "Deployment healthy!"
+            docker image prune -f
+            exit 0
+          fi
+          echo "Waiting for health... (\$i/30)"
+          sleep 3
+        done
+
+        echo "Health check failed after 90s"
+        \$COMPOSE logs --tail=50 api web
+        exit 1
+      DEPLOY
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/
+      when: manual
+      allow_failure: false

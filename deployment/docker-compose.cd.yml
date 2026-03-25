@@ -2,6 +2,9 @@
 # EyeOnChess — CD Deployment Compose
 # Uses pre-built GHCR images instead of local builds.
 # Usage: IMAGE_TAG=1.2.0 docker compose -f deployment/docker-compose.cd.yml up -d
+#
+# IMAGE_REGISTRY defaults to ghcr.io/amiwrpremium/eye-on-chess.
+# Override for GitLab: IMAGE_REGISTRY=registry.gitlab.com/user/eye-on-chess
 # ──────────────────────────────────────────────────────────
 name: eyeonchess
 
@@ -101,9 +104,9 @@ services:
         reservations:
           memory: 64M
 
-  # ── Application (GHCR images) ────────────────────────
+  # ── Application (registry images) ─────────────────────
   api:
-    image: ghcr.io/amiwrpremium/eye-on-chess/api:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REGISTRY:-ghcr.io/amiwrpremium/eye-on-chess}/api:${IMAGE_TAG:-latest}
     container_name: eyeonchess-api
     restart: unless-stopped
     env_file:
@@ -132,7 +135,7 @@ services:
           memory: 256M
 
   web:
-    image: ghcr.io/amiwrpremium/eye-on-chess/web:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REGISTRY:-ghcr.io/amiwrpremium/eye-on-chess}/web:${IMAGE_TAG:-latest}
     container_name: eyeonchess-web
     restart: unless-stopped
     env_file:
@@ -153,7 +156,7 @@ services:
           memory: 128M
 
   worker:
-    image: ghcr.io/amiwrpremium/eye-on-chess/worker:${IMAGE_TAG:-latest}
+    image: ${IMAGE_REGISTRY:-ghcr.io/amiwrpremium/eye-on-chess}/worker:${IMAGE_TAG:-latest}
     container_name: eyeonchess-worker
     restart: unless-stopped
     env_file:

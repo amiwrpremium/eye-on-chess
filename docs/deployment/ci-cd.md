@@ -615,6 +615,105 @@ gh api -X DELETE /user/packages/container/eye-on-chess%2Fapi/versions/<version-i
 
 ---
 
+## GitLab CI/CD
+
+EyeOnChess also ships a `.gitlab-ci.yml` that mirrors the GitHub Actions pipeline. It works on both gitlab.com and self-hosted GitLab instances (e.g., your own GitLab).
+
+### Pipeline Stages
+
+| Stage    | Jobs                                          | Trigger                                |
+| -------- | --------------------------------------------- | -------------------------------------- |
+| `lint`   | eslint, prettier, typescript                  | Push to default branch, MRs, `v*` tags |
+| `test`   | test-chess, test-api, test-web (parallel)     | Push to default branch, MRs, `v*` tags |
+| `build`  | build-api, build-web, build-worker (parallel) | `v*` tags only                         |
+| `deploy` | deploy-production (manual trigger)            | `v*` tags only                         |
+
+### GitLab Setup
+
+#### 1. Enable Container Registry
+
+On gitlab.com, the container registry is enabled by default. On self-hosted GitLab:
+
+1. Go to **Admin Area** → **Settings** → **CI/CD** → **Container Registry**
+2. Enable the registry and set the URL
+
+#### 2. Add CI/CD Variables
+
+Go to your project → **Settings** → **CI/CD** → **Variables** → **Add variable**:
+
+| Variable          | Value                               | Flags                        |
+| ----------------- | ----------------------------------- | ---------------------------- |
+| `SSH_HOST`        | Your VPS IP                         | Protected                    |
+| `SSH_USER`        | `deploy`                            | Protected                    |
+| `SSH_PRIVATE_KEY` | Contents of `~/.ssh/deploy_ed25519` | Protected, Masked, File type |
+| `SITE_URL`        | `http://your-domain.com`            | Protected                    |
+
+The `CI_REGISTRY`, `CI_REGISTRY_USER`, `CI_REGISTRY_PASSWORD`, and `CI_REGISTRY_IMAGE` variables are provided automatically by GitLab — you don't need to set them.
+
+#### 3. Create a Production Environment
+
+1. Go to **Operate** → **Environments** → **New environment**
+2. Name: `production`, External URL: your site URL
+3. Save
+
+#### 4. Configure the VPS for GitLab Registry
+
+On the VPS, log in to the GitLab container registry:
+
+```bash
+# For gitlab.com
+docker login registry.gitlab.com -u YOUR_GITLAB_USERNAME -p YOUR_GITLAB_PAT
+
+# For self-hosted (replace with your registry URL)
+docker login registry.your-gitlab.com -u YOUR_USERNAME -p YOUR_PAT
+```
+
+Set the `IMAGE_REGISTRY` variable on the VPS so `docker-compose.cd.yml` pulls from GitLab instead of GHCR:
+
+```bash
+# Add to /opt/eyeonchess/.env
+echo 'IMAGE_REGISTRY=registry.gitlab.com/your-username/eye-on-chess' >> /opt/eyeonchess/.env
+```
+
+#### 5. Deploy
+
+Push a tag to trigger the pipeline:
+
+```bash
+git tag v1.2.0
+git push gitlab v1.2.0
+```
+
+The lint and test stages run automatically. The build stage pushes images to the GitLab Container Registry. The deploy stage requires **manual approval** — click the play button in the GitLab UI to deploy.
+
+#### 6. Mirroring from GitHub
+
+If your primary remote is GitHub and you want to mirror to GitLab:
+
+```bash
+# Add GitLab as a second remote
+git remote add gitlab https://gitlab.com/your-username/eye-on-chess.git
+
+# Push to both
+git push origin master --tags
+git push gitlab master --tags
+```
+
+Or set up GitLab's built-in mirroring: **Settings** → **Repository** → **Mirroring repositories** → add the GitHub URL.
+
+### Key Differences from GitHub Actions
+
+| Feature            | GitHub Actions             | GitLab CI                  |
+| ------------------ | -------------------------- | -------------------------- |
+| Registry           | GHCR (ghcr.io)             | GitLab Container Registry  |
+| Deploy trigger     | Automatic on tag           | Manual (click play button) |
+| Pipeline file      | `.github/workflows/cd.yml` | `.gitlab-ci.yml`           |
+| Secrets            | Repository Secrets         | CI/CD Variables            |
+| Environments       | Settings → Environments    | Operate → Environments     |
+| Image registry var | Hardcoded in workflow      | Auto: `$CI_REGISTRY_IMAGE` |
+
+---
+
 ## Quick Reference
 
 | Action               | Command                                                                                                    |

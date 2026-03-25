@@ -316,6 +316,10 @@ export async function gameRoutes(app: FastifyInstance) {
     const where = {
       status: { in: ["COMPLETED" as const, "ABORTED" as const] },
       OR: [{ whiteId: userId }, { blackId: userId }],
+      // Exclude abandoned bot games with no moves (zombie-cleaned)
+      NOT: {
+        AND: [{ isVsBot: true }, { status: "ABORTED" }, { pgn: "" }],
+      },
     };
 
     const [games, total] = await Promise.all([

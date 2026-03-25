@@ -637,6 +637,56 @@ export async function gameRoutes(app: FastifyInstance) {
     return { result, termination: "RESIGNATION" };
   });
 
+  // Sync moves to an existing bot game (client-side bot engine doesn't sync moves during play)
+  app.post<{
+    Params: { id: string };
+    Body: {
+      moves: { ply: number; san: string; uci: string; fen: string }[];
+      fen: string;
+      result: string | null;
+      termination: string | null;
+    };
+  }>("/games/:id/sync-moves", async (request, reply) => {
+    const userId = request.user.userId;
+    const { id } = request.params;
+    const { moves: movesData, fen, result, termination } = request.body;
+
+    const game = await prisma.game.findUnique({ where: { id }, select: { id: true, whiteId: true, blackId: true, isVsBot: true } });
+    if (!game) return reply.status(404).send({ error: "Game not found" });
+    if (!game.isVsBot) return reply.status(400).send({ error: "Only bot games can sync moves" });
+    if (game.whiteId !== userId && game.blackId !== userId) return reply.status(403).send({ error: "Not a participant" });
+
+    // Delete existing moves (in case of re-sync) and insert all
+    await prisma.move.deleteMany({ where: { gameId: id } });
+    if (movesData.length > 0) {
+      await prisma.move.createMany({
+        data: movesData.map((m) => ({
+          gameId: id,
+          ply: m.ply,
+          san: m.san,
+          uci: m.uci,
+          fen: m.fen,
+        })),
+      });
+    }
+
+    // Build PGN from SANs
+    const pgn = movesData
+      .map((m, i) => (i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ${m.san}` : m.san))
+      .join(" ");
+
+    // Update game record
+    const updateData: Record<string, unknown> = { fen, pgn };
+    if (result) updateData.result = result;
+    if (termination) updateData.termination = termination;
+    updateData.status = "COMPLETED";
+    updateData.endedAt = new Date();
+
+    await prisma.game.update({ where: { id }, data: updateData });
+
+    return { success: true };
+  });
+
   // Sync an offline bot game
   app.post<{
     Body: {

@@ -148,6 +148,32 @@ export default function BotGamePage({
   // Mode preset label (for display)
   const [modePreset, setModePreset] = useState<GameModePreset>("friendly");
 
+  // --- Sync completed game to server ---
+  async function syncGameToServer(
+    gameMoves: MoveRecord[],
+    uciMoves: string[],
+    finalFen: string,
+    result: string | null,
+    termination: string | null
+  ) {
+    if (!gameId || !isOnline) return;
+    try {
+      await api.post(`/api/v1/games/${gameId}/sync-moves`, {
+        moves: gameMoves.map((m, i) => ({
+          ply: m.ply,
+          san: m.san,
+          uci: uciMoves[i] || "",
+          fen: m.fen,
+        })),
+        fen: finalFen,
+        result,
+        termination,
+      });
+    } catch {
+      // Silent fail — game still playable, just won't have server moves for analysis
+    }
+  }
+
   // --- Hooks ---
   const botChat = useBotChat({ messages: bot?.messages });
   const botReactions = useBotReactions();
@@ -427,6 +453,9 @@ export default function BotGamePage({
         sound.playGameOver();
         setThreatArrows([]);
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, moveUci], result);
+        const term = chess.isCheckmate() ? "CHECKMATE" : "AGREEMENT";
+        const dbResult = result.includes("White wins") ? "WHITE_WIN" : result.includes("Black wins") ? "BLACK_WIN" : "DRAW";
+        syncGameToServer(newMoves, [...allUciMoves, moveUci], chess.fen(), dbResult, term);
       } else {
         // Single eval call for all features (evalBar, threats, suggestions, engine)
         const needsEval =
@@ -517,6 +546,9 @@ export default function BotGamePage({
         setGameOver(result);
         sound.playGameOver();
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, playerUci], result);
+        const term = chess.isCheckmate() ? "CHECKMATE" : "AGREEMENT";
+        const dbResult = result.includes("White wins") ? "WHITE_WIN" : result.includes("Black wins") ? "BLACK_WIN" : "DRAW";
+        syncGameToServer(newMoves, [...allUciMoves, playerUci], chess.fen(), dbResult, term);
         return;
       }
       // Evaluate position before bot responds for move feedback and eval bar
@@ -624,6 +656,8 @@ export default function BotGamePage({
       } catch {}
     }
     if (!gameId) saveGameOffline(moves, allUciMoves, result);
+    const dbResult = playerIsWhite ? "BLACK_WIN" : "WHITE_WIN";
+    syncGameToServer(moves, allUciMoves, game.fen(), dbResult, "RESIGNATION");
   }
 
   // --- Play Again (go back to selection) ---

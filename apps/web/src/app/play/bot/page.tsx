@@ -211,7 +211,7 @@ export default function PlayBotPage() {
   async function resumeGame() {
     if (!activeGame) return;
     try {
-      const { data } = await api.get(`/api/games/${activeGame.id}`);
+      const { data } = await api.get(`/api/v1/games/${activeGame.id}`);
       const g = data.game;
       setGame(new Chess(g.fen));
       setGameId(g.id);
@@ -240,7 +240,7 @@ export default function PlayBotPage() {
   async function resignActiveAndContinue() {
     if (activeGame) {
       try {
-        await api.post(`/api/games/${activeGame.id}/resign`);
+        await api.post(`/api/v1/games/${activeGame.id}/resign`);
       } catch {}
     }
     setActiveGame(null);
@@ -506,7 +506,7 @@ export default function PlayBotPage() {
         sound.playGameOver();
         if (gameId && isOnline) {
           try {
-            await api.post(`/api/games/${gameId}/move`, { from, to, promotion });
+            await api.post(`/api/v1/games/${gameId}/move`, { from, to, promotion });
           } catch {}
         }
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, playerUci], result);
@@ -547,7 +547,7 @@ export default function PlayBotPage() {
       }
       if (gameId && isOnline) {
         try {
-          await api.post(`/api/games/${gameId}/move`, { from, to, promotion });
+          await api.post(`/api/v1/games/${gameId}/move`, { from, to, promotion });
         } catch {}
       }
       // Game-over already handled above (before eval). Proceed to bot move.
@@ -613,7 +613,7 @@ export default function PlayBotPage() {
     setConfirmResign(false);
     if (gameId && isOnline) {
       try {
-        await api.post(`/api/games/${gameId}/resign`);
+        await api.post(`/api/v1/games/${gameId}/resign`);
       } catch {}
     }
     if (!gameId) saveGameOffline(moves, allUciMoves, result);

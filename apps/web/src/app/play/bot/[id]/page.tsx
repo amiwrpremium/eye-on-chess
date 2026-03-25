@@ -1085,15 +1085,29 @@ export default function BotGamePage({
                 New Game
               </button>
               {gameId && isOnline && (
-                <>
-                  <button
-                    onClick={() => router.push(`/game/${gameId}/analysis`)}
-                    className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
-                  >
-                    Analyze
-                  </button>
-                  <ExportPGN gameId={gameId} compact />
-                </>
+                <button
+                  onClick={() => router.push(`/game/${gameId}/analysis`)}
+                  className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
+                >
+                  Analyze
+                </button>
+              )}
+              {gameId && isOnline ? (
+                <ExportPGN gameId={gameId} compact />
+              ) : (
+                <button
+                  onClick={() => {
+                    const pgn = moves
+                      .map((m, i) => (i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ${m.san}` : m.san))
+                      .join(" ");
+                    try {
+                      navigator.clipboard.writeText(pgn);
+                    } catch {}
+                  }}
+                  className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+                >
+                  Copy PGN
+                </button>
               )}
             </div>
           </div>

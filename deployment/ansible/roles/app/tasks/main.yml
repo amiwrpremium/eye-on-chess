@@ -1,0 +1,46 @@
+---
+- name: Create app directory
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+
+- name: Clone repository
+  become_user: "{{ deploy_user }}"
+  git:
+    repo: "{{ github_repo }}"
+    dest: "{{ app_dir }}"
+    version: master
+    depth: 1
+    force: true
+
+- name: Template .env file
+  template:
+    src: env.j2
+    dest: "{{ app_dir }}/.env"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0600"
+
+- name: Pull images from GHCR
+  become_user: "{{ deploy_user }}"
+  command: docker compose --env-file .env -f deployment/docker-compose.cd.yml pull
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: Start all services
+  become_user: "{{ deploy_user }}"
+  command: docker compose --env-file .env -f deployment/docker-compose.cd.yml up -d
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: Wait for API health
+  uri:
+    url: http://localhost/health
+    status_code: 200
+  register: health
+  retries: 30
+  delay: 5
+  until: health.status == 200

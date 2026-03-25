@@ -1,0 +1,25 @@
+---
+- name: Create backup directory
+  file:
+    path: "{{ app_dir }}/backups"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+
+- name: Create backup log file
+  file:
+    path: /var/log/eyeonchess-backup.log
+    state: touch
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0644"
+  changed_when: false
+
+- name: Set up daily backup cron (3 AM)
+  cron:
+    name: "EyeOnChess DB backup"
+    minute: "0"
+    hour: "3"
+    user: "{{ deploy_user }}"
+    job: "cd {{ app_dir }} && ./scripts/backup.sh >> /var/log/eyeonchess-backup.log 2>&1"

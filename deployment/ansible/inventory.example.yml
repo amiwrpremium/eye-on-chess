@@ -1,0 +1,13 @@
+---
+# Copy this file to inventory.yml and fill in your server details.
+#
+# Example:
+#   cp inventory.example.yml inventory.yml
+#   # Edit inventory.yml with your server IP
+
+all:
+  hosts:
+    eyeonchess:
+      ansible_host: 203.0.113.50 # Your VPS IP address
+      ansible_user: root # SSH user (root for first-time setup)
+      ansible_ssh_private_key_file: ~/.ssh/id_ed25519

@@ -1,0 +1,18 @@
+---
+# ── Deploy User ────────────────────────────────────────
+deploy_user: deploy
+app_dir: /opt/eyeonchess
+
+# ── GitHub ─────────────────────────────────────────────
+github_repo: https://github.com/amiwrpremium/eye-on-chess.git
+github_username: amiwrpremium
+
+# ── Secrets (pass via --extra-vars or Ansible Vault) ───
+# deploy_ssh_public_key: "ssh-ed25519 AAAA..."
+# github_pat: "ghp_..."          # For GHCR image pulls
+# postgres_password: ""          # openssl rand -hex 16
+# redis_password: ""             # openssl rand -hex 16
+# jwt_secret: ""                 # openssl rand -hex 32
+# seed_user_password: ""         # Admin account password
+# site_url: "http://your-domain.com"
+# grafana_admin_password: ""

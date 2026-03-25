@@ -1,0 +1,28 @@
+---
+# EyeOnChess — First-Time Server Setup
+#
+# Usage:
+#   ansible-playbook -i inventory.yml playbook.yml
+#
+# Prerequisites:
+#   - Target server running Ubuntu 22.04 or 24.04
+#   - SSH access as root or a sudo-capable user
+#   - Ansible 2.14+ installed locally
+#
+# This playbook installs Docker, creates a deploy user, clones the repo,
+# configures the environment, and starts all services.
+#
+# NOTE: Server hardening (firewall, fail2ban, SSH config, SSL) is YOUR
+# responsibility. This playbook only sets up the application.
+
+- name: EyeOnChess Server Setup
+  hosts: eyeonchess
+  become: true
+  vars_files:
+    - vars/defaults.yml
+
+  roles:
+    - docker
+    - deploy-user
+    - app
+    - backup

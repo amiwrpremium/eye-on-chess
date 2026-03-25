@@ -1,0 +1,20 @@
+---
+- name: Create deploy user
+  user:
+    name: "{{ deploy_user }}"
+    groups: docker
+    append: true
+    shell: /bin/bash
+    create_home: true
+
+- name: Set up SSH authorized keys
+  authorized_key:
+    user: "{{ deploy_user }}"
+    key: "{{ deploy_ssh_public_key }}"
+    state: present
+
+- name: Log in to GHCR for image pulls
+  become_user: "{{ deploy_user }}"
+  command: docker login ghcr.io -u {{ github_username }} -p {{ github_pat }}
+  no_log: true
+  changed_when: true

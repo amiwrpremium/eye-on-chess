@@ -1,4 +1,5 @@
 .PHONY: help up down build logs restart ps \
+       deploy deploy-all rollback \
        dev dev-up dev-down dev-build dev-logs dev-restart dev-ps \
        logs-api logs-web logs-worker logs-postgres logs-redis \
        dev-logs-api dev-logs-web dev-logs-worker dev-logs-postgres dev-logs-redis \
@@ -20,6 +21,9 @@ help: ## Show this help
 	@echo ""
 	@echo "Production:"
 	@grep -E '^(up|down|build|logs|restart|ps|logs-[a-z]+):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "CD Deployment:"
+	@grep -E '^(deploy|rollback)[a-zA-Z_-]*:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Development:"
 	@grep -E '^dev[a-zA-Z_-]*:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -73,6 +77,34 @@ logs-postgres: ## Tail production Postgres logs
 
 logs-redis: ## Tail production Redis logs
 	$(PROD_COMPOSE) logs -f redis
+
+# ── CD Deployment ────────────────────────────────────────
+CD_COMPOSE = docker compose --env-file .env -f deployment/docker-compose.cd.yml
+
+deploy: ## Deploy from GHCR images (usage: IMAGE_TAG=1.2.0 make deploy)
+	$(CD_COMPOSE) pull api web worker
+	$(CD_COMPOSE) up -d --no-deps api
+	@echo "Waiting for API health..."
+	@sleep 10
+	$(CD_COMPOSE) up -d --no-deps web
+	@sleep 5
+	$(CD_COMPOSE) up -d --no-deps worker
+	@echo "Deployment complete. Verifying health..."
+	@for i in $$(seq 1 20); do \
+		if curl -sf http://localhost/health > /dev/null 2>&1; then \
+			echo "Healthy!"; exit 0; \
+		fi; \
+		echo "Waiting... ($$i/20)"; sleep 3; \
+	done; echo "Health check failed" && exit 1
+
+deploy-all: ## Deploy all services from GHCR images (including infra)
+	$(CD_COMPOSE) pull
+	$(CD_COMPOSE) up -d
+
+rollback: ## Rollback to a specific version (usage: make rollback IMAGE_TAG=1.1.5)
+	@test -n "$(IMAGE_TAG)" || (echo "Usage: make rollback IMAGE_TAG=1.1.5" && exit 1)
+	IMAGE_TAG=$(IMAGE_TAG) $(CD_COMPOSE) pull api web worker
+	IMAGE_TAG=$(IMAGE_TAG) $(CD_COMPOSE) up -d
 
 # ── Development ──────────────────────────────────────────
 dev: build-base ## Start development (hot reload, Nginx on port 80)

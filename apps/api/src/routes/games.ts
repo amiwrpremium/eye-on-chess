@@ -318,7 +318,7 @@ export async function gameRoutes(app: FastifyInstance) {
       OR: [{ whiteId: userId }, { blackId: userId }],
       // Exclude abandoned bot games with no moves (zombie-cleaned)
       NOT: {
-        AND: [{ isVsBot: true }, { status: "ABORTED" }, { pgn: "" }],
+        AND: [{ isVsBot: true }, { status: "ABORTED" as const }, { pgn: "" }],
       },
     };
 
@@ -770,7 +770,7 @@ export async function gameRoutes(app: FastifyInstance) {
           termination: termination as Termination | null,
           fen: chess.fen(),
           pgn: chess.pgn(),
-          timeControl: timeControl || "UNLIMITED",
+          timeControl: (timeControl || "UNLIMITED") as TimeControl,
           initialTime: initialTime || 0,
           increment: increment || 0,
           isVsBot: true,

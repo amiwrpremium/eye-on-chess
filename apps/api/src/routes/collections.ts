@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { sanitizeString } from "../middleware/admin.js";
 import { parsePagination, paginationMeta } from "../lib/pagination.js";
 import { createCollectionBodySchema } from "../lib/schemas.js";
 import {
@@ -41,7 +42,7 @@ export async function collectionRoutes(app: FastifyInstance) {
       const userId = request.user.userId;
       const { name } = request.body;
 
-      const trimmed = name.trim().slice(0, 50);
+      const trimmed = sanitizeString(name).slice(0, 50);
 
       const existing = await prisma.collection.findUnique({
         where: { userId_name: { userId, name: trimmed } },

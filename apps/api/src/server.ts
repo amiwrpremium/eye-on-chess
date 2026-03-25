@@ -79,7 +79,22 @@ async function main() {
   });
 
   await fastify.register(cookie);
-  await fastify.register(helmet, { contentSecurityPolicy: false });
+  await fastify.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "blob:"],
+        connectSrc: ["'self'", "ws:", "wss:"],
+        workerSrc: ["'self'", "blob:"],
+        fontSrc: ["'self'"],
+        mediaSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameSrc: ["'none'"],
+      },
+    },
+  });
   await fastify.register(compress, { global: true });
 
   // OpenAPI docs at /docs
@@ -238,6 +253,20 @@ async function main() {
         fastify.log.error({ err }, "Stale game cleanup error");
       }
     }, 5 * 60 * 1000);
+
+    // Clean up expired refresh tokens every hour
+    setInterval(async () => {
+      try {
+        const deleted = await prisma.refreshToken.deleteMany({
+          where: { expiresAt: { lt: new Date() } },
+        });
+        if (deleted.count > 0) {
+          fastify.log.info(`Cleaned up ${deleted.count} expired refresh token(s)`);
+        }
+      } catch (err) {
+        fastify.log.error({ err }, "Refresh token cleanup error");
+      }
+    }, 60 * 60 * 1000);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

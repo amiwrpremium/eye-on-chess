@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js";
 import { signAccessToken, generateRefreshToken, hashToken } from "../lib/jwt.js";
 import { getSiteSettings } from "../lib/settings.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { sanitizeString } from "../middleware/admin.js";
 import { registerBodySchema, loginBodySchema, preferencesBodySchema } from "../lib/schemas.js";
 import {
   apiError,
@@ -63,7 +64,8 @@ export async function authRoutes(app: FastifyInstance) {
   app.post<{
     Body: { email: string; username: string; password: string; inviteCode: string };
   }>("/auth/register", { schema: { body: registerBodySchema } }, async (request, reply) => {
-    const { email, username, password, inviteCode } = request.body;
+    const { email, password, inviteCode } = request.body;
+    const username = sanitizeString(request.body.username);
 
     // Validate invite code
     const invite = await prisma.invite.findUnique({ where: { code: inviteCode } });

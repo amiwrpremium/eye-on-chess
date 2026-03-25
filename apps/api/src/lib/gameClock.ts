@@ -1,4 +1,5 @@
 import { redis } from "./redis.js";
+import { prisma } from "./prisma.js";
 import type { ClockState } from "@eyeonchess/chess";
 /** Re-exported clock state representing each player's remaining time and turn info. */
 export type { ClockState } from "@eyeonchess/chess";
@@ -45,9 +46,39 @@ export async function getClocks(gameId: string): Promise<ClockState | null> {
  * @param gameId - The game identifier.
  * @returns The real-time adjusted clock state, or null if not found.
  */
+/**
+ * Attempt to recover clock state from the database when Redis key is missing.
+ * Resets clocks to initial time — not perfect, but prevents stuck games.
+ */
+async function recoverClocks(gameId: string): Promise<ClockState | null> {
+  try {
+    const game = await prisma.game.findUnique({
+      where: { id: gameId },
+      select: {
+        initialTime: true,
+        increment: true,
+        timeControl: true,
+        moves: { orderBy: { ply: "desc" as const }, take: 1, select: { createdAt: true } },
+      },
+    });
+    if (!game || game.timeControl === "UNLIMITED") return null;
+
+    const initialTimeMs = game.initialTime * 1000;
+    const incrementMs = game.increment * 1000;
+    await initClocks(gameId, initialTimeMs, incrementMs);
+    return getClocks(gameId);
+  } catch {
+    return null;
+  }
+}
+
 export async function getClocksRealtime(gameId: string): Promise<ClockState | null> {
-  const state = await getClocks(gameId);
-  if (!state) return null;
+  let state = await getClocks(gameId);
+  if (!state) {
+    // Attempt recovery from DB
+    state = await recoverClocks(gameId);
+    if (!state) return null;
+  }
 
   // Deduct elapsed time for the active player
   const elapsed = Date.now() - state.lastMoveTimestamp;

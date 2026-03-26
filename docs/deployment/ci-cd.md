@@ -714,6 +714,116 @@ Or set up GitLab's built-in mirroring: **Settings** → **Repository** → **Mir
 
 ---
 
+## HTTPS with Let's Encrypt
+
+EyeOnChess supports automatic HTTPS via Let's Encrypt Certbot, running as a Docker container alongside Nginx.
+
+### How It Works
+
+- `SITE_DOMAIN` empty → HTTP-only (development/localhost)
+- `SITE_DOMAIN=eyeonchess.com` → Certbot obtains cert, Nginx serves HTTPS, HTTP redirects to HTTPS
+
+Certbot uses HTTP-01 challenge (port 80) to verify domain ownership. Nginx proxies `/.well-known/acme-challenge/` to Certbot's webroot. Certs auto-renew every 12 hours.
+
+### Enabling HTTPS
+
+#### 1. Point your domain to the VPS
+
+Create DNS A records:
+
+```
+eyeonchess.com        A    203.0.113.50
+grafana.eyeonchess.com    A    203.0.113.50
+```
+
+Wait for DNS propagation (5-60 minutes). Verify: `dig eyeonchess.com`
+
+#### 2. Set environment variables
+
+On your VPS, edit `/opt/eyeonchess/.env`:
+
+```bash
+SITE_DOMAIN=eyeonchess.com
+CERTBOT_EMAIL=you@example.com
+SITE_URL=https://eyeonchess.com
+NEXT_PUBLIC_API_URL=https://eyeonchess.com
+NODE_ENV=production
+```
+
+#### 3. Start services
+
+```bash
+cd /opt/eyeonchess
+make deploy-all
+# Or: docker compose --env-file .env -f deployment/docker-compose.cd.yml up -d
+```
+
+On first boot:
+
+1. Nginx starts in HTTP-only mode (certs don't exist yet)
+2. Certbot obtains the certificate via HTTP-01 challenge (~30 seconds)
+3. Certbot logs: `"Certificate obtained! Restart Nginx to enable HTTPS"`
+
+#### 4. Restart Nginx to activate SSL
+
+```bash
+docker compose --env-file .env -f deployment/docker-compose.cd.yml restart nginx
+```
+
+Nginx detects the certs and switches to HTTPS mode. From now on, every restart automatically uses SSL.
+
+#### 5. Verify
+
+```bash
+curl -I https://eyeonchess.com
+# HTTP/2 200
+# strict-transport-security: max-age=31536000; includeSubDomains
+
+curl -I http://eyeonchess.com
+# HTTP/1.1 301 Moved Permanently
+# Location: https://eyeonchess.com/
+```
+
+### Certificate Renewal
+
+Certbot checks for renewal every 12 hours automatically. Let's Encrypt certs last 90 days, so renewal happens ~30 days before expiry.
+
+To test renewal manually:
+
+```bash
+docker compose --env-file .env -f deployment/docker-compose.cd.yml exec certbot certbot renew --dry-run
+```
+
+### Using Ansible for HTTPS
+
+If `site_domain` is set in your Ansible variables, the playbook automatically:
+
+1. Starts all services (Nginx in HTTP mode)
+2. Waits for Certbot to obtain the certificate
+3. Restarts Nginx to activate SSL
+
+```bash
+ansible-playbook -i inventory.yml playbook.yml \
+  --extra-vars '{
+    "site_domain": "eyeonchess.com",
+    "certbot_email": "you@example.com",
+    ...other vars...
+  }'
+```
+
+### Disabling HTTPS
+
+To go back to HTTP-only, remove `SITE_DOMAIN` from `.env` and restart:
+
+```bash
+# Edit .env: remove or empty SITE_DOMAIN
+docker compose --env-file .env -f deployment/docker-compose.cd.yml restart nginx
+```
+
+Nginx falls back to the HTTP-only configuration. Existing certs are preserved in the `eyeonchess-certbot-certs` volume.
+
+---
+
 ## Quick Reference
 
 | Action               | Command                                                                                                    |

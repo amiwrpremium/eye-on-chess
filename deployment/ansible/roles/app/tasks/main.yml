@@ -44,3 +44,27 @@
   retries: 30
   delay: 5
   until: health.status == 200
+
+- name: Wait for Certbot to obtain certificate
+  when: site_domain is defined and site_domain | length > 0
+  become_user: "{{ deploy_user }}"
+  shell: |
+    for i in $(seq 1 60); do
+      if docker compose --env-file .env -f deployment/docker-compose.cd.yml logs certbot 2>&1 | grep -q "Certificate obtained\|Certificate already exists"; then
+        echo "Certificate ready"
+        exit 0
+      fi
+      echo "Waiting for Certbot... ($i/60)"
+      sleep 5
+    done
+    echo "Certbot timed out"
+    exit 1
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: Restart Nginx to activate SSL
+  when: site_domain is defined and site_domain | length > 0
+  become_user: "{{ deploy_user }}"
+  command: docker compose --env-file .env -f deployment/docker-compose.cd.yml restart nginx
+  args:
+    chdir: "{{ app_dir }}"

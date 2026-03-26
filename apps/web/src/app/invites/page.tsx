@@ -154,7 +154,7 @@ export default function InvitesPage() {
         {/* Generate button */}
         <button
           onClick={generate}
-          disabled={generating || (stats && !stats.canCreate)}
+          disabled={generating || !!(stats && !stats.canCreate)}
           className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded font-medium transition-colors"
         >
           {generating

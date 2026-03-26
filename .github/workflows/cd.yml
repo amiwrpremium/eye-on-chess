@@ -28,7 +28,7 @@ jobs:
           - image: api
             dockerfile: apps/api/Dockerfile.prod
           - image: web
-            dockerfile: apps/web/Dockerfile
+            dockerfile: apps/web/Dockerfile.prod
           - image: worker
             dockerfile: apps/api/Dockerfile.worker
     steps:

@@ -115,7 +115,7 @@ jobs:
         run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
 
       - name: Build Web Docker image
-        run: docker build -f apps/web/Dockerfile -t eyeonchess-web .
+        run: docker build -f apps/web/Dockerfile.prod -t eyeonchess-web .
 
   build-worker:
     name: Build Worker

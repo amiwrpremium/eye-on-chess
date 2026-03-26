@@ -152,7 +152,7 @@ build-web:
   <<: *build-template
   script:
     - docker build -f deployment/Dockerfile.base -t eyeonchess-base .
-    - docker build -f apps/web/Dockerfile
+    - docker build -f apps/web/Dockerfile.prod
       -t ${IMAGE_PREFIX}/web:${VERSION}
       -t ${IMAGE_PREFIX}/web:latest .
     - docker push ${IMAGE_PREFIX}/web:${VERSION}

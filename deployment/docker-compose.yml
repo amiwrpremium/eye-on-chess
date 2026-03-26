@@ -167,7 +167,7 @@ services:
     container_name: eyeonchess-web
     build:
       context: ..
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/Dockerfile.prod
     restart: unless-stopped
     env_file:
       - ../.env

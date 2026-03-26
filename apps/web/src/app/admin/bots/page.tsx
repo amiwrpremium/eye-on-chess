@@ -414,7 +414,7 @@ export default function AdminBotsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400">Elo ({form.elo})</label>
+                  <label className="text-xs text-gray-400">Elo ({String(form.elo ?? "")})</label>
                   <input
                     type="range"
                     min={100}
@@ -490,7 +490,9 @@ export default function AdminBotsPage() {
                     </div>
                   ))}
                   <div>
-                    <label className="text-xs text-gray-400">Max Depth ({form.maxDepth})</label>
+                    <label className="text-xs text-gray-400">
+                      Max Depth ({String(form.maxDepth ?? "")})
+                    </label>
                     <input
                       type="range"
                       min={1}

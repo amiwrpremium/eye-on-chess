@@ -153,7 +153,9 @@ export default function PlayBotPage() {
   }
 
   function getActiveMode(): GameModeSettings {
-    return modePreset === "custom" ? customSettings : GAME_MODE_PRESETS[modePreset];
+    return modePreset === "custom"
+      ? customSettings
+      : GAME_MODE_PRESETS[modePreset as Exclude<GameModePreset, "custom">];
   }
 
   async function startGame() {

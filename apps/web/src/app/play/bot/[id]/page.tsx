@@ -345,7 +345,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
     if (config?.settings) {
       setActiveSettings(config.settings);
     } else if (config?.mode && config.mode !== "custom" && config.mode in GAME_MODE_PRESETS) {
-      setActiveSettings(GAME_MODE_PRESETS[config.mode as GameModePreset]);
+      setActiveSettings(GAME_MODE_PRESETS[config.mode as Exclude<GameModePreset, "custom">]);
     } else {
       setActiveSettings(GAME_MODE_PRESETS.friendly);
     }

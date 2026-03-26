@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +8,14 @@ import { useAuthStore } from "../../stores/auth";
 import api from "../../lib/api";
 
 export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const register = useAuthStore((s) => s.register);

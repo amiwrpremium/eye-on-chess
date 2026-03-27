@@ -51,7 +51,7 @@ All features re-enable automatically when the connection returns — the `useOnl
 Games played offline are stored in `localStorage`:
 
 - Completed bot games are saved locally with full move history.
-- When the app detects a network connection, stored games are automatically synced to the server via `POST /api/games/sync`.
+- When the app detects a network connection, stored games are automatically synced to the server via `POST /api/v1/games/sync`.
 - The pending game count is shown on the bot game page.
 
 ## Auto-Sync

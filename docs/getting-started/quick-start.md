@@ -16,8 +16,13 @@ cp .env.example .env
 
 Edit `.env` and change at minimum:
 
+- `POSTGRES_PASSWORD` — Generate with `openssl rand -hex 16`
+- `REDIS_PASSWORD` — Generate with `openssl rand -hex 16`
 - `JWT_SECRET` — Generate with `openssl rand -hex 32`
 - `SEED_USER_PASSWORD` — Your admin password
+- `GRAFANA_ADMIN_PASSWORD` — Grafana login password
+
+Update `DATABASE_URL` and `REDIS_URL` to match the new passwords.
 
 ## Start
 

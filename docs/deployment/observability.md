@@ -155,4 +155,4 @@ deployment/
 - Prometheus and Loki are internal-only (no ports exposed to host)
 - Grafana is the single entry point for all observability
 - Promtail discovers containers automatically via Docker socket
-- The `/metrics` endpoint is proxied through Nginx — consider restricting access in production
+- The `/metrics` endpoint is restricted to internal IPs only in both Nginx configs (localhost + private subnets). External requests receive 403.

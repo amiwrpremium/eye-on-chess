@@ -13,9 +13,9 @@ All configuration is done via environment variables in a `.env` file at the proj
 
 ## Environment
 
-| Variable   | Description                                              | Default       |
-| ---------- | -------------------------------------------------------- | ------------- |
-| `NODE_ENV` | Set to `production` for secure cookies and optimizations | `development` |
+| Variable   | Description                                                                                   | Default      |
+| ---------- | --------------------------------------------------------------------------------------------- | ------------ |
+| `NODE_ENV` | Set to `production` for secure cookies, strict CORS, wss-only WebSocket, and Swagger disabled | `production` |
 
 ## API URLs
 
@@ -52,6 +52,16 @@ These variables define the admin user created on first boot.
 | `SEED_USER_PASSWORD` | Admin password. **Change this before deploying!** | `changeme123`            |
 
 The seed user is created with `role: ADMIN` and `verified: true`.
+
+## SSL (Optional)
+
+| Variable          | Description                                                                             | Default |
+| ----------------- | --------------------------------------------------------------------------------------- | ------- |
+| `SITE_DOMAIN`     | Domain for automatic HTTPS via Let's Encrypt. Leave empty for HTTP-only.                | (empty) |
+| `CERTBOT_EMAIL`   | Email for Let's Encrypt notifications. Required when `SITE_DOMAIN` is set.              | (empty) |
+| `CERTBOT_DOMAINS` | Space-separated list of domains for the SSL cert. Defaults to `SITE_DOMAIN` if not set. | (empty) |
+
+See [HTTPS Setup](../deployment/ci-cd.md#https-with-lets-encrypt) and [Cloudflare Setup](../deployment/cloudflare.md) for detailed guides.
 
 ## Worker (Stockfish)
 

@@ -745,6 +745,8 @@ On your VPS, edit `/opt/eyeonchess/.env`:
 ```bash
 SITE_DOMAIN=eyeonchess.com
 CERTBOT_EMAIL=you@example.com
+# Optional: include subdomains in the cert
+# CERTBOT_DOMAINS=eyeonchess.com grafana.eyeonchess.com
 SITE_URL=https://eyeonchess.com
 NEXT_PUBLIC_API_URL=https://eyeonchess.com
 NODE_ENV=production
@@ -786,13 +788,24 @@ curl -I http://eyeonchess.com
 
 ### Certificate Renewal
 
-Certbot checks for renewal every 12 hours automatically. Let's Encrypt certs last 90 days, so renewal happens ~30 days before expiry.
+Certbot checks for renewal every 12 hours automatically. Let's Encrypt certs last 90 days, so renewal happens ~30 days before expiry. After renewal, Certbot writes a `.renewed` flag file and Nginx's background watcher detects it within 60 seconds and reloads automatically. No manual restart needed for renewals.
 
 To test renewal manually:
 
 ```bash
 docker compose --env-file .env -f deployment/docker-compose.cd.yml exec certbot certbot renew --dry-run
 ```
+
+### Multi-Domain Certificates
+
+By default, Certbot requests a certificate for `SITE_DOMAIN` only. To include additional domains (e.g., a Grafana subdomain), set `CERTBOT_DOMAINS`:
+
+```bash
+# In .env
+CERTBOT_DOMAINS=eyeonchess.com grafana.eyeonchess.com
+```
+
+Each domain must have a DNS A record pointing to your server.
 
 ### Using Ansible for HTTPS
 

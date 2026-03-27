@@ -44,18 +44,18 @@ All API responses include security headers via `@fastify/helmet`:
 
 Content-Security-Policy is enabled with pragmatic directives:
 
-| Directive     | Value                                  | Reason                                   |
-| ------------- | -------------------------------------- | ---------------------------------------- |
-| `default-src` | `'self'`                               | Only same-origin by default              |
-| `script-src`  | `'self' 'unsafe-inline' 'unsafe-eval'` | Next.js dev + Swagger UI YAML parser     |
-| `style-src`   | `'self' 'unsafe-inline'`               | Tailwind CSS + Chessground inline styles |
-| `img-src`     | `'self' data: blob:`                   | Data URIs for inline images              |
-| `connect-src` | `'self' ws: wss:`                      | WebSocket for Socket.IO                  |
-| `worker-src`  | `'self' blob:`                         | Stockfish WASM web worker                |
-| `font-src`    | `'self'`                               | Local fonts only                         |
-| `media-src`   | `'self'`                               | Sound files                              |
-| `object-src`  | `'none'`                               | No plugins                               |
-| `frame-src`   | `'none'`                               | No iframes                               |
+| Directive     | Value                                          | Reason                                   |
+| ------------- | ---------------------------------------------- | ---------------------------------------- |
+| `default-src` | `'self'`                                       | Only same-origin by default              |
+| `script-src`  | `'self' 'unsafe-inline' 'unsafe-eval'`         | Next.js dev + Swagger UI YAML parser     |
+| `style-src`   | `'self' 'unsafe-inline'`                       | Tailwind CSS + Chessground inline styles |
+| `img-src`     | `'self' data: blob:`                           | Data URIs for inline images              |
+| `connect-src` | `'self' wss:` (prod) / `'self' ws: wss:` (dev) | WebSocket for Socket.IO                  |
+| `worker-src`  | `'self' blob:`                                 | Stockfish WASM web worker                |
+| `font-src`    | `'self'`                                       | Local fonts only                         |
+| `media-src`   | `'self'`                                       | Sound files                              |
+| `object-src`  | `'none'`                                       | No plugins                               |
+| `frame-src`   | `'none'`                                       | No iframes                               |
 
 `unsafe-inline` and `unsafe-eval` are required for Tailwind, Chessground, Next.js development, and Swagger UI. In production, these could be tightened with nonces.
 

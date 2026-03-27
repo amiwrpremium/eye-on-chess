@@ -24,7 +24,7 @@ services:
       - ./nginx.http.conf:/etc/nginx/http.conf:ro
       - ./nginx.ssl.conf.template:/etc/nginx/templates/ssl.conf.template:ro
       - ./nginx-entrypoint.sh:/etc/nginx/nginx-entrypoint.sh:ro
-      - certbot-certs:/etc/letsencrypt:ro
+      - certbot-certs:/etc/letsencrypt
       - certbot-webroot:/var/www/certbot:ro
     depends_on:
       web:

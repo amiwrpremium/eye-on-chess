@@ -57,6 +57,7 @@ services:
     environment:
       SITE_DOMAIN: ${SITE_DOMAIN:-}
       CERTBOT_EMAIL: ${CERTBOT_EMAIL:-}
+      CERTBOT_DOMAINS: ${CERTBOT_DOMAINS:-}
     depends_on:
       - nginx
 

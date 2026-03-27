@@ -37,7 +37,7 @@ export default function ActivityFeed() {
 
   const loadActivity = useCallback(async () => {
     try {
-      const { data } = await api.get("/api/v1/activity");
+      const { data } = await api.get("/api/v1/feed");
       setEvents(data.events);
     } catch {
       // ignore

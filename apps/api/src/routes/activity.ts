@@ -8,7 +8,7 @@ import type { ActivityEvent } from "@eyeonchess/chess";
 export async function activityRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authMiddleware);
 
-  app.get("/activity", async (request) => {
+  app.get("/feed", async (request) => {
     const userId = request.user.userId;
     const cacheKey = `activity:${userId}`;
 

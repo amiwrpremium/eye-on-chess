@@ -13,6 +13,7 @@
     "db:seed-demo": "tsx prisma/seed-demo.ts",
     "db:seed-bots": "tsx prisma/seed-bots.ts",
     "worker": "tsx src/worker.ts",
+    "worker:start": "node dist/worker.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"

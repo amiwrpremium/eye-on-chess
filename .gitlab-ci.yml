@@ -168,6 +168,16 @@ build-worker:
     - docker push ${IMAGE_PREFIX}/worker:${VERSION}
     - docker push ${IMAGE_PREFIX}/worker:latest
 
+build-migrate:
+  <<: *build-template
+  script:
+    - docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+    - docker build -f apps/api/Dockerfile.migrate
+      -t ${IMAGE_PREFIX}/migrate:${VERSION}
+      -t ${IMAGE_PREFIX}/migrate:latest .
+    - docker push ${IMAGE_PREFIX}/migrate:${VERSION}
+    - docker push ${IMAGE_PREFIX}/migrate:latest
+
 # ── Deploy ─────────────────────────────────────────────
 # Only runs on v* tags, after build succeeds
 

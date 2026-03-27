@@ -31,6 +31,8 @@ jobs:
             dockerfile: apps/web/Dockerfile.prod
           - image: worker
             dockerfile: apps/api/Dockerfile.worker
+          - image: migrate
+            dockerfile: apps/api/Dockerfile.migrate
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 

@@ -130,10 +130,23 @@ jobs:
       - name: Build Worker Docker image
         run: docker build -f apps/api/Dockerfile.worker -t eyeonchess-worker .
 
+  build-migrate:
+    name: Build Migrate
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+
+      - name: Build Migrate Docker image
+        run: docker build -f apps/api/Dockerfile.migrate -t eyeonchess-migrate .
+
   compose:
     name: Docker Compose
     runs-on: ubuntu-latest
-    needs: [build-api, build-web, build-worker]
+    needs: [build-api, build-web, build-worker, build-migrate]
     steps:
       - uses: actions/checkout@v4
 

@@ -18,10 +18,10 @@ docker compose --env-file .env -f deployment/docker-compose.yml up -d
 | nginx      | nginx:alpine                 | **80, 443** (host) | `wget http://localhost/health`      |
 | certbot    | certbot/certbot:latest       | —                  | —                                   |
 | postgres   | postgres:16-alpine           | internal           | `pg_isready -U postgres`            |
-| pgbouncer  | edoburu/pgbouncer:v1.23.1-p2 | internal (6432)    | —                                   |
+| pgbouncer  | edoburu/pgbouncer:v1.23.1-p2 | internal (6432)    | `pg_isready -h localhost -p 6432`   |
 | redis      | redis:7-alpine               | internal           | `redis-cli ping`                    |
 | api        | Built from Dockerfile.prod   | internal (3001)    | `wget http://localhost:3001/health` |
-| web        | Built from Dockerfile        | internal (3000)    | `wget http://localhost:3000`        |
+| web        | Built from Dockerfile.prod   | internal (3000)    | `wget http://localhost:3000`        |
 | worker     | Built from Dockerfile.worker | —                  | —                                   |
 | prometheus | prom/prometheus:v3.4.1       | internal (9090)    | —                                   |
 | loki       | grafana/loki:3.5.0           | internal (3100)    | —                                   |

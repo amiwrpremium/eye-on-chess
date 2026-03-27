@@ -19,10 +19,10 @@ All configuration is done via environment variables in a `.env` file at the proj
 
 ## API URLs
 
-| Variable              | Description                                                             | Default                 |
-| --------------------- | ----------------------------------------------------------------------- | ----------------------- |
-| `API_URL`             | Internal Docker network URL (used by server-side code)                  | `http://api:3001`       |
-| `NEXT_PUBLIC_API_URL` | Public API URL (used by the browser). Set to your domain in production. | `http://localhost:3001` |
+| Variable              | Description                                                                          | Default            |
+| --------------------- | ------------------------------------------------------------------------------------ | ------------------ |
+| `API_URL`             | Internal Docker network URL (used by server-side code)                               | `http://api:3001`  |
+| `NEXT_PUBLIC_API_URL` | Public API URL (used by the browser, routed through Nginx). **Baked at build time.** | `http://localhost` |
 
 ## Site Configuration
 

@@ -29,7 +29,7 @@ Update `DATABASE_URL` and `REDIS_URL` to match the new passwords.
 ### Production (Nginx on port 80)
 
 ```bash
-docker compose -f deployment/docker-compose.yml up -d
+docker compose --env-file .env -f deployment/docker-compose.yml up -d
 ```
 
 Open **http://localhost** and log in with the admin credentials from your `.env`.

@@ -48,7 +48,7 @@ services:
   certbot:
     image: certbot/certbot:latest
     container_name: eyeonchess-certbot
-    restart: unless-stopped
+    restart: "no"
     volumes:
       - certbot-certs:/etc/letsencrypt
       - certbot-webroot:/var/www/certbot
@@ -102,6 +102,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432 -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     deploy:
       resources:
         limits:
@@ -148,7 +154,7 @@ services:
       - ./config/bots.yml:/app/config/bots.yml:ro
     depends_on:
       pgbouncer:
-        condition: service_started
+        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:

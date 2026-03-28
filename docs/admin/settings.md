@@ -1,6 +1,6 @@
 # Site Settings
 
-Configure platform behavior from `/admin/settings` or via the API.
+Configure platform behavior from the admin panel settings page or via the API.
 
 ## Settings
 

@@ -62,7 +62,7 @@ make help        # Show all commands
 2. Log in with the seed admin credentials:
    - Email: value of `SEED_USER_EMAIL` (default: `admin@eyeonchess.local`)
    - Password: value of `SEED_USER_PASSWORD` (default: `changeme123`)
-3. Access the admin panel from the Play page (purple "Admin Panel" button)
+3. Access the admin panel at `admin.{your-domain}` or via the Play page (purple "Admin Panel" button)
 
 ## Stopping
 

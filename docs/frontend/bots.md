@@ -20,7 +20,7 @@ deployment/config/bots.yml     <- Seed template (initial data only)
 
 - **YAML** defines the default bot roster for new environments
 - **Seeder** only creates bots that don't exist (non-destructive)
-- **Admin panel** (`/admin/bots`) is the primary editing interface
+- **Admin panel** (`/bots` on the admin subdomain) is the primary editing interface
 - **`FORCE_RESEED=1 make seed-bots`** overwrites all bots from YAML (destructive)
 - **Frontend** fetches from API, caches to localStorage, works offline from cache
 
@@ -156,7 +156,7 @@ Bot games auto-save state to prevent data loss from accidental tab closure or na
 
 ## Admin Management
 
-The admin panel (`/admin/bots`) provides full CRUD:
+The admin panel (`/bots` on the admin subdomain) provides full CRUD:
 
 - **Edit** any bot: name, Elo, description, behavior sliders, messages (JSON), openings (JSON)
 - **Enable/Disable** bots without deleting

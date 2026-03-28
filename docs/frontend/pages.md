@@ -34,17 +34,18 @@ Redirects to `/login` if no refresh token cookie.
 | `/invites`           | `invites/page.tsx`            | Invite code management — generate, copy, and share invite codes                                                               |
 | `/settings`          | `settings/page.tsx`           | Dark/light mode toggle, board theme picker (6 themes), piece set picker (3 sets)                                              |
 
-## Admin Pages (require ADMIN role)
+## Admin Pages (separate app)
 
-Redirects to `/play` if not admin. Uses `AdminLayout` with sidebar navigation.
+The admin panel is a separate Next.js app at `apps/admin`, served on `admin.{domain}`. See [Admin Panel docs](../admin/overview.md).
 
-| Route              | File                       | Description                                                                             |
-| ------------------ | -------------------------- | --------------------------------------------------------------------------------------- |
-| `/admin`           | `admin/page.tsx`           | Dashboard — stat cards (users, games, queue depth)                                      |
-| `/admin/users`     | `admin/users/page.tsx`     | User management — search, paginate, activate/deactivate, verify, promote/demote, delete |
-| `/admin/games`     | `admin/games/page.tsx`     | Game management — search, filter by status, delete                                      |
-| `/admin/settings`  | `admin/settings/page.tsx`  | Site settings — site name, registration toggle, max users, email verification           |
-| `/admin/audit-log` | `admin/audit-log/page.tsx` | Audit log — filterable history of all admin actions                                     |
+| Route         | App           | Description                                                                             |
+| ------------- | ------------- | --------------------------------------------------------------------------------------- |
+| `/`           | `apps/admin`  | Dashboard — stat cards (users, games, queue depth)                                      |
+| `/users`      | `apps/admin`  | User management — search, paginate, activate/deactivate, verify, promote/demote, delete |
+| `/games`      | `apps/admin`  | Game management — search, filter by status, delete                                      |
+| `/bots`       | `apps/admin`  | Bot personality editor — sliders, JSON editors, create/delete                            |
+| `/settings`   | `apps/admin`  | Site settings — site name, registration toggle, max users, email verification           |
+| `/audit-log`  | `apps/admin`  | Audit log — filterable history of all admin actions                                     |
 
 ## Route Protection
 
@@ -54,4 +55,4 @@ Redirects to `/play` if not admin. Uses `AdminLayout` with sidebar navigation.
 - Redirect authenticated users away from `/login` and `/register` → `/play`
 - Check is based on `refresh_token` cookie existence (not JWT validation — that happens API-side)
 
-Protected route prefixes: `/play`, `/friends`, `/game`, `/history`, `/collections`, `/settings`, `/admin`
+Protected route prefixes: `/play`, `/friends`, `/game`, `/history`, `/collections`, `/settings`, `/stats`, `/invites`

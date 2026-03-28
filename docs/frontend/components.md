@@ -152,9 +152,9 @@ Heatmap or bar chart of games played per day/week, similar to a contribution gra
 
 Modal for incoming game challenges. Listens to `challenge:incoming` socket event.
 
-### `AdminLayout`
+### `AdminLayout` (moved to `apps/admin`)
 
-Sidebar navigation layout for admin pages. Responsive — collapses to hamburger drawer on mobile.
+The admin layout is now part of the separate `apps/admin` app. See [Admin Panel docs](../admin/overview.md).
 
 ### `ThemeProvider`
 

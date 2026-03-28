@@ -1,16 +1,17 @@
 # Admin Panel Overview
 
-The admin panel is accessible at `/admin` for users with the `ADMIN` role.
+The admin panel is a separate Next.js app (`apps/admin`) served on `admin.{your-domain}`.
 
 ## Access
 
-1. Log in with an admin account (the seed user is created as admin on first boot)
-2. On the Play page, click the purple **"Admin Panel"** button
+1. Log in with an admin account on the main site (the seed user is created as admin on first boot)
+2. On the Play page, click the purple **"Admin Panel"** button (links to the admin subdomain)
 3. The button is only visible to users with `role: ADMIN`
+4. The admin app verifies admin role via the shared API — non-admins are redirected to the main site
 
 ## Features
 
-### Dashboard (`/admin`)
+### Dashboard (`/`)
 
 Rich overview with 17+ metrics:
 
@@ -20,7 +21,7 @@ Rich overview with 17+ metrics:
 - **Quick Info**: top 3 most played bots, recent admin actions (last 5), site status badges
 - **Site Status**: registration open/closed, max users, email verification on/off
 
-### User Management (`/admin/users`)
+### User Management (`/users`)
 
 - Searchable, paginated user table
 - **Activate/Deactivate** — prevents login for deactivated users
@@ -30,14 +31,14 @@ Rich overview with 17+ metrics:
 - **Delete** — permanently removes user and all their data
 - All destructive actions require confirmation
 
-### Game Management (`/admin/games`)
+### Game Management (`/games`)
 
 - Searchable by player name
 - Filterable by status (Waiting, Active, Completed, Aborted)
 - Paginated table
 - Delete games (cascades to moves and analysis)
 
-### Bot Management (`/admin/bots`)
+### Bot Management (`/bots`)
 
 Full CRUD for bot personalities:
 
@@ -51,7 +52,7 @@ Full CRUD for bot personalities:
 
 Bot edits persist across container restarts — the seeder only creates missing bots, never overwrites existing ones.
 
-### Site Settings (`/admin/settings`)
+### Site Settings (`/settings`)
 
 - **Site Name** — white-label display name
 - **Open Registration** — toggle new user registrations
@@ -60,7 +61,7 @@ Bot edits persist across container restarts — the seeder only creates missing 
 
 Settings are persisted to the database and survive container restarts. Environment variables serve as initial defaults only.
 
-### Audit Log (`/admin/audit-log`)
+### Audit Log (`/audit-log`)
 
 - Chronological log of all admin actions
 - Filterable by action type (user.update, user.delete, game.delete, settings.update, bot.create, bot.update, bot.delete, bot.reseed)

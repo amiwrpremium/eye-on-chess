@@ -157,12 +157,12 @@ export default function PlayPage() {
           </Link>
           {user.role === "ADMIN" &&
             (isOnline ? (
-              <Link
-                href="/admin"
+              <a
+                href={`${process.env.NEXT_PUBLIC_ADMIN_URL || "/admin"}`}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded font-medium transition-colors"
               >
                 Admin Panel
-              </Link>
+              </a>
             ) : (
               <span className="px-4 py-2 bg-gray-800 rounded font-medium text-gray-500 cursor-not-allowed">
                 Admin Panel

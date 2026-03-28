@@ -178,6 +178,15 @@ build-migrate:
     - docker push ${IMAGE_PREFIX}/migrate:${VERSION}
     - docker push ${IMAGE_PREFIX}/migrate:latest
 
+build-admin:
+  <<: *build-template
+  script:
+    - docker build -f apps/admin/Dockerfile
+      -t ${IMAGE_PREFIX}/admin:${VERSION}
+      -t ${IMAGE_PREFIX}/admin:latest .
+    - docker push ${IMAGE_PREFIX}/admin:${VERSION}
+    - docker push ${IMAGE_PREFIX}/admin:latest
+
 # ── Deploy ─────────────────────────────────────────────
 # Only runs on v* tags, after build succeeds
 

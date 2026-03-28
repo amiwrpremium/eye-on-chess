@@ -143,10 +143,20 @@ jobs:
       - name: Build Migrate Docker image
         run: docker build -f apps/api/Dockerfile.migrate -t eyeonchess-migrate .
 
+  build-admin:
+    name: Build Admin
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Admin Docker image
+        run: docker build -f apps/admin/Dockerfile -t eyeonchess-admin .
+
   compose:
     name: Docker Compose
     runs-on: ubuntu-latest
-    needs: [build-api, build-web, build-worker, build-migrate]
+    needs: [build-api, build-web, build-worker, build-migrate, build-admin]
     steps:
       - uses: actions/checkout@v4
 

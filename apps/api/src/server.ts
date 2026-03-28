@@ -63,9 +63,17 @@ async function main() {
   // CORS — whitelist based on SITE_URL, permissive in development
   const isProduction = process.env.NODE_ENV === "production";
   const siteUrl = process.env.SITE_URL || "http://localhost";
+  const adminUrl = process.env.ADMIN_URL || siteUrl.replace("://", "://admin.");
   const allowedOrigins = isProduction
-    ? [siteUrl]
-    : [siteUrl, "http://localhost", "http://localhost:3000", "http://localhost:3001"];
+    ? [siteUrl, adminUrl]
+    : [
+        siteUrl,
+        adminUrl,
+        "http://localhost",
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+      ];
 
   await fastify.register(cors, {
     origin: (origin, cb) => {

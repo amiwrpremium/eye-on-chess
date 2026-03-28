@@ -27,12 +27,12 @@ export function useUpdateNotification() {
           sessionStorage.setItem(UPDATE_PENDING_KEY, "1");
         } catch {}
         // Show a non-intrusive message via dynamic import to avoid circular deps
-        import("../components/Toast").then(({ useToast }) => {
+        import("@eyeonchess/ui").then(({ useToast }) => {
           useToast.getState().show("Update available — will apply after your game");
         });
       } else {
         // Safe to reload
-        import("../components/Toast").then(({ useToast }) => {
+        import("@eyeonchess/ui").then(({ useToast }) => {
           useToast.getState().show("Updating to latest version...");
         });
         setTimeout(() => window.location.reload(), 3000);

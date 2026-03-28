@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "../../lib/api";
 import { useAuthStore } from "../../stores/auth";
-import { Skeleton } from "../../components/Skeleton";
+import { Skeleton } from "@eyeonchess/ui";
 import RatingChart from "../../components/stats/RatingChart";
 import RecordBar from "../../components/stats/RecordBar";
 import OpeningsTable from "../../components/stats/OpeningsTable";

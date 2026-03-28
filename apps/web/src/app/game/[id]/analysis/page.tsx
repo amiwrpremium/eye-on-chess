@@ -10,7 +10,7 @@ import { useKeyboardShortcuts } from "../../../../lib/useKeyboardShortcuts";
 import api from "../../../../lib/api";
 import { useAuthStore } from "../../../../stores/auth";
 import dynamic from "next/dynamic";
-import { BoardSkeleton } from "../../../../components/Skeleton";
+import { BoardSkeleton } from "@eyeonchess/ui";
 
 const ChessBoard = dynamic(() => import("../../../../components/ChessBoard"), {
   loading: () => <BoardSkeleton />,

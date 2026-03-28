@@ -6,7 +6,7 @@ import Link from "next/link";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
 import { connectSocket, getSocket } from "../../../lib/socket";
-import ConfirmModal from "../../../components/ConfirmModal";
+import { ConfirmModal } from "@eyeonchess/ui";
 
 interface Friend {
   friendshipId: string;

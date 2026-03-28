@@ -28,7 +28,7 @@ import { useKeyboardShortcuts } from "../../../../lib/useKeyboardShortcuts";
 import dynamic from "next/dynamic";
 import KeyboardShortcutsHelp from "../../../../components/KeyboardShortcutsHelp";
 import ExportPGN from "../../../../components/ExportPGN";
-import { BoardSkeleton } from "../../../../components/Skeleton";
+import { BoardSkeleton } from "@eyeonchess/ui";
 
 const ChessBoard = dynamic(() => import("../../../../components/ChessBoard"), {
   loading: () => <BoardSkeleton />,
@@ -40,7 +40,7 @@ const EvaluationBar = dynamic(() => import("../../../../components/EvaluationBar
 import MoveList from "../../../../components/MoveList";
 import CapturedPieces from "../../../../components/CapturedPieces";
 import MoveFeedbackPopup from "../../../../components/MoveFeedbackPopup";
-import ConfirmModal from "../../../../components/ConfirmModal";
+import { ConfirmModal } from "@eyeonchess/ui";
 import type { BotPersonality, MoveRecord, ThinkTimeContext } from "@eyeonchess/chess";
 import { computeThinkTime } from "@eyeonchess/chess";
 import { useBotChat } from "../../../../lib/useBotChat";
@@ -194,7 +194,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
       // Save to pending queue for retry on next page load
       savePendingSync({ gameId, moves: syncMoves, result, termination });
       try {
-        const { useToast } = await import("../../../../components/Toast");
+        const { useToast } = await import("@eyeonchess/ui");
         useToast.getState().show("Game sync failed — will retry later", "error");
       } catch {}
     }

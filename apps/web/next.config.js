@@ -71,7 +71,7 @@ const withPWA = require("next-pwa")({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  transpilePackages: ["@eyeonchess/chess"],
+  transpilePackages: ["@eyeonchess/chess", "@eyeonchess/ui"],
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,

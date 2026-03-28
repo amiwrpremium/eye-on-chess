@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "../../lib/api";
 import { useAuthStore } from "../../stores/auth";
-import { useToast } from "../../components/Toast";
+import { useToast } from "@eyeonchess/ui";
 
 interface InviteItem {
   id: string;

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "../../lib/api";
 import { useAuthStore } from "../../stores/auth";
-import ConfirmModal from "../../components/ConfirmModal";
-import { Skeleton } from "../../components/Skeleton";
+import { ConfirmModal } from "@eyeonchess/ui";
+import { Skeleton } from "@eyeonchess/ui";
 
 interface CollectionItem {
   id: string;

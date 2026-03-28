@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@eyeonchess/chess": "workspace:*",
+    "@eyeonchess/ui": "workspace:*",
     "axios": "^1.13.6",
     "chess.js": "^1.4.0",
     "chessground": "^9.2.1",

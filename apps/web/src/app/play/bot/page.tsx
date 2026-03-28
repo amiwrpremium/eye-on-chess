@@ -20,8 +20,8 @@ import {
   getPendingCount,
   retryPendingSyncs,
 } from "../../../lib/offlineSync";
-import ConfirmModal from "../../../components/ConfirmModal";
-import { useToast } from "../../../components/Toast";
+import { ConfirmModal } from "@eyeonchess/ui";
+import { useToast } from "@eyeonchess/ui";
 import type { BotPersonality } from "@eyeonchess/chess";
 import BotSelector from "../../../components/BotSelector";
 

@@ -90,136 +90,171 @@ async function endGame(
  * @param io - The Socket.IO server instance.
  */
 export function setupGameSocket(io: SocketServer) {
+  /** Wrap an async socket handler with error logging to prevent unhandled rejections. */
+  function safe(event: string, handler: (...args: never[]) => Promise<void>) {
+    return async (...args: never[]) => {
+      try {
+        await handler(...args);
+      } catch (err) {
+        logger.error({ err, event }, "socket handler error");
+      }
+    };
+  }
+
   io.on("connection", (socket: Socket) => {
     const userId = socket.data.userId as string;
 
     // Join game room
-    socket.on("game:join", async (gameId: string) => {
-      socket.join(`game:${gameId}`);
+    socket.on(
+      "game:join",
+      safe("game:join", async (gameId: string) => {
+        socket.join(`game:${gameId}`);
 
-      const state = await getFullGameState(gameId);
-      if (state) {
-        socket.emit("game:state", state);
-      }
-    });
+        const state = await getFullGameState(gameId);
+        if (state) {
+          socket.emit("game:state", state);
+        }
+      })
+    );
 
     // Make a move
     socket.on("game:move", (data) => processMove(io, socket, userId, drawOffers, data));
 
     // Resign
-    socket.on("game:resign", async (gameId: string) => {
-      const game = await prisma.game.findUnique({ where: { id: gameId } });
-      if (!game || game.status !== "ACTIVE") return;
+    socket.on(
+      "game:resign",
+      safe("game:resign", async (gameId: string) => {
+        const game = await prisma.game.findUnique({ where: { id: gameId } });
+        if (!game || game.status !== "ACTIVE") return;
 
-      const result = game.whiteId === userId ? "BLACK_WIN" : "WHITE_WIN";
-      await endGame(io, gameId, result, "RESIGNATION");
-    });
+        const result = game.whiteId === userId ? "BLACK_WIN" : "WHITE_WIN";
+        await endGame(io, gameId, result, "RESIGNATION");
+      })
+    );
 
     // Draw offer
-    socket.on("game:draw:offer", async (gameId: string) => {
-      const game = await prisma.game.findUnique({ where: { id: gameId } });
-      if (!game || game.status !== "ACTIVE") return;
+    socket.on(
+      "game:draw:offer",
+      safe("game:draw:offer", async (gameId: string) => {
+        const game = await prisma.game.findUnique({ where: { id: gameId } });
+        if (!game || game.status !== "ACTIVE") return;
 
-      drawOffers.set(gameId, userId);
-      socket.to(`game:${gameId}`).emit("game:draw:offered", { by: userId });
-    });
+        drawOffers.set(gameId, userId);
+        socket.to(`game:${gameId}`).emit("game:draw:offered", { by: userId });
+      })
+    );
 
     // Accept draw
-    socket.on("game:draw:accept", async (gameId: string) => {
-      const offerer = drawOffers.get(gameId);
-      if (!offerer || offerer === userId) return;
+    socket.on(
+      "game:draw:accept",
+      safe("game:draw:accept", async (gameId: string) => {
+        const offerer = drawOffers.get(gameId);
+        if (!offerer || offerer === userId) return;
 
-      drawOffers.delete(gameId);
-      await endGame(io, gameId, "DRAW", "AGREEMENT");
-    });
+        drawOffers.delete(gameId);
+        await endGame(io, gameId, "DRAW", "AGREEMENT");
+      })
+    );
 
     // Decline draw
-    socket.on("game:draw:decline", async (gameId: string) => {
-      drawOffers.delete(gameId);
-      socket.to(`game:${gameId}`).emit("game:draw:declined");
-    });
+    socket.on(
+      "game:draw:decline",
+      safe("game:draw:decline", async (gameId: string) => {
+        drawOffers.delete(gameId);
+        socket.to(`game:${gameId}`).emit("game:draw:declined");
+      })
+    );
 
     // Emoji reaction
-    socket.on("game:reaction", async (data: { gameId: string; reaction: string }) => {
-      const { gameId, reaction } = data;
+    socket.on(
+      "game:reaction",
+      safe("game:reaction", async (data: { gameId: string; reaction: string }) => {
+        const { gameId, reaction } = data;
 
-      if (!VALID_REACTIONS.includes(reaction as (typeof VALID_REACTIONS)[number])) return;
+        if (!VALID_REACTIONS.includes(reaction as (typeof VALID_REACTIONS)[number])) return;
 
-      const game = await prisma.game.findUnique({
-        where: { id: gameId },
-        select: { whiteId: true, blackId: true, status: true },
-      });
-      if (!game || game.status !== "ACTIVE") return;
-      if (game.whiteId !== userId && game.blackId !== userId) return;
+        const game = await prisma.game.findUnique({
+          where: { id: gameId },
+          select: { whiteId: true, blackId: true, status: true },
+        });
+        if (!game || game.status !== "ACTIVE") return;
+        if (game.whiteId !== userId && game.blackId !== userId) return;
 
-      const allowed = await checkReactionRateLimit(gameId, userId);
-      if (!allowed) return;
+        const allowed = await checkReactionRateLimit(gameId, userId);
+        if (!allowed) return;
 
-      socket.to(`game:${gameId}`).emit("game:reaction", {
-        userId,
-        reaction,
-      });
-    });
+        socket.to(`game:${gameId}`).emit("game:reaction", {
+          userId,
+          reaction,
+        });
+      })
+    );
 
     // Rematch offer
-    socket.on("game:rematch:offer", async (gameId: string) => {
-      const game = await prisma.game.findUnique({
-        where: { id: gameId },
-        select: {
-          whiteId: true,
-          blackId: true,
-          timeControl: true,
-          initialTime: true,
-          increment: true,
-          status: true,
-        },
-      });
-      if (!game || game.status !== "COMPLETED") return;
+    socket.on(
+      "game:rematch:offer",
+      safe("game:rematch:offer", async (gameId: string) => {
+        const game = await prisma.game.findUnique({
+          where: { id: gameId },
+          select: {
+            whiteId: true,
+            blackId: true,
+            timeControl: true,
+            initialTime: true,
+            increment: true,
+            status: true,
+          },
+        });
+        if (!game || game.status !== "COMPLETED") return;
 
-      socket.to(`game:${gameId}`).emit("game:rematch:offered", {
-        by: userId,
-        gameId,
-        timeControl: game.timeControl,
-        initialTime: game.initialTime,
-        increment: game.increment,
-      });
-    });
+        socket.to(`game:${gameId}`).emit("game:rematch:offered", {
+          by: userId,
+          gameId,
+          timeControl: game.timeControl,
+          initialTime: game.initialTime,
+          increment: game.increment,
+        });
+      })
+    );
 
     // Accept rematch
-    socket.on("game:rematch:accept", async (gameId: string) => {
-      const oldGame = await prisma.game.findUnique({
-        where: { id: gameId },
-        select: {
-          whiteId: true,
-          blackId: true,
-          timeControl: true,
-          initialTime: true,
-          increment: true,
-        },
-      });
-      if (!oldGame) return;
+    socket.on(
+      "game:rematch:accept",
+      safe("game:rematch:accept", async (gameId: string) => {
+        const oldGame = await prisma.game.findUnique({
+          where: { id: gameId },
+          select: {
+            whiteId: true,
+            blackId: true,
+            timeControl: true,
+            initialTime: true,
+            increment: true,
+          },
+        });
+        if (!oldGame) return;
 
-      // Create new game with swapped colors
-      const newGame = await prisma.game.create({
-        data: {
-          whiteId: oldGame.blackId,
-          blackId: oldGame.whiteId,
-          status: "ACTIVE",
-          timeControl: oldGame.timeControl,
-          initialTime: oldGame.initialTime,
-          increment: oldGame.increment,
-          whiteTimeLeft: oldGame.initialTime * 1000,
-          blackTimeLeft: oldGame.initialTime * 1000,
-          startedAt: new Date(),
-        },
-      });
+        // Create new game with swapped colors
+        const newGame = await prisma.game.create({
+          data: {
+            whiteId: oldGame.blackId,
+            blackId: oldGame.whiteId,
+            status: "ACTIVE",
+            timeControl: oldGame.timeControl,
+            initialTime: oldGame.initialTime,
+            increment: oldGame.increment,
+            whiteTimeLeft: oldGame.initialTime * 1000,
+            blackTimeLeft: oldGame.initialTime * 1000,
+            startedAt: new Date(),
+          },
+        });
 
-      if (oldGame.timeControl !== "UNLIMITED") {
-        await initClocks(newGame.id, oldGame.initialTime * 1000, oldGame.increment * 1000);
-      }
+        if (oldGame.timeControl !== "UNLIMITED") {
+          await initClocks(newGame.id, oldGame.initialTime * 1000, oldGame.increment * 1000);
+        }
 
-      io.to(`game:${gameId}`).emit("game:rematch:started", { newGameId: newGame.id });
-    });
+        io.to(`game:${gameId}`).emit("game:rematch:started", { newGameId: newGame.id });
+      })
+    );
   });
 
   startTimeoutChecker(io);

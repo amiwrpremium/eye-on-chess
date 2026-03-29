@@ -16,6 +16,7 @@ export async function fetchCsrfToken() {
 /**
  * Makes an authenticated admin API request with automatic CSRF token management.
  * Fetches a CSRF token before the first mutation request.
+ * On 403, refetches the token and retries once (handles expired tokens).
  *
  * @param method - HTTP method to use.
  * @param url - API endpoint URL.
@@ -37,11 +38,27 @@ export async function adminRequest(
     headers["x-csrf-token"] = csrfToken;
   }
 
-  const { data } = await api.request({
-    method,
-    url,
-    data: body,
-    headers,
-  });
-  return data;
+  try {
+    const { data } = await api.request({
+      method,
+      url,
+      data: body,
+      headers,
+    });
+    return data;
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } }).response?.status;
+    if (method !== "get" && status === 403) {
+      // CSRF token likely expired — refetch and retry once
+      await fetchCsrfToken();
+      const { data } = await api.request({
+        method,
+        url,
+        data: body,
+        headers: { "x-csrf-token": csrfToken! },
+      });
+      return data;
+    }
+    throw err;
+  }
 }

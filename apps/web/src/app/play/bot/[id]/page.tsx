@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Chess } from "chess.js";
 import api from "../../../../lib/api";
 import { useAuthStore } from "../../../../stores/auth";
+import { useSettingsStore } from "../../../../stores/settings";
 import { useBotEngine } from "../../../../lib/useBotEngine";
 import { useOnlineStatus } from "../../../../lib/useOnlineStatus";
 import { lookupOpeningClient } from "../../../../lib/openings";
@@ -100,6 +101,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
   const { id } = params;
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
+  const { darkMode, setDarkMode } = useSettingsStore();
   const botEngine = useBotEngine();
   const sound = useSound();
   const isOnline = useOnlineStatus();
@@ -1075,12 +1077,21 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
             )}
             {error && <p className="text-red-400 text-xs text-center">{error}</p>}
 
-            <button
-              onClick={() => setShowShortcuts(true)}
-              className="w-full py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              Keyboard shortcuts (?)
-            </button>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => setShowShortcuts(true)}
+                className="py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                Shortcuts (?)
+              </button>
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? "\u2600\uFE0F Light" : "\uD83C\uDF19 Dark"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

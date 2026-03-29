@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
+import { useSettingsStore } from "../../../stores/settings";
 import { connectSocket, getSocket } from "../../../lib/socket";
 import dynamic from "next/dynamic";
 import { BoardSkeleton } from "@eyeonchess/ui";
@@ -59,6 +60,7 @@ export default function GamePage() {
   const lastReactionTime = useRef(0);
 
   const sound = useSound();
+  const { darkMode, setDarkMode } = useSettingsStore();
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [flipDisplay, setFlipDisplay] = useState(false);
 
@@ -480,6 +482,22 @@ export default function GamePage() {
                 </button>
               </div>
             )}
+
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => setShowShortcuts(true)}
+                className="py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                Shortcuts (?)
+              </button>
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? "\u2600\uFE0F Light" : "\uD83C\uDF19 Dark"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

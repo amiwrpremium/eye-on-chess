@@ -24,14 +24,7 @@ import { ConfirmModal, useToast } from "@eyeonchess/ui";
 import type { BotPersonality } from "@eyeonchess/chess";
 import { loadBotPrefs, saveBotPrefs } from "../../../lib/gamePrefs";
 import BotSelector from "../../../components/BotSelector";
-
-const TIME_PRESETS = [
-  { label: "1+0", key: "bullet_1_0" },
-  { label: "3+2", key: "blitz_3_2" },
-  { label: "5+0", key: "blitz_5_0" },
-  { label: "10+0", key: "rapid_10_0" },
-  { label: "Unlimited", key: "unlimited" },
-];
+import TimeControlPicker from "../../../components/TimeControlPicker";
 
 function eloLabel(elo: number): string {
   if (elo < 400) return "Beginner";
@@ -385,55 +378,23 @@ export default function PlayBotPage() {
         </div>
 
         {/* Time */}
-        <div className="bg-gray-900 rounded-lg p-4">
-          <h2 className="text-sm font-semibold text-gray-400 mb-3">Time Control</h2>
-          <div className="grid grid-cols-3 gap-2 mb-2">
-            {TIME_PRESETS.map((p) => (
-              <button
-                key={p.key}
-                onClick={() => {
-                  setSelectedTime(p.key);
-                  setShowCustomTime(false);
-                }}
-                className={`px-3 py-2 rounded text-sm font-medium transition-colors ${!showCustomTime && selectedTime === p.key ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"}`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setShowCustomTime(!showCustomTime)}
-            className="text-sm text-blue-400 hover:underline"
-          >
-            {showCustomTime ? "Use preset" : "Custom"}
-          </button>
-          {showCustomTime && (
-            <div className="flex gap-4 mt-2">
-              <div className="flex-1">
-                <label className="text-xs text-gray-400">Min</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={180}
-                  value={customMinutes}
-                  onChange={(e) => setCustomMinutes(parseInt(e.target.value) || 0)}
-                  className="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="text-xs text-gray-400">Inc (s)</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={60}
-                  value={customIncrement}
-                  onChange={(e) => setCustomIncrement(parseInt(e.target.value) || 0)}
-                  className="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm"
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        <TimeControlPicker
+          selectedTime={showCustomTime ? "custom" : selectedTime}
+          showCustomTime={showCustomTime}
+          customMinutes={customMinutes}
+          customIncrement={customIncrement}
+          onSelect={(key) => {
+            setSelectedTime(key);
+            setShowCustomTime(false);
+          }}
+          onSelectCustom={(min, inc) => {
+            setCustomMinutes(min);
+            setCustomIncrement(inc);
+            setShowCustomTime(true);
+          }}
+          onCustomMinutesChange={setCustomMinutes}
+          onCustomIncrementChange={setCustomIncrement}
+        />
 
         <button
           onClick={() => setConfirmStart(true)}

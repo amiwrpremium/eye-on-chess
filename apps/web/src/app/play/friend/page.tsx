@@ -8,6 +8,8 @@ import { useAuthStore } from "../../../stores/auth";
 import { connectSocket, getSocket } from "../../../lib/socket";
 import { ConfirmModal, useToast } from "@eyeonchess/ui";
 import { loadFriendPrefs, saveFriendPrefs } from "../../../lib/gamePrefs";
+import TimeControlPicker from "../../../components/TimeControlPicker";
+import { TIME_CONTROL_PRESETS } from "@eyeonchess/chess";
 
 interface Friend {
   friendshipId: string;
@@ -16,18 +18,6 @@ interface Friend {
   rating: number;
   isOnline: boolean;
 }
-
-const PRESETS = [
-  { label: "1+0", key: "bullet_1_0", category: "Bullet" },
-  { label: "2+1", key: "bullet_2_1", category: "Bullet" },
-  { label: "3+0", key: "blitz_3_0", category: "Blitz" },
-  { label: "5+0", key: "blitz_5_0", category: "Blitz" },
-  { label: "5+3", key: "blitz_5_3", category: "Blitz" },
-  { label: "10+0", key: "rapid_10_0", category: "Rapid" },
-  { label: "15+10", key: "rapid_15_10", category: "Rapid" },
-  { label: "30+0", key: "classical_30_0", category: "Classical" },
-  { label: "Unlimited", key: "unlimited", category: "" },
-];
 
 export default function ChallengeFriendPage() {
   const router = useRouter();
@@ -178,68 +168,17 @@ export default function ChallengeFriendPage() {
 
         {/* Time control */}
         {selectedFriend && (
-          <div className="bg-gray-900 rounded-lg p-4">
-            <h2 className="text-sm font-semibold text-gray-400 mb-3">Time Control</h2>
-
-            {/* Presets */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.key}
-                  onClick={() => setConfirmChallenge(p.key)}
-                  disabled={sending}
-                  className="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 rounded text-sm font-medium transition-colors"
-                >
-                  <span className="block">{p.label}</span>
-                  {p.category && <span className="block text-xs text-gray-500">{p.category}</span>}
-                </button>
-              ))}
-            </div>
-
-            {/* Custom */}
-            <button
-              onClick={() => setShowCustom(!showCustom)}
-              className="text-sm text-blue-400 hover:underline mb-2"
-            >
-              {showCustom ? "Hide custom" : "Custom time control"}
-            </button>
-
-            {showCustom && (
-              <div className="space-y-3 mt-2">
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <label className="text-xs text-gray-400">Minutes</label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={180}
-                      value={customMinutes}
-                      onChange={(e) => setCustomMinutes(parseInt(e.target.value) || 1)}
-                      className="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-xs text-gray-400">Increment (sec)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={60}
-                      value={customIncrement}
-                      onChange={(e) => setCustomIncrement(parseInt(e.target.value) || 0)}
-                      className="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm"
-                    />
-                  </div>
-                </div>
-                <button
-                  onClick={() => setConfirmChallenge("custom")}
-                  disabled={sending}
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded font-medium text-sm transition-colors"
-                >
-                  Send {customMinutes}+{customIncrement} Challenge
-                </button>
-              </div>
-            )}
-          </div>
+          <TimeControlPicker
+            selectedTime={null}
+            showCustomTime={showCustom}
+            customMinutes={customMinutes}
+            customIncrement={customIncrement}
+            onSelect={(key) => setConfirmChallenge(key)}
+            onSelectCustom={() => setConfirmChallenge("custom")}
+            onCustomMinutesChange={setCustomMinutes}
+            onCustomIncrementChange={setCustomIncrement}
+            disabled={sending}
+          />
         )}
 
         <div className="text-center">
@@ -251,7 +190,7 @@ export default function ChallengeFriendPage() {
         <ConfirmModal
           open={!!confirmChallenge}
           title="Send Challenge?"
-          message={`Challenge ${selectedFriend?.username || "friend"} (${selectedFriend?.rating || "?"})\nTime: ${confirmChallenge === "custom" ? `${customMinutes}+${customIncrement}` : PRESETS.find((p) => p.key === confirmChallenge)?.label || confirmChallenge || ""}`}
+          message={`Challenge ${selectedFriend?.username || "friend"} (${selectedFriend?.rating || "?"})\nTime: ${confirmChallenge === "custom" ? `${customMinutes}+${customIncrement}` : (confirmChallenge && TIME_CONTROL_PRESETS[confirmChallenge]?.label) || confirmChallenge || ""}`}
           confirmLabel="Send Challenge"
           confirmVariant="primary"
           onConfirm={() => {

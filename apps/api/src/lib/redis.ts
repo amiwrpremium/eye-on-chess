@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { logger } from "./logger.js";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 const ONLINE_TTL = 30; // seconds
@@ -14,11 +15,11 @@ export const redis = new Redis(REDIS_URL, {
   maxRetriesPerRequest: 3,
   retryStrategy(times) {
     if (times > 10) {
-      console.error(`Redis: giving up after ${times} reconnect attempts`);
+      logger.error({ attempts: times }, "redis: giving up reconnecting");
       return null;
     }
     const delay = Math.min(times * 200, 5000);
-    console.warn(`Redis: reconnecting in ${delay}ms (attempt ${times})`);
+    logger.warn({ delay, attempt: times }, "redis: reconnecting");
     return delay;
   },
   reconnectOnError(err) {

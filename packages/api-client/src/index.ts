@@ -86,7 +86,7 @@ api.interceptors.response.use(
       }
       return Promise.reject(error);
     }
-  },
+  }
 );
 
 /** Pre-configured Axios instance with auth token injection and automatic 401 refresh. */

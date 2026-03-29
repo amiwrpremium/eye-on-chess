@@ -34,7 +34,10 @@ export function parsePagination(
   const defaultLimit = options?.defaultLimit ?? 20;
   const maxLimit = options?.maxLimit ?? 50;
   const page = Math.max(1, parseInt(query.page || "1") || 1);
-  const limit = Math.min(maxLimit, Math.max(1, parseInt(query.limit || String(defaultLimit)) || defaultLimit));
+  const limit = Math.min(
+    maxLimit,
+    Math.max(1, parseInt(query.limit || String(defaultLimit)) || defaultLimit),
+  );
   return { page, limit, skip: (page - 1) * limit, take: limit };
 }
 

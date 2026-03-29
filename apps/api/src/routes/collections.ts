@@ -173,7 +173,9 @@ export async function collectionRoutes(app: FastifyInstance) {
 
       await prisma.gameCollection
         .delete({ where: { gameId_collectionId: { gameId, collectionId: id } } })
-        .catch((err) => logger.warn({ err, gameId, collectionId: id }, "failed to remove game from collection"));
+        .catch((err) =>
+          logger.warn({ err, gameId, collectionId: id }, "failed to remove game from collection")
+        );
       return { success: true };
     }
   );

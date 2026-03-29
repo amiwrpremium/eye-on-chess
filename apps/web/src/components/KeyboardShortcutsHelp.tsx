@@ -40,7 +40,11 @@ export default function KeyboardShortcutsHelp({
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">Keyboard Shortcuts</h2>
-          <button onClick={onClose} aria-label="Close keyboard shortcuts" className="text-gray-400 hover:text-white text-sm">
+          <button
+            onClick={onClose}
+            aria-label="Close keyboard shortcuts"
+            className="text-gray-400 hover:text-white text-sm"
+          >
             Esc
           </button>
         </div>

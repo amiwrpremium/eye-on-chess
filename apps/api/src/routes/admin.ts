@@ -519,7 +519,10 @@ export async function adminRoutes(app: FastifyInstance) {
       adminId?: string;
     };
   }>("/admin/audit-log", async (request) => {
-    const { page, limit, skip } = parsePagination(request.query, { defaultLimit: 50, maxLimit: 100 });
+    const { page, limit, skip } = parsePagination(request.query, {
+      defaultLimit: 50,
+      maxLimit: 100,
+    });
     const actionFilter = request.query.action;
     const adminFilter = request.query.adminId;
 
@@ -550,7 +553,10 @@ export async function adminRoutes(app: FastifyInstance) {
 
   app.get("/admin/bots", async (request) => {
     const { search, sort, order } = request.query as Record<string, string | undefined>;
-    const { page, limit, skip } = parsePagination(request.query as { page?: string; limit?: string }, { maxLimit: 100 });
+    const { page, limit, skip } = parsePagination(
+      request.query as { page?: string; limit?: string },
+      { maxLimit: 100 }
+    );
     const sortField = ["elo", "name", "category", "sortOrder", "createdAt"].includes(sort || "")
       ? sort!
       : "sortOrder";

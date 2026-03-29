@@ -17,7 +17,7 @@ prisma.$on("query" as never, (e: { duration: number; query: string; params: stri
     const reqId = getRequestId();
     logger.warn(
       { duration: e.duration, query: e.query.slice(0, 200), ...(reqId ? { reqId } : {}) },
-      "slow query",
+      "slow query"
     );
   }
 });

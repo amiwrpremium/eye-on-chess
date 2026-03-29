@@ -85,7 +85,13 @@ export default function ChallengePopup() {
   if (!challenge) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="challenge-title" className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onKeyDown={(e) => e.key === "Escape" && decline()}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="challenge-title"
+      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+      onKeyDown={(e) => e.key === "Escape" && decline()}
+    >
       <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full mx-4">
         <h2 id="challenge-title" className="text-lg font-bold mb-2 text-center">Challenge!</h2>
         <p className="text-gray-300 text-center mb-1">

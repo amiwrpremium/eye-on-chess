@@ -1,4 +1,14 @@
 import { z } from "zod";
+import type { TimeControl } from "@eyeonchess/chess";
+
+const TIME_CONTROLS: [TimeControl, ...TimeControl[]] = [
+  "BULLET",
+  "BLITZ",
+  "RAPID",
+  "CLASSICAL",
+  "UNLIMITED",
+];
+const timeControlEnum = z.enum(TIME_CONTROLS);
 
 // ── Common ─────────────────────────────────────────────
 
@@ -91,7 +101,7 @@ export const syncOfflineGameBodySchema = z.object({
   termination: z.string().nullable(),
   startedAt: z.string(),
   endedAt: z.string().nullable(),
-  timeControl: z.string().optional(),
+  timeControl: timeControlEnum.optional(),
   initialTime: z.number().optional(),
   increment: z.number().optional(),
 });

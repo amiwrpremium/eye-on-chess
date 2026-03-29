@@ -30,9 +30,9 @@ export default function GameOverModal({
   resultLabel,
 }: GameOverModalProps) {
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div role="dialog" aria-modal="true" aria-labelledby="game-over-title" className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
-        <h2 className="text-xl font-bold mb-2">Game Over</h2>
+        <h2 id="game-over-title" className="text-xl font-bold mb-2">Game Over</h2>
         <p className="text-gray-300 mb-4">{resultLabel}</p>
         {gameOver.ratingChange && (
           <div className="flex justify-center gap-6 mb-4 text-sm">

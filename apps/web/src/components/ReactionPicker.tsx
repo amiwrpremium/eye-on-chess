@@ -28,6 +28,7 @@ export default function ReactionPicker({ onReact, disabled }: ReactionPickerProp
             disabled={disabled}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-gray-700 hover:bg-gray-600 disabled:opacity-40 rounded-lg text-xl active:scale-110 transition-transform group relative"
             title={r.label}
+            aria-label={r.label}
           >
             {r.emoji}
             <span className="absolute bottom-full mb-1 hidden group-hover:block bg-gray-800 text-xs text-gray-300 px-2 py-0.5 rounded whitespace-nowrap z-10">

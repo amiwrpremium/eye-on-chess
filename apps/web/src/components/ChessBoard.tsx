@@ -27,6 +27,12 @@ const PIECE_SYMBOLS: Record<string, string> = {
   b: "\u265D",
   n: "\u265E",
 };
+const PIECE_NAMES: Record<string, string> = {
+  q: "queen",
+  r: "rook",
+  b: "bishop",
+  n: "knight",
+};
 
 function getLegalDests(fen: string): Map<Key, Key[]> {
   const chess = new Chess(fen);
@@ -196,12 +202,17 @@ export default function ChessBoard({
     <div className="relative w-full" style={{ aspectRatio: "1/1" }}>
       <div ref={boardRef} className="w-full h-full" />
       {promotion && (
-        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+        <div
+          role="dialog"
+          aria-label="Choose promotion piece"
+          className="absolute inset-0 bg-black/60 flex items-center justify-center z-10"
+        >
           <div className="bg-gray-800 rounded-lg p-4 flex gap-2">
             {PROMOTION_PIECES.map((p) => (
               <button
                 key={p}
                 onClick={() => selectPromotion(p)}
+                aria-label={`Promote to ${PIECE_NAMES[p]}`}
                 className="w-14 h-14 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center text-3xl transition-colors"
               >
                 {PIECE_SYMBOLS[p]}

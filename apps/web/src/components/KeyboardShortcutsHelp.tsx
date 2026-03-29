@@ -27,8 +27,12 @@ export default function KeyboardShortcutsHelp({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Keyboard shortcuts"
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
       onClick={onClose}
+      onKeyDown={(e) => e.key === "Escape" && onClose()}
     >
       <div
         className="bg-gray-900 rounded-lg p-5 max-w-sm w-full mx-4"
@@ -36,7 +40,7 @@ export default function KeyboardShortcutsHelp({
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">Keyboard Shortcuts</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-sm">
+          <button onClick={onClose} aria-label="Close keyboard shortcuts" className="text-gray-400 hover:text-white text-sm">
             Esc
           </button>
         </div>

@@ -7,6 +7,7 @@ import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
 import { connectSocket, getSocket } from "../../../lib/socket";
 import { ConfirmModal, useToast } from "@eyeonchess/ui";
+import { loadFriendPrefs, saveFriendPrefs } from "../../../lib/gamePrefs";
 
 interface Friend {
   friendshipId: string;
@@ -40,6 +41,14 @@ export default function ChallengeFriendPage() {
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState("");
   const [confirmChallenge, setConfirmChallenge] = useState<string | null>(null); // preset or "custom"
+
+  // Restore last-used time settings from localStorage
+  useEffect(() => {
+    const prefs = loadFriendPrefs();
+    setShowCustom(prefs.showCustom);
+    setCustomMinutes(prefs.customMinutes);
+    setCustomIncrement(prefs.customIncrement);
+  }, []);
 
   useEffect(() => {
     fetchMe();
@@ -89,6 +98,13 @@ export default function ChallengeFriendPage() {
     if (!selectedFriend) return;
     setSending(true);
     setMessage("");
+
+    saveFriendPrefs({
+      lastTimeControl: preset || "custom",
+      showCustom,
+      customMinutes,
+      customIncrement,
+    });
 
     try {
       const body: Record<string, unknown> = { friendId: selectedFriend.id };

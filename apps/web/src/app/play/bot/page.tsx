@@ -20,9 +20,9 @@ import {
   getPendingCount,
   retryPendingSyncs,
 } from "../../../lib/offlineSync";
-import { ConfirmModal } from "@eyeonchess/ui";
-import { useToast } from "@eyeonchess/ui";
+import { ConfirmModal, useToast } from "@eyeonchess/ui";
 import type { BotPersonality } from "@eyeonchess/chess";
+import { loadBotPrefs, saveBotPrefs } from "../../../lib/gamePrefs";
 import BotSelector from "../../../components/BotSelector";
 
 const TIME_PRESETS = [
@@ -90,6 +90,20 @@ export default function PlayBotPage() {
   // Game mode
   const [modePreset, setModePreset] = useState<GameModePreset>("friendly");
   const [customSettings, setCustomSettings] = useState<GameModeSettings>({ ...DEFAULT_CUSTOM });
+
+  // Restore last-used settings from localStorage
+  useEffect(() => {
+    const prefs = loadBotPrefs();
+    setColorChoice(prefs.colorChoice);
+    setSelectedTime(prefs.selectedTime);
+    setShowCustomTime(prefs.showCustomTime);
+    setCustomMinutes(prefs.customMinutes);
+    setCustomIncrement(prefs.customIncrement);
+    setModePreset(prefs.modePreset);
+    setCustomSettings(prefs.customSettings);
+    setUseCustomElo(prefs.useCustomElo);
+    setBotElo(prefs.botElo);
+  }, []);
 
   // UI state
   const [error, setError] = useState("");
@@ -176,6 +190,18 @@ export default function PlayBotPage() {
     try {
       sessionStorage.setItem("botGameConfig", JSON.stringify(config));
     } catch {}
+
+    saveBotPrefs({
+      colorChoice,
+      selectedTime,
+      showCustomTime,
+      customMinutes,
+      customIncrement,
+      modePreset,
+      customSettings,
+      useCustomElo,
+      botElo,
+    });
 
     if (isOnline) {
       try {

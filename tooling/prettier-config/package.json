@@ -1,0 +1,9 @@
+{
+  "name": "@eyeonchess/prettier-config",
+  "version": "1.4.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.json"
+  }
+}

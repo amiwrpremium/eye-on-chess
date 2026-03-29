@@ -1,8 +1,4 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "declaration": true
-  },
+  "extends": "@eyeonchess/typescript-config/library",
   "include": ["src"]
 }

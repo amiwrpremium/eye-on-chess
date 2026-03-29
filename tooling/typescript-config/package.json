@@ -1,0 +1,12 @@
+{
+  "name": "@eyeonchess/typescript-config",
+  "version": "1.4.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base": "./base.json",
+    "./library": "./library.json",
+    "./react-library": "./react-library.json",
+    "./nextjs": "./nextjs.json"
+  }
+}

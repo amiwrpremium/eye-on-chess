@@ -1,0 +1,66 @@
+name: Changesets
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  # On PRs: verify a changeset exists (or was intentionally skipped)
+  check:
+    name: Check Changeset
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check for changeset
+        run: |
+          CHANGESETS=$(git diff --name-only origin/master...HEAD -- '.changeset/*.md' | grep -v README.md | wc -l)
+          if [ "$CHANGESETS" -eq 0 ]; then
+            echo "::warning::No changeset found. If this PR does not need a version bump, add an empty changeset with 'pnpm changeset --empty'."
+          fi
+
+  # On merge to master: create/update the "Version Packages" PR
+  version:
+    name: Version Packages
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create Version PR
+        uses: changesets/action@v1
+        with:
+          title: "chore(deps): version packages"
+          commit: "chore(deps): version packages"
+          version: pnpm version-packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

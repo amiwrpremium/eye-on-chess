@@ -64,14 +64,17 @@ export default function PlayerClock({ timeMs, isActive, isRunning }: PlayerClock
   }, [isActive]);
 
   const isLow = display < 30_000;
+  const isCritical = display < 10_000;
 
   return (
     <div
-      className={`font-mono text-2xl font-bold px-4 py-2 rounded ${
+      className={`font-mono text-2xl font-bold px-4 py-2 rounded transition-colors ${
         isActive
-          ? isLow
-            ? "bg-red-900 text-red-300"
-            : "bg-gray-700 text-white"
+          ? isCritical
+            ? "bg-red-900 text-red-300 animate-pulse"
+            : isLow
+              ? "bg-red-900 text-red-300"
+              : "bg-gray-700 text-white"
           : "bg-gray-800 text-gray-500"
       }`}
     >

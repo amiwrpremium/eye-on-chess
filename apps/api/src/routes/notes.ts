@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
+import { logger } from "../lib/logger.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { sanitizeString } from "../middleware/admin.js";
 import { updateNoteBodySchema } from "../lib/schemas.js";
@@ -43,7 +44,7 @@ export async function noteRoutes(app: FastifyInstance) {
       if (!text || text.trim().length === 0) {
         await prisma.gameNote
           .delete({ where: { userId_gameId: { userId, gameId } } })
-          .catch(() => {});
+          .catch((err) => logger.warn({ err, gameId }, "failed to delete empty note"));
         return { note: null };
       }
 

@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import bcrypt from "bcrypt";
 import { prisma } from "../lib/prisma.js";
+import { logger } from "../lib/logger.js";
 import { signAccessToken, generateRefreshToken, hashToken } from "../lib/jwt.js";
 import { getSiteSettings } from "../lib/settings.js";
 import { authMiddleware } from "../middleware/auth.js";
@@ -227,7 +228,9 @@ export async function authRoutes(app: FastifyInstance) {
     const rawToken = request.cookies[COOKIE_NAME];
     if (rawToken) {
       const hashed = hashToken(rawToken);
-      await prisma.refreshToken.delete({ where: { token: hashed } }).catch(() => {});
+      await prisma.refreshToken
+        .delete({ where: { token: hashed } })
+        .catch((err) => logger.warn({ err }, "failed to delete refresh token on logout"));
     }
 
     reply.clearCookie(COOKIE_NAME, { path: "/" });

@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
+import { logger } from "../lib/logger.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { sanitizeString } from "../middleware/admin.js";
 import { parsePagination, paginationMeta } from "../lib/pagination.js";
@@ -172,7 +173,7 @@ export async function collectionRoutes(app: FastifyInstance) {
 
       await prisma.gameCollection
         .delete({ where: { gameId_collectionId: { gameId, collectionId: id } } })
-        .catch(() => {});
+        .catch((err) => logger.warn({ err, gameId, collectionId: id }, "failed to remove game from collection"));
       return { success: true };
     }
   );

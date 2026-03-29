@@ -1,6 +1,7 @@
 import client from "prom-client";
 import { prisma } from "./prisma.js";
 import { redis } from "./redis.js";
+import { logger } from "./logger.js";
 
 /**
  * Custom application metrics for Prometheus.
@@ -51,7 +52,7 @@ export async function updateMetrics() {
       gamesCompletedTotal.inc(completed - lastCompletedCount);
     }
     lastCompletedCount = completed;
-  } catch {
-    // Don't crash on metrics update failure
+  } catch (err) {
+    logger.warn({ err }, "metrics update failed");
   }
 }

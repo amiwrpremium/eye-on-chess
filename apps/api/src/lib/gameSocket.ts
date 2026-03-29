@@ -374,8 +374,8 @@ function startTimeoutChecker(io: SocketServer) {
           }
         }
       }
-    } catch {
-      // Silently continue
+    } catch (err) {
+      logger.error({ err }, "timeout checker error");
     }
   }, 1000);
 }

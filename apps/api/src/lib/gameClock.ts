@@ -1,5 +1,6 @@
 import { redis } from "./redis.js";
 import { prisma } from "./prisma.js";
+import { logger } from "./logger.js";
 import type { ClockState } from "@eyeonchess/chess";
 /** Re-exported clock state representing each player's remaining time and turn info. */
 export type { ClockState } from "@eyeonchess/chess";
@@ -67,7 +68,8 @@ async function recoverClocks(gameId: string): Promise<ClockState | null> {
     const incrementMs = game.increment * 1000;
     await initClocks(gameId, initialTimeMs, incrementMs);
     return getClocks(gameId);
-  } catch {
+  } catch (err) {
+    logger.warn({ err, gameId }, "failed to get realtime clocks");
     return null;
   }
 }

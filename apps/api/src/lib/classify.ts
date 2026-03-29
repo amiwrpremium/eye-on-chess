@@ -1,4 +1,5 @@
 import { Chess } from "chess.js";
+import { logger } from "./logger.js";
 import type { MoveClassification } from "@eyeonchess/chess";
 
 /** Result of classifying a single chess move with its evaluation data. */
@@ -46,7 +47,8 @@ function isSacrifice(fen: string, moveUCI: string): boolean {
     if (recaptures.length > 0 && !targetPiece) return true;
 
     return false;
-  } catch {
+  } catch (err) {
+    logger.warn({ err, fen, from, to }, "hanging piece detection failed");
     return false;
   }
 }

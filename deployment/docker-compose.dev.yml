@@ -137,7 +137,7 @@ services:
     env_file:
       - ../.env
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@pgbouncer:6432/eyeonchess?pgbouncer=true
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@pgbouncer:6432/eyeonchess?pgbouncer=true&connection_limit=10
     volumes:
       - ../apps/api/src:/app/apps/api/src
       - ../apps/api/prisma:/app/apps/api/prisma
@@ -166,7 +166,7 @@ services:
     env_file:
       - ../.env
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@pgbouncer:6432/eyeonchess?pgbouncer=true
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@pgbouncer:6432/eyeonchess?pgbouncer=true&connection_limit=10
     volumes:
       - ../apps/api/src:/app/apps/api/src
       - ../apps/api/prisma:/app/apps/api/prisma

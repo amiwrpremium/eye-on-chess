@@ -68,6 +68,11 @@ routes:
     max: 60
     timeWindow: "1 minute"
 
+  # User profiles — public, unauthenticated
+  "/api/v1/users/*":
+    max: 30
+    timeWindow: "1 minute"
+
   # User search
   "/api/v1/users/search":
     max: 30

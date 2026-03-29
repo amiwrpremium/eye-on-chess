@@ -75,3 +75,7 @@ Not a Zustand store, but module-level state:
 - `accessToken` — stored in closure, set via `setAccessToken()`
 - Axios instance with `withCredentials: true` and `Authorization` header interceptor
 - 401 interceptor with refresh queue (prevents thundering herd during concurrent refresh)
+
+## Admin API Client
+
+The admin API client (`adminApi`) now lives in `apps/admin`. It wraps the base Axios instance with automatic CSRF token management — fetching a token from `GET /api/v1/admin/csrf` before mutations (POST, PUT, PATCH, DELETE) and attaching it as the `X-CSRF-Token` header. Previously this was in `apps/web/src/lib/adminApi.ts`, but it has moved to the dedicated admin app as part of the admin panel separation.

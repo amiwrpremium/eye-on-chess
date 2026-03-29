@@ -67,7 +67,7 @@ Cross-origin requests are restricted to the configured `SITE_URL`:
 - **Development**: `SITE_URL` plus any `http://localhost` variant
 - Requests with no `Origin` header (server-to-server, curl, mobile apps) are always allowed
 
-Set `SITE_URL` in your `.env` to match your frontend domain (e.g. `https://chess.example.com`).
+Set `SITE_URL` in your `.env` to match your frontend domain (e.g. `https://chess.example.com`). If you run the admin panel on a separate subdomain, set `ADMIN_URL` as well (e.g. `https://admin.chess.example.com`) — it is also added to the CORS allowlist.
 
 ## Error Codes
 
@@ -199,7 +199,7 @@ Returns **200** when all services are healthy, **503** with `"status": "degraded
 
 All GET endpoints with 200 responses include an `ETag` header (MD5 hash of the response body). Clients can send `If-None-Match` with the cached ETag to receive a `304 Not Modified` response with no body when content hasn't changed.
 
-This reduces bandwidth for frequently polled endpoints like `/api/v1/bots`, `/api/v1/stats`, and `/api/v1/activity`.
+This reduces bandwidth for frequently polled endpoints like `/api/v1/bots`, `/api/v1/stats`, and `/api/v1/feed`.
 
 ```
 GET /api/v1/bots

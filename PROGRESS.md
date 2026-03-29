@@ -385,6 +385,17 @@ Self-hostable chess platform built with Next.js 14, Fastify, PostgreSQL, Redis, 
 - **Error handling:** Bot game page wraps makeBotMove/handleMove in try-catch with 30s Stockfish timeout.
 - **PWA update notification:** `useUpdateNotification` hook detects service worker updates via `controllerchange` event. Game-aware: defers reload during active bot games, auto-reloads otherwise. Deferred updates stored in sessionStorage, applied on next navigation. Integrated via `ClientProviders.tsx`.
 
+### Admin Panel Separation (Complete)
+
+- **Separate admin app** (`apps/admin`): The admin panel has been extracted from `apps/web` into its own Next.js application
+- **Dedicated subdomain**: Admin panel runs on `admin.{SITE_DOMAIN}` with its own Nginx server block
+- **Shared UI package** (`packages/ui`): Common components (Toast, ConfirmModal, Skeleton) shared between `apps/web` and `apps/admin`
+- **Admin API client** moved from `apps/web/src/lib/adminApi.ts` to `apps/admin`
+- **AdminLayout** moved from `apps/web/src/components/AdminLayout.tsx` to `apps/admin`
+- **Docker**: Separate admin service on port 3002 with its own health check
+- **CI/CD**: Added `build-admin` job to parallel build stage
+- **CORS**: `ADMIN_URL` added to the CORS allowlist alongside `SITE_URL`
+
 ## Current Status
 
 - All phases complete: 1, 2, 3, 4, 5, 7, 8, 9 + release prep + admin panel + technical improvements + bot personality system + security hardening + v1.1.4 hardening & PWA

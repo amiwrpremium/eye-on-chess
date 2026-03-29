@@ -101,6 +101,11 @@ apps/web/          Next.js frontend
   src/stores/      Zustand state stores
   src/lib/         Utilities (API client, socket)
 
+apps/admin/        Next.js admin panel (separate subdomain)
+  src/app/         Admin pages (App Router)
+  src/components/  Admin-specific components
+  src/lib/         Admin API client, utilities
+
 apps/api/          Fastify backend
   src/routes/      API route handlers
   src/lib/         Utilities (Prisma, Redis, JWT, Stockfish)
@@ -108,6 +113,7 @@ apps/api/          Fastify backend
   prisma/          Schema, migrations, seed
 
 packages/chess/    Shared TypeScript types
+packages/ui/       Shared UI components (Toast, ConfirmModal, Skeleton)
 deployment/        Dockerfiles, Nginx config
 scripts/           Utility scripts (backup, etc.)
 ```

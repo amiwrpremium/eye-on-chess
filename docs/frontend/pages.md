@@ -38,14 +38,14 @@ Redirects to `/login` if no refresh token cookie.
 
 The admin panel is a separate Next.js app at `apps/admin`, served on `admin.{domain}`. See [Admin Panel docs](../admin/overview.md).
 
-| Route         | App           | Description                                                                             |
-| ------------- | ------------- | --------------------------------------------------------------------------------------- |
-| `/`           | `apps/admin`  | Dashboard — stat cards (users, games, queue depth)                                      |
-| `/users`      | `apps/admin`  | User management — search, paginate, activate/deactivate, verify, promote/demote, delete |
-| `/games`      | `apps/admin`  | Game management — search, filter by status, delete                                      |
-| `/bots`       | `apps/admin`  | Bot personality editor — sliders, JSON editors, create/delete                            |
-| `/settings`   | `apps/admin`  | Site settings — site name, registration toggle, max users, email verification           |
-| `/audit-log`  | `apps/admin`  | Audit log — filterable history of all admin actions                                     |
+| Route        | App          | Description                                                                             |
+| ------------ | ------------ | --------------------------------------------------------------------------------------- |
+| `/`          | `apps/admin` | Dashboard — stat cards (users, games, queue depth)                                      |
+| `/users`     | `apps/admin` | User management — search, paginate, activate/deactivate, verify, promote/demote, delete |
+| `/games`     | `apps/admin` | Game management — search, filter by status, delete                                      |
+| `/bots`      | `apps/admin` | Bot personality editor — sliders, JSON editors, create/delete                           |
+| `/settings`  | `apps/admin` | Site settings — site name, registration toggle, max users, email verification           |
+| `/audit-log` | `apps/admin` | Audit log — filterable history of all admin actions                                     |
 
 ## Route Protection
 

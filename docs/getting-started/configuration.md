@@ -19,10 +19,13 @@ All configuration is done via environment variables in a `.env` file at the proj
 
 ## API URLs
 
-| Variable              | Description                                                                          | Default            |
-| --------------------- | ------------------------------------------------------------------------------------ | ------------------ |
-| `API_URL`             | Internal Docker network URL (used by server-side code)                               | `http://api:3001`  |
-| `NEXT_PUBLIC_API_URL` | Public API URL (used by the browser, routed through Nginx). **Baked at build time.** | `http://localhost` |
+| Variable                | Description                                                                          | Default            |
+| ----------------------- | ------------------------------------------------------------------------------------ | ------------------ |
+| `API_URL`               | Internal Docker network URL (used by server-side code)                               | `http://api:3001`  |
+| `NEXT_PUBLIC_API_URL`   | Public API URL (used by the browser, routed through Nginx). **Baked at build time.** | `http://localhost` |
+| `ADMIN_URL`             | Admin panel URL (added to CORS allowlist). Defaults to `admin.{SITE_URL domain}`.    | —                  |
+| `NEXT_PUBLIC_ADMIN_URL` | Public admin panel URL for the admin app build. **Baked at build time.**             | —                  |
+| `NEXT_PUBLIC_SITE_URL`  | Main site URL for the admin app back-to-app link. **Baked at build time.**           | —                  |
 
 ## Site Configuration
 
@@ -90,4 +93,5 @@ Before deploying to production, ensure:
 3. `NODE_ENV=production` is set
 4. `NEXT_PUBLIC_API_URL` points to your public domain
 5. `SITE_URL` matches your public URL
-6. Consider setting `REGISTRATION_OPEN=false` until ready
+6. `ADMIN_URL` points to your admin subdomain (e.g. `https://admin.yourdomain.com`)
+7. Consider setting `REGISTRATION_OPEN=false` until ready

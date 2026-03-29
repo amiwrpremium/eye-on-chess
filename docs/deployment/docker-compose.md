@@ -83,6 +83,7 @@ docker compose --env-file .env -f deployment/docker-compose.dev.yml up --build
 | redis     | **6379** (127.0.0.1) | Direct access for debugging                    |
 | api       | **3001** (127.0.0.1) | Hot reload via `tsx watch`                     |
 | web       | **3000**             | Hot reload via Next.js HMR (internal to Nginx) |
+| admin     | **3002** (127.0.0.1) | Hot reload via Next.js HMR (internal to Nginx) |
 | worker    | —                    | Hot reload via volume mount                    |
 
 ### Volume Mounts
@@ -92,6 +93,7 @@ Source directories are mounted into containers for hot reload:
 - `apps/api/src/` → `/app/apps/api/src/`
 - `apps/api/prisma/` → `/app/apps/api/prisma/`
 - `apps/web/src/` → `/app/apps/web/src/`
+- `apps/admin/src/` → `/app/apps/admin/src/`
 - `packages/chess/src/` → `/app/packages/chess/src/`
 
 Nginx is included in development on port 80 as the primary entry point (same routing as production). Service ports are also exposed on `127.0.0.1` for direct debugging access.

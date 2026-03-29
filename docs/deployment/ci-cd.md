@@ -371,13 +371,15 @@ gh run view <run-id> --log-failed
 
 ### 3.3 What Happens During Deployment
 
-1. **Build** (parallel, ~2-3 min): Four images (api, web, worker, migrate) are built in parallel on GitHub Actions runners
-2. **Push** (~30s): Images are pushed to `ghcr.io/{owner}/eye-on-chess/{api,web,worker,migrate}:{version}`
+1. **Build** (parallel, ~2-3 min): Five images (api, web, worker, migrate, admin) are built in parallel on GitHub Actions runners
+2. **Push** (~30s): Images are pushed to `ghcr.io/{owner}/eye-on-chess/{api,web,worker,migrate,admin}:{version}`
 3. **Deploy** (~1 min): GitHub Actions SSHs into your VPS and runs:
-   - `docker compose pull api web worker migrate` — downloads new images
+   - `docker compose pull api web worker migrate admin` — downloads new images
    - `docker compose up -d --no-deps api` — restarts API
    - Waits 10 seconds for API health
    - `docker compose up -d --no-deps web` — restarts web frontend
+   - Waits 5 seconds
+   - `docker compose up -d --no-deps admin` — restarts admin panel
    - Waits 5 seconds
    - `docker compose up -d --no-deps worker` — restarts analysis worker
    - Polls `/health` endpoint up to 30 times to confirm
@@ -622,12 +624,12 @@ EyeOnChess also ships a `.gitlab-ci.yml` that mirrors the GitHub Actions pipelin
 
 ### Pipeline Stages
 
-| Stage    | Jobs                                          | Trigger                                |
-| -------- | --------------------------------------------- | -------------------------------------- |
-| `lint`   | eslint, prettier, typescript                  | Push to default branch, MRs, `v*` tags |
-| `test`   | test-chess, test-api, test-web (parallel)     | Push to default branch, MRs, `v*` tags |
-| `build`  | build-api, build-web, build-worker (parallel) | `v*` tags only                         |
-| `deploy` | deploy-production (manual trigger)            | `v*` tags only                         |
+| Stage    | Jobs                                                                      | Trigger                                |
+| -------- | ------------------------------------------------------------------------- | -------------------------------------- |
+| `lint`   | eslint, prettier, typescript                                              | Push to default branch, MRs, `v*` tags |
+| `test`   | test-chess, test-api, test-web (parallel)                                 | Push to default branch, MRs, `v*` tags |
+| `build`  | build-api, build-web, build-worker, build-admin, build-migrate (parallel) | `v*` tags only                         |
+| `deploy` | deploy-production (manual trigger)                                        | `v*` tags only                         |
 
 ### GitLab Setup
 
@@ -734,6 +736,7 @@ Create DNS A records:
 
 ```
 eyeonchess.com        A    203.0.113.50
+admin.eyeonchess.com      A    203.0.113.50
 grafana.eyeonchess.com    A    203.0.113.50
 ```
 
@@ -747,7 +750,7 @@ On your VPS, edit `/opt/eyeonchess/.env`:
 SITE_DOMAIN=eyeonchess.com
 CERTBOT_EMAIL=you@example.com
 # Optional: include subdomains in the cert
-# CERTBOT_DOMAINS=eyeonchess.com grafana.eyeonchess.com
+# CERTBOT_DOMAINS=eyeonchess.com admin.eyeonchess.com grafana.eyeonchess.com
 SITE_URL=https://eyeonchess.com
 NEXT_PUBLIC_API_URL=https://eyeonchess.com
 NODE_ENV=production

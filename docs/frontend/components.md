@@ -166,7 +166,7 @@ Injects global CSS overrides for board colors and piece set filters based on set
 
 ### `Skeleton` / `BoardSkeleton` / `MoveListSkeleton` / `ProfileSkeleton`
 
-Loading placeholder components with pulse animation.
+Loading placeholder components with pulse animation. Also available from `packages/ui` for the admin app.
 
 ### `ErrorBoundary`
 
@@ -174,11 +174,11 @@ React class component error boundary. Shows friendly error message with refresh 
 
 ### `Toast`
 
-Fixed-position toast notification. Zustand-backed — call `useToast().show(message, type)` from anywhere.
+Fixed-position toast notification. Zustand-backed — call `useToast().show(message, type)` from anywhere. Also available from `packages/ui` for the admin app.
 
 ### `ConfirmModal`
 
-Reusable confirmation dialog with configurable title, message, button label, and danger/primary styling. Supports a loading state that disables both buttons and replaces the confirm label with an ellipsis. Returns null when not open.
+Reusable confirmation dialog with configurable title, message, button label, and danger/primary styling. Supports a loading state that disables both buttons and replaces the confirm label with an ellipsis. Returns null when not open. Also available from `packages/ui` for the admin app.
 
 **Props:** `open: boolean`, `title: string`, `message: string`, `confirmLabel?: string`, `confirmVariant?: 'danger' | 'primary'`, `onConfirm: () => void`, `onCancel: () => void`, `loading?: boolean`
 

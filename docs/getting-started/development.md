@@ -28,6 +28,7 @@ make dev-logs     # Tail logs
 | Service  | URL                   | Notes                           |
 | -------- | --------------------- | ------------------------------- |
 | Web      | http://localhost:3000 | Next.js with hot reload         |
+| Admin    | http://localhost:3002 | Next.js admin panel, hot reload |
 | API      | http://localhost:3001 | Fastify with tsx watch          |
 | Postgres | localhost:5432        | Direct access for tools         |
 | Redis    | localhost:6379        | Direct access for tools         |

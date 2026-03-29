@@ -42,7 +42,7 @@ eye-on-chess/
 │   │           ├── collections.ts # /collections/* (game collections)
 │   │           ├── invites.ts    # /invites/* (invite codes, validation)
 │   │           ├── notes.ts      # /games/:id/notes (game annotations)
-│   │           ├── activity.ts   # /activity (activity feed)
+│   │           ├── activity.ts   # /feed (activity feed)
 │   │           ├── stats.ts      # /stats (personal statistics)
 │   │           ├── bots.ts       # /bots (bot personality list)
 │   │           └── admin.ts      # /admin/* (dashboard, users, games, settings, audit)
@@ -59,7 +59,6 @@ eye-on-chess/
 │           ├── middleware.ts      # Next.js route protection
 │           ├── lib/
 │           │   ├── api.ts        # Axios instance + auto-refresh interceptor
-│           │   ├── adminApi.ts   # Admin API helper (CSRF token management)
 │           │   └── socket.ts     # Socket.io client + heartbeat
 │           ├── stores/
 │           │   ├── auth.ts       # Auth state (user, tokens, login/logout)
@@ -71,7 +70,6 @@ eye-on-chess/
 │           │   ├── MoveList.tsx        # Move notation list
 │           │   ├── PlayerClock.tsx     # Optimistic countdown clock
 │           │   ├── ChallengePopup.tsx  # Incoming challenge modal
-│           │   ├── AdminLayout.tsx     # Admin sidebar layout
 │           │   ├── ThemeProvider.tsx    # Dark/light mode
 │           │   ├── BoardThemeStyles.tsx # Board color themes
 │           │   ├── Skeleton.tsx        # Loading skeletons
@@ -94,21 +92,42 @@ eye-on-chess/
 │               ├── profile/[username]/page.tsx
 │               ├── friends/page.tsx
 │               ├── settings/page.tsx
-│               ├── board-test/page.tsx  # Component demo
-│               └── admin/
-│                   ├── layout.tsx       # Admin layout wrapper
-│                   ├── page.tsx         # Dashboard
-│                   ├── users/page.tsx
-│                   ├── games/page.tsx
-│                   ├── settings/page.tsx
-│                   └── audit-log/page.tsx
+│               └── board-test/page.tsx  # Component demo
+│
+│   └── admin/                     # Next.js admin panel
+│       ├── Dockerfile            # Admin Dockerfile
+│       ├── package.json
+│       ├── tsconfig.json
+│       ├── next.config.js
+│       ├── tailwind.config.ts
+│       └── src/
+│           ├── lib/
+│           │   └── adminApi.ts   # Admin API helper (CSRF token management)
+│           ├── components/
+│           │   └── AdminLayout.tsx # Admin sidebar layout
+│           └── app/
+│               ├── layout.tsx     # Admin root layout
+│               ├── page.tsx       # Dashboard
+│               ├── users/page.tsx
+│               ├── games/page.tsx
+│               ├── bots/page.tsx
+│               ├── settings/page.tsx
+│               └── audit-log/page.tsx
 │
 ├── packages/
-│   └── chess/                    # Shared TypeScript types
+│   ├── chess/                    # Shared TypeScript types
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── src/
+│   │       └── index.ts          # Color, PieceType, Piece types
+│   │
+│   └── ui/                       # Shared UI components
 │       ├── package.json
 │       ├── tsconfig.json
 │       └── src/
-│           └── index.ts          # Color, PieceType, Piece types
+│           ├── Toast.tsx         # Toast notifications
+│           ├── ConfirmModal.tsx  # Confirmation dialog
+│           └── Skeleton.tsx      # Loading skeletons
 │
 ├── deployment/
 │   ├── docker-compose.yml        # Production compose

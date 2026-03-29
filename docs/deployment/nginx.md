@@ -42,6 +42,14 @@ This means:
 | `/.well-known/acme-challenge/*` | Certbot webroot   | SSL only — Let's Encrypt validation    |
 | `/*` (everything else)          | `web:3000`        | Next.js frontend                       |
 
+### Admin Subdomain
+
+Requests to `admin.{SITE_DOMAIN}` are routed to `admin:3002`:
+
+| Path | Upstream     | Notes          |
+| ---- | ------------ | -------------- |
+| `/*` | `admin:3002` | Admin panel UI |
+
 ### Grafana Subdomain
 
 Requests to `grafana.{SITE_DOMAIN}` are routed to `grafana:3000`:

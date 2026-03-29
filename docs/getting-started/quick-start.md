@@ -43,6 +43,7 @@ docker compose -f deployment/docker-compose.dev.yml up --build
 | Service  | URL                   |
 | -------- | --------------------- |
 | Web      | http://localhost:3000 |
+| Admin    | http://localhost:3002 |
 | API      | http://localhost:3001 |
 | Postgres | localhost:5432        |
 | Redis    | localhost:6379        |

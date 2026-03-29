@@ -55,8 +55,8 @@ This means:
 
 ## API Reference
 
-| Endpoint                  | Description                                                 |
-| ------------------------- | ----------------------------------------------------------- |
+| Endpoint                     | Description                                                 |
+| ---------------------------- | ----------------------------------------------------------- |
 | `GET /api/v1/admin/settings` | Read current settings                                       |
 | `PUT /api/v1/admin/settings` | Update settings (CSRF required)                             |
-| `GET /api/settings`       | Public endpoint returning site name and registration status |
+| `GET /api/settings`          | Public endpoint returning site name and registration status |

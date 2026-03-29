@@ -32,6 +32,7 @@ In **DNS** → **Records**, add:
 | Type | Name       | Content     | Proxy status              | TTL  |
 | ---- | ---------- | ----------- | ------------------------- | ---- |
 | A    | `@` (root) | Your VPS IP | **DNS only** (grey cloud) | Auto |
+| A    | `admin`    | Your VPS IP | **DNS only** (grey cloud) | Auto |
 | A    | `grafana`  | Your VPS IP | **DNS only** (grey cloud) | Auto |
 
 Start with **DNS only** (grey cloud) — this lets Certbot validate your domain directly. You'll enable proxying after getting the certificate.
@@ -43,7 +44,7 @@ On your server, set these in `.env`:
 ```bash
 SITE_DOMAIN=yourdomain.com
 CERTBOT_EMAIL=you@example.com
-CERTBOT_DOMAINS=yourdomain.com grafana.yourdomain.com
+CERTBOT_DOMAINS=yourdomain.com admin.yourdomain.com grafana.yourdomain.com
 SITE_URL=https://yourdomain.com
 NEXT_PUBLIC_API_URL=https://yourdomain.com
 NODE_ENV=production

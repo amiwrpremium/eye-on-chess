@@ -128,4 +128,44 @@ Update site settings. Persisted to DB (survives container restarts).
 
 Paginated audit log with action and admin filters.
 
-**Audit actions:** `user.update`, `user.delete`, `game.delete`, `settings.update`
+**Audit actions:** `user.update`, `user.delete`, `game.delete`, `settings.update`, `bot.create`, `bot.update`, `bot.delete`, `bot.reseed`
+
+## Bot Management Endpoints
+
+### `GET /api/v1/admin/bots`
+
+List all bots (includes disabled). Returns the full list of bot profiles from the database.
+
+### `POST /api/v1/admin/bots`
+
+Create a new bot. Requires CSRF token.
+
+**Body:**
+
+```json
+{
+  "id": "unique_lowercase_id",
+  "name": "DisplayName",
+  "elo": 1500,
+  "description": "Brief personality description",
+  "avatar": "emoji",
+  "tier": "custom",
+  "category": "intermediate",
+  "enabled": true,
+  "personality": { ... },
+  "messages": { ... },
+  "preferredOpenings": { ... }
+}
+```
+
+### `PATCH /api/v1/admin/bots/:id`
+
+Update bot fields (personality, messages, openings, etc.). Requires CSRF token.
+
+### `DELETE /api/v1/admin/bots/:id`
+
+Delete a bot. Requires CSRF token.
+
+### `POST /api/v1/admin/bots/reseed`
+
+Re-seed bots from YAML. Set `FORCE_RESEED=1` to overwrite existing bots. Requires CSRF token.

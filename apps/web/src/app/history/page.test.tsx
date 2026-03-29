@@ -33,7 +33,7 @@ vi.mock("../../lib/api", () => ({
   },
 }));
 
-vi.mock("../../components/Skeleton", () => ({
+vi.mock("@eyeonchess/ui", () => ({
   Skeleton: ({ className }: { className?: string }) => (
     <div data-testid="skeleton" className={className} />
   ),

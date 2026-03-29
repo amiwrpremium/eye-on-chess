@@ -61,6 +61,10 @@ Every admin mutation is logged to the `AuditLog` table with:
 | `user.delete`     | User deleted                             |
 | `game.delete`     | Game deleted                             |
 | `settings.update` | Site settings changed                    |
+| `bot.create`      | Bot created                              |
+| `bot.update`      | Bot updated                              |
+| `bot.delete`      | Bot deleted                              |
+| `bot.reseed`      | Bots reseeded from YAML                  |
 
 ## Self-Protection
 

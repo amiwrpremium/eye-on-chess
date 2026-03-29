@@ -43,8 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <nav className="p-2 space-y-1">
           {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -65,10 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
-          <a
-            href={siteUrl}
-            className="text-sm text-gray-400 hover:text-white transition-colors"
-          >
+          <a href={siteUrl} className="text-sm text-gray-400 hover:text-white transition-colors">
             &larr; Back to app
           </a>
         </div>

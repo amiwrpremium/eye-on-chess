@@ -29,12 +29,17 @@ async function getFullGameState(gameId: string) {
   return { game, clocks };
 }
 
+// Track draw offers: gameId -> offeringUserId (module-level so endGame can clean up)
+const drawOffers = new Map<string, string>();
+
 async function endGame(
   io: SocketServer,
   gameId: string,
   result: GameResult,
   termination: Termination
 ) {
+  drawOffers.delete(gameId);
+
   const game = await prisma.game.update({
     where: { id: gameId },
     data: {
@@ -85,9 +90,6 @@ async function endGame(
  * @param io - The Socket.IO server instance.
  */
 export function setupGameSocket(io: SocketServer) {
-  // Track draw offers: gameId -> offeringUserId
-  const drawOffers = new Map<string, string>();
-
   io.on("connection", (socket: Socket) => {
     const userId = socket.data.userId as string;
 

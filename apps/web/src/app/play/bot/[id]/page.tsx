@@ -427,6 +427,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
 
       clearGameConfig();
       setInitialized(true);
+      sound.playNotify();
     } else {
       // Online game: fetch from API
       setGameId(id);
@@ -472,6 +473,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           setGameStartTime(g.startedAt || new Date().toISOString());
           clearGameConfig();
           setInitialized(true);
+          sound.playNotify();
         })
         .catch(() => {
           setError("Failed to load game.");
@@ -798,6 +800,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
     setCurrentPly(newMoves.length);
     setLastMove(undefined);
     setFeedback(null);
+    sound.playUndo();
   }
 
   // --- Resign ---

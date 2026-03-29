@@ -3,7 +3,7 @@
 import { useRef, useCallback } from "react";
 import { useSettingsStore } from "../stores/settings";
 
-type SoundName = "move" | "capture" | "check" | "castle" | "gameover" | "notify";
+type SoundName = "move" | "capture" | "check" | "castle" | "gameover" | "notify" | "lowtime" | "undo";
 
 const SOUND_FILES: Record<SoundName, string> = {
   move: "/sounds/move.wav",
@@ -12,6 +12,8 @@ const SOUND_FILES: Record<SoundName, string> = {
   castle: "/sounds/castle.wav",
   gameover: "/sounds/gameover.wav",
   notify: "/sounds/notify.wav",
+  lowtime: "/sounds/lowtime.wav",
+  undo: "/sounds/undo.wav",
 };
 
 interface ChessMoveInfo {
@@ -70,6 +72,8 @@ export function useSound() {
   const playCastle = useCallback(() => play("castle"), [play]);
   const playGameOver = useCallback(() => play("gameover"), [play]);
   const playNotify = useCallback(() => play("notify"), [play]);
+  const playLowTime = useCallback(() => play("lowtime"), [play]);
+  const playUndo = useCallback(() => play("undo"), [play]);
 
   const playForMove = useCallback(
     (move: ChessMoveInfo) => {
@@ -86,6 +90,8 @@ export function useSound() {
     playCastle,
     playGameOver,
     playNotify,
+    playLowTime,
+    playUndo,
     playForMove,
   };
 }

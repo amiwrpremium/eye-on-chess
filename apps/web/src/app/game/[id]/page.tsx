@@ -160,6 +160,7 @@ export default function GamePage() {
         setCurrentPly(moveRecords.length);
       }
       setReconnecting(false);
+      if (g.status === "ACTIVE") sound.playNotify();
     });
 
     socket.on("game:moved", (data) => {

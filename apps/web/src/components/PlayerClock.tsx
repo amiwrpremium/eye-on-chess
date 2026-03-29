@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useSound } from "../lib/useSound";
 
 interface PlayerClockProps {
   timeMs: number;
@@ -18,13 +19,15 @@ function formatClock(ms: number): string {
 /**
  * Renders a chess clock display with optimistic client-side countdown.
  * Shows time in mm:ss format, turns red when below 30 seconds, and
- * dims when inactive.
+ * dims when inactive. Plays a tick sound every second when under 10 seconds.
  *
  * @param props - {@link PlayerClockProps}
  * @returns The formatted clock element.
  */
 export default function PlayerClock({ timeMs, isActive, isRunning }: PlayerClockProps) {
   const [display, setDisplay] = useState(timeMs);
+  const sound = useSound();
+  const lastTickSecond = useRef(-1);
 
   useEffect(() => {
     setDisplay(timeMs);
@@ -39,11 +42,26 @@ export default function PlayerClock({ timeMs, isActive, isRunning }: PlayerClock
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - start;
-      setDisplay(Math.max(0, startTime - elapsed));
+      const remaining = Math.max(0, startTime - elapsed);
+      setDisplay(remaining);
+
+      // Play tick sound every second when under 10s
+      if (remaining > 0 && remaining < 10_000) {
+        const sec = Math.ceil(remaining / 1000);
+        if (sec !== lastTickSecond.current) {
+          lastTickSecond.current = sec;
+          sound.playLowTime();
+        }
+      }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isActive, isRunning, timeMs]);
+  }, [isActive, isRunning, timeMs, sound]);
+
+  // Reset tick tracking when clock becomes inactive
+  useEffect(() => {
+    if (!isActive) lastTickSecond.current = -1;
+  }, [isActive]);
 
   const isLow = display < 30_000;
 

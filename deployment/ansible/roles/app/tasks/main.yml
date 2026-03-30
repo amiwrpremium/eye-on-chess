@@ -12,7 +12,7 @@
   git:
     repo: "{{ github_repo }}"
     dest: "{{ app_dir }}"
-    version: master
+    version: "v{{ image_tag }}"
     depth: 1
     force: true
 

@@ -16,7 +16,7 @@ mkdir -p "$BACKUP_DIR"
 if [ -n "${BACKUP_ENCRYPTION_KEY:-}" ]; then
   FILENAME="eyeonchess_${TIMESTAMP}.sql.gz.enc"
   echo "Backing up database (encrypted) to ${BACKUP_DIR}/${FILENAME}..."
-  docker compose -f deployment/docker-compose.yml exec -T postgres pg_dump -U postgres eyeonchess \
+  docker compose --env-file .env -f deployment/docker-compose.cd.yml exec -T postgres pg_dump -U postgres eyeonchess \
     | gzip \
     | openssl enc -aes-256-cbc -pbkdf2 -pass "pass:${BACKUP_ENCRYPTION_KEY}" \
     > "${BACKUP_DIR}/${FILENAME}"
@@ -25,7 +25,7 @@ else
   FILENAME="eyeonchess_${TIMESTAMP}.sql.gz"
   echo "Backing up database to ${BACKUP_DIR}/${FILENAME}..."
   echo "  (Set BACKUP_ENCRYPTION_KEY to enable encryption)"
-  docker compose -f deployment/docker-compose.yml exec -T postgres pg_dump -U postgres eyeonchess \
+  docker compose --env-file .env -f deployment/docker-compose.cd.yml exec -T postgres pg_dump -U postgres eyeonchess \
     | gzip \
     > "${BACKUP_DIR}/${FILENAME}"
   PATTERN="eyeonchess_*.sql.gz"

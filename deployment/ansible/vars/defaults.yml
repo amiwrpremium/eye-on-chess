@@ -7,12 +7,19 @@ app_dir: /opt/eyeonchess
 github_repo: https://github.com/amiwrpremium/eye-on-chess.git
 github_username: amiwrpremium
 
+# ── Docker Images ─────────────────────────────────────
+image_tag: latest
+image_prefix: "ghcr.io/amiwrpremium/eye-on-chess"
+
 # ── Secrets (pass via --extra-vars or Ansible Vault) ───
 # deploy_ssh_public_key: "ssh-ed25519 AAAA..."
-# github_pat: "ghp_..."          # For GHCR image pulls
-# postgres_password: ""          # openssl rand -hex 16
-# redis_password: ""             # openssl rand -hex 16
-# jwt_secret: ""                 # openssl rand -hex 32
-# seed_user_password: ""         # Admin account password
-# site_url: "http://your-domain.com"
-# grafana_admin_password: ""
+# github_pat: "ghp_..."              # For GHCR image pulls
+# postgres_password: ""              # openssl rand -hex 16
+# redis_password: ""                 # openssl rand -hex 16
+# jwt_secret: ""                     # openssl rand -hex 32
+# seed_user_password: ""             # Admin account password
+# site_url: "https://your-domain.com"
+# site_domain: "your-domain.com"
+# certbot_email: "you@example.com"
+# certbot_domains: "your-domain.com admin.your-domain.com grafana.your-domain.com"
+# grafana_admin_password: ""         # openssl rand -hex 16

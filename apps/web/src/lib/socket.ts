@@ -1,8 +1,10 @@
 import { io, Socket } from "socket.io-client";
 import { getAccessToken } from "./api";
+import { useToast } from "@eyeonchess/ui";
 
 let socket: Socket | null = null;
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+let wasDisconnected = false;
 
 /**
  * Establishes a Socket.IO connection to the API server.
@@ -38,6 +40,10 @@ export function connectSocket() {
   });
 
   socket.on("connect", () => {
+    if (wasDisconnected) {
+      useToast.getState().show("Reconnected", "success");
+      wasDisconnected = false;
+    }
     // Start heartbeat
     if (heartbeatInterval) clearInterval(heartbeatInterval);
     heartbeatInterval = setInterval(() => {
@@ -46,6 +52,7 @@ export function connectSocket() {
   });
 
   socket.on("disconnect", () => {
+    wasDisconnected = true;
     if (heartbeatInterval) {
       clearInterval(heartbeatInterval);
       heartbeatInterval = null;

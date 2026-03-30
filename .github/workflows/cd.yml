@@ -55,6 +55,8 @@ jobs:
             -t ${{ env.IMAGE_PREFIX }}/${{ matrix.image }}:${{ steps.version.outputs.version }} \
             -t ${{ env.IMAGE_PREFIX }}/${{ matrix.image }}:latest \
             --build-arg NEXT_PUBLIC_API_URL=${{ secrets.SITE_URL || 'http://localhost' }} \
+            --build-arg NEXT_PUBLIC_SITE_URL=${{ secrets.SITE_URL || 'http://localhost' }} \
+            --build-arg NEXT_PUBLIC_ADMIN_URL=${{ secrets.ADMIN_URL || '' }} \
             --label "org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}" \
             --label "org.opencontainers.image.revision=${{ github.sha }}" \
             --label "org.opencontainers.image.version=${{ steps.version.outputs.version }}" \

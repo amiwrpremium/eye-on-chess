@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
 
   // No refresh token → redirect to main site login
   if (!refreshToken) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost";
+    const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost";
     return NextResponse.redirect(`${siteUrl}/login`);
   }
 

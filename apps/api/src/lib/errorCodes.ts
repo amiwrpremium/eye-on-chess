@@ -23,7 +23,7 @@ export const AUTH_TOKEN_USED = "AUTH_TOKEN_USED";
 export const AUTH_USER_NOT_FOUND = "AUTH_USER_NOT_FOUND";
 
 // ── Games ──────────────────────────────────────────────
-export const GAME_NOT_FOUND = "GAME_NOT_FOUND";
+export const GAME_NOT_FOUND = "GAME_NOT_FOUND";\nexport const GAME_NOT_SHAREABLE = "GAME_NOT_SHAREABLE";
 export const GAME_SELF_CHALLENGE = "GAME_SELF_CHALLENGE";
 export const GAME_NOT_FRIENDS = "GAME_NOT_FRIENDS";
 export const GAME_ALREADY_RESOLVED = "GAME_ALREADY_RESOLVED";

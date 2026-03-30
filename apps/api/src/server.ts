@@ -20,6 +20,7 @@ import { inviteRoutes } from "./routes/invites.js";
 import { noteRoutes } from "./routes/notes.js";
 import { activityRoutes } from "./routes/activity.js";
 import { statsRoutes } from "./routes/stats.js";
+import { publicGameRoutes } from "./routes/publicGames.js";
 import { setupSocket } from "./lib/socket.js";
 import { setupGameSocket } from "./lib/gameSocket.js";
 import { getSiteSettings } from "./lib/settings.js";
@@ -186,6 +187,7 @@ async function main() {
   // ── API v1 routes ───────────────────────────────────
   await fastify.register(
     async (v1) => {
+      await v1.register(publicGameRoutes);
       await v1.register(botRoutes);
       await v1.register(authRoutes);
       await v1.register(userRoutes);

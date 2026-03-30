@@ -87,3 +87,8 @@ routes:
   "/metrics":
     max: 1000
     timeWindow: "1 minute"
+
+  # Public game view — unauthenticated
+  "/api/v1/games/*/view":
+    max: 30
+    timeWindow: "1 minute"

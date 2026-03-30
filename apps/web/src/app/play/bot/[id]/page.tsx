@@ -39,6 +39,7 @@ const EvaluationBar = dynamic(() => import("../../../../components/EvaluationBar
   ssr: false,
 });
 import MoveList from "../../../../components/MoveList";
+import MoveTimeline from "../../../../components/MoveTimeline";
 import CapturedPieces from "../../../../components/CapturedPieces";
 import MoveFeedbackPopup from "../../../../components/MoveFeedbackPopup";
 import { ConfirmModal } from "@eyeonchess/ui";
@@ -977,100 +978,182 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
 
   // ── GAME SCREEN ──────────────────────────────────────
   return (
-    <main className="flex flex-col items-center min-h-screen p-2 pt-2 sm:p-4 sm:pt-4">
-      <div className="w-full max-w-6xl">
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 items-start">
-          <div className="flex gap-2 flex-1 min-w-0">
+    <main className="flex flex-col h-[100dvh] lg:h-auto lg:min-h-screen overflow-hidden lg:overflow-auto p-1 lg:p-4">
+      <div className="w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 lg:block">
+        <div className="flex flex-col lg:flex-row gap-1 lg:gap-4 items-start flex-1 min-h-0">
+          {/* ── LEFT: Board area ── */}
+          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full">
+            {/* Bot info */}
+            <div className="flex items-center gap-1.5 px-1 py-0.5">
+              <div className="w-5 h-5 lg:w-7 lg:h-7 bg-gray-700 rounded-full flex items-center justify-center text-xs lg:text-base shrink-0">
+                {bot ? bot.avatar : "\u{1F916}"}
+              </div>
+              <span className="text-xs lg:text-sm font-medium truncate">
+                {bot ? bot.name : "Bot"} ({botElo})
+              </span>
+              <BotChatBubble message={botChat.currentMessage} />
+              {thinking && (
+                <span className="flex gap-0.5 ml-1">
+                  <span
+                    className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <span
+                    className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <span
+                    className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  />
+                </span>
+              )}
+            </div>
+
+            {/* Eval bar (horizontal on mobile, vertical on desktop) */}
             {activeSettings.evalBar && (
-              <div className="h-auto flex">
+              <div className="lg:hidden h-3 w-full">
                 <EvaluationBar evalCP={evalScore} mate={null} />
               </div>
             )}
-            <div className="flex flex-col gap-1 flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-gray-700 rounded-full flex items-center justify-center text-base">
-                  {bot ? bot.avatar : "\u{1F916}"}
-                </div>
-                <span className="text-sm font-medium">
-                  {bot ? bot.name : "Bot"} ({botElo}){" "}
-                  <span className="text-gray-500">{eloLabel(botElo)}</span>
-                </span>
-                <BotChatBubble message={botChat.currentMessage} />
-                {!isOnline && (
-                  <span className="text-xs text-yellow-500 bg-yellow-900/30 px-2 py-0.5 rounded">
-                    OFFLINE
-                  </span>
-                )}
-                <span className="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded">
-                  {GAME_MODE_LABELS[modePreset].name}
-                </span>
-              </div>
-              <CapturedPieces fen={displayFen} color={playerIsWhite ? "white" : "black"} />
 
-              <div className="relative w-full max-w-[640px] border-2 border-gray-700 rounded">
-                <ChessBoard
-                  fen={displayFen}
-                  orientation={orientation}
-                  movable={isMyTurn && isViewingLatest && !gameOver}
-                  premovable={!gameOver && isViewingLatest}
-                  coordinates={showCoordinates}
-                  lastMove={lastMove}
-                  check={isInCheck}
-                  onMove={handleMove}
-                  arrows={arrows.length > 0 ? arrows : undefined}
-                  highlightedSquares={
-                    highlightedSquares.length > 0 ? highlightedSquares : undefined
-                  }
-                />
-                {activeSettings.moveFeedback && <MoveFeedbackPopup classification={feedback} />}
-                <ReactionOverlay
-                  reactions={botReactions.activeReactions}
-                  onExpired={botReactions.removeReaction}
-                />
-                {showConfetti && <Confetti />}
-                {activeSettings.engine && engineLines.length > 0 && (
-                  <div className="absolute top-0 left-0 right-0 z-10">
-                    <EngineLines lines={engineLines} fen={displayFen} />
-                  </div>
-                )}
-                {thinking && (
-                  <div className="absolute bottom-0 left-0 right-0 flex justify-center py-2 bg-gradient-to-t from-black/60 to-transparent z-10">
-                    <div className="flex items-center gap-1.5 bg-gray-900/90 px-3 py-1.5 rounded-full">
-                      <span className="text-xs text-gray-300 font-medium">Thinking</span>
-                      <span className="flex gap-0.5">
-                        <span
-                          className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "0ms" }}
-                        />
-                        <span
-                          className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "150ms" }}
-                        />
-                        <span
-                          className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "300ms" }}
-                        />
-                      </span>
-                    </div>
-                  </div>
-                )}
+            {/* Engine lines (flow element, not overlaid) */}
+            {activeSettings.engine && engineLines.length > 0 && (
+              <div className="lg:hidden">
+                <EngineLines lines={engineLines} fen={displayFen} />
               </div>
+            )}
 
-              <CapturedPieces fen={displayFen} color={playerIsWhite ? "black" : "white"} />
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold">
-                  {user.username[0].toUpperCase()}
+            {/* Board + desktop eval bar wrapper */}
+            <div className="flex gap-1 flex-1 min-h-0">
+              {activeSettings.evalBar && (
+                <div className="hidden lg:flex h-auto">
+                  <EvaluationBar evalCP={evalScore} mate={null} />
                 </div>
-                <span className="text-sm font-medium">{user.username}</span>
+              )}
+              <div className="flex flex-col flex-1 min-h-0 min-w-0">
+                {/* Desktop: captured pieces */}
+                <div className="hidden lg:block">
+                  <CapturedPieces fen={displayFen} color={playerIsWhite ? "white" : "black"} />
+                </div>
+
+                {/* BOARD */}
+                <div
+                  className="relative w-full lg:max-w-[640px] border border-gray-700 rounded flex-1 min-h-0"
+                  style={{ aspectRatio: "1/1" }}
+                >
+                  <ChessBoard
+                    fen={displayFen}
+                    orientation={orientation}
+                    movable={isMyTurn && isViewingLatest && !gameOver}
+                    premovable={!gameOver && isViewingLatest}
+                    coordinates={showCoordinates}
+                    lastMove={lastMove}
+                    check={isInCheck}
+                    onMove={handleMove}
+                    arrows={arrows.length > 0 ? arrows : undefined}
+                    highlightedSquares={
+                      highlightedSquares.length > 0 ? highlightedSquares : undefined
+                    }
+                  />
+                  {activeSettings.moveFeedback && <MoveFeedbackPopup classification={feedback} />}
+                  <ReactionOverlay
+                    reactions={botReactions.activeReactions}
+                    onExpired={botReactions.removeReaction}
+                  />
+                  {showConfetti && <Confetti />}
+                </div>
+
+                {/* Desktop: captured pieces */}
+                <div className="hidden lg:block">
+                  <CapturedPieces fen={displayFen} color={playerIsWhite ? "black" : "white"} />
+                </div>
               </div>
+            </div>
+
+            {/* Player info */}
+            <div className="flex items-center gap-1.5 px-1 py-0.5">
+              <div className="w-5 h-5 lg:w-7 lg:h-7 bg-gray-700 rounded-full flex items-center justify-center text-[10px] lg:text-xs font-bold shrink-0">
+                {user.username[0].toUpperCase()}
+              </div>
+              <span className="text-xs lg:text-sm font-medium">{user.username}</span>
+            </div>
+
+            {/* Mobile: move timeline */}
+            <div className="lg:hidden">
+              <MoveTimeline moves={moves} currentPly={currentPly} onGoToPly={setCurrentPly} />
+            </div>
+
+            {/* Mobile: compact buttons */}
+            <div className="lg:hidden flex flex-wrap gap-1 justify-center px-1 py-0.5">
+              <button
+                onClick={() => setCurrentPly(0)}
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+              >
+                &laquo;
+              </button>
+              <button
+                onClick={() => setCurrentPly(Math.max(0, currentPly - 1))}
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+              >
+                &lsaquo;
+              </button>
+              <button
+                onClick={() => setCurrentPly(Math.min(moves.length, currentPly + 1))}
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+              >
+                &rsaquo;
+              </button>
+              <button
+                onClick={() => setCurrentPly(moves.length)}
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+              >
+                &raquo;
+              </button>
+              <button
+                onClick={() => setFlipDisplay((f) => !f)}
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+              >
+                &updownarrow;
+              </button>
+              {!gameOver && activeSettings.hints && (
+                <button
+                  onClick={handleHint}
+                  disabled={!isMyTurn || !botEngine.ready}
+                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded text-xs"
+                >
+                  {hintStep === 0 ? "Hint" : hintStep === 1 ? "Show" : "Hide"}
+                </button>
+              )}
+              {!gameOver && activeSettings.takeback && moves.length >= 2 && (
+                <button
+                  onClick={handleTakeback}
+                  disabled={thinking}
+                  className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 rounded text-xs"
+                >
+                  Undo
+                </button>
+              )}
+              {!gameOver && (
+                <button
+                  onClick={() => setConfirmResign(true)}
+                  className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+                >
+                  Resign
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="w-full lg:w-72 space-y-3">
+          {/* ── RIGHT: Desktop panel ── */}
+          <div className="hidden lg:block w-72 space-y-3">
             {openingName && (
               <div className="text-xs text-gray-400 text-center px-2 py-1 bg-gray-900 rounded">
                 {openingName}
               </div>
+            )}
+            {activeSettings.engine && engineLines.length > 0 && (
+              <EngineLines lines={engineLines} fen={displayFen} />
             )}
             <MoveList
               moves={moves}
@@ -1084,28 +1167,28 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
               }}
               onMoveHoverEnd={() => setPreviewArrow(null)}
             />
-            <div className="flex gap-2 justify-center">
+            <div className="flex gap-2 justify-center flex-wrap">
               <button
                 onClick={() => setCurrentPly(0)}
-                className="px-4 py-2 min-h-[44px] min-w-[44px] bg-gray-700 hover:bg-gray-600 rounded text-base flex items-center justify-center"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
               >
                 &laquo;
               </button>
               <button
                 onClick={() => setCurrentPly(Math.max(0, currentPly - 1))}
-                className="px-4 py-2 min-h-[44px] min-w-[44px] bg-gray-700 hover:bg-gray-600 rounded text-base flex items-center justify-center"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
               >
                 &lsaquo;
               </button>
               <button
                 onClick={() => setCurrentPly(Math.min(moves.length, currentPly + 1))}
-                className="px-4 py-2 min-h-[44px] min-w-[44px] bg-gray-700 hover:bg-gray-600 rounded text-base flex items-center justify-center"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
               >
                 &rsaquo;
               </button>
               <button
                 onClick={() => setCurrentPly(moves.length)}
-                className="px-4 py-2 min-h-[44px] min-w-[44px] bg-gray-700 hover:bg-gray-600 rounded text-base flex items-center justify-center"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
               >
                 &raquo;
               </button>
@@ -1119,20 +1202,18 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                     })
                     .catch(() => {});
                 }}
-                className="px-4 py-2 min-h-[44px] bg-gray-700 hover:bg-gray-600 rounded text-xs flex items-center justify-center"
-                title="Copy FEN to clipboard"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+                title="Copy FEN"
               >
                 {fenCopied ? "\u2713 FEN" : "FEN"}
               </button>
               <button
                 onClick={() => setShowCoordinates((c) => !c)}
-                className={`px-4 py-2 min-h-[44px] rounded text-xs flex items-center justify-center ${showCoordinates ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-800 text-gray-500 hover:bg-gray-700"}`}
-                title="Toggle board coordinates"
+                className={`px-3 py-1.5 rounded text-xs ${showCoordinates ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-800 text-gray-500"}`}
               >
                 a-h
               </button>
             </div>
-
             {!gameOver && (
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -1140,7 +1221,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                     <button
                       onClick={handleHint}
                       disabled={!isMyTurn || !botEngine.ready}
-                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded text-sm font-medium transition-colors"
+                      className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded text-sm font-medium"
                     >
                       {hintStep === 0 ? "Hint" : hintStep === 1 ? "Show Move" : "Hide"}
                     </button>
@@ -1149,7 +1230,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                     <button
                       onClick={handleTakeback}
                       disabled={thinking}
-                      className="flex-1 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 rounded text-sm font-medium transition-colors"
+                      className="flex-1 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 rounded text-sm font-medium"
                     >
                       Takeback
                     </button>
@@ -1157,24 +1238,23 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                 </div>
                 <button
                   onClick={() => setConfirmResign(true)}
-                  className="w-full py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition-colors"
+                  className="w-full py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
                 >
                   Resign
                 </button>
               </div>
             )}
             {error && <p className="text-red-400 text-xs text-center">{error}</p>}
-
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => setShowShortcuts(true)}
-                className="py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                className="py-1 text-xs text-gray-500 hover:text-gray-300"
               >
                 Shortcuts (?)
               </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className="py-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                className="py-1 text-xs text-gray-500 hover:text-gray-300"
                 aria-label="Toggle dark mode"
               >
                 {darkMode ? "\u2600\uFE0F Light" : "\uD83C\uDF19 Dark"}

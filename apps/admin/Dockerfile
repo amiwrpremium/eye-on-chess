@@ -3,10 +3,13 @@ RUN apk add --no-cache wget && npm install -g pnpm@10.32.1
 
 FROM base AS deps
 WORKDIR /app
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.base.json ./
 COPY apps/admin/package.json ./apps/admin/
 COPY packages/api-client/package.json ./packages/api-client/
 COPY packages/ui/package.json ./packages/ui/
+COPY tooling/eslint-config/package.json ./tooling/eslint-config/
+COPY tooling/prettier-config/package.json ./tooling/prettier-config/
+COPY tooling/typescript-config/package.json ./tooling/typescript-config/
 RUN pnpm install --frozen-lockfile && pnpm store prune
 
 FROM base AS builder
@@ -20,7 +23,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/admin/node_modules ./apps/admin/node_modules
 COPY --from=deps /app/packages/api-client/node_modules* ./packages/api-client/node_modules/
 COPY --from=deps /app/packages/ui/node_modules* ./packages/ui/node_modules/
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.base.json ./
+COPY tooling ./tooling
 COPY packages/api-client ./packages/api-client
 COPY packages/ui ./packages/ui
 COPY apps/admin ./apps/admin

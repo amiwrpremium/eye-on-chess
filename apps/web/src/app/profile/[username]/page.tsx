@@ -6,6 +6,7 @@ import Link from "next/link";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
 import CollectionPicker from "../../../components/CollectionPicker";
+import StreakBadge from "../../../components/stats/StreakBadge";
 
 interface RecentGame {
   id: string;
@@ -46,6 +47,10 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [h2hMode, setH2hMode] = useState(true);
   const [favoriteGameId, setFavoriteGameId] = useState<string | null>(null);
+  const [streaks, setStreaks] = useState<{
+    current: { type: "win" | "loss" | "none"; count: number };
+    bestWin: number;
+  } | null>(null);
 
   useEffect(() => {
     fetchMe();
@@ -93,6 +98,17 @@ export default function ProfilePage() {
     }
     load();
   }, [username, currentUser, h2hMode]);
+
+  // Fetch streaks for own profile
+  useEffect(() => {
+    if (!isOwnProfile) return;
+    api
+      .get("/api/v1/stats")
+      .then(({ data }) => {
+        if (data.streaks) setStreaks(data.streaks);
+      })
+      .catch(() => {});
+  }, [isOwnProfile]);
 
   async function sendRequest() {
     setActionLoading(true);
@@ -214,6 +230,10 @@ export default function ProfilePage() {
             <p className="text-gray-400 text-xs">Draws</p>
           </div>
         </div>
+
+        {streaks && isOwnProfile && (
+          <StreakBadge current={streaks.current} bestWin={streaks.bestWin} />
+        )}
 
         {/* Friend actions */}
         {!isOwnProfile && currentUser && (

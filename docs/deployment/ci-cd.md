@@ -74,14 +74,14 @@ Replace `{owner}/{repo}` with your GitHub username and repository name (e.g., `a
 
 The CD workflow needs these secrets to SSH into your VPS and deploy:
 
-| Secret            | Description                     | Example                             |
-| ----------------- | ------------------------------- | ----------------------------------- |
-| `SSH_HOST`        | Your VPS IP address or hostname | `203.0.113.50`                      |
-| `SSH_PORT`        | SSH port (defaults to 22)       | `2222`                              |
-| `SSH_USER`        | The deploy user on your VPS     | `deploy`                            |
-| `SSH_PRIVATE_KEY` | Ed25519 private key for SSH     | Contents of `~/.ssh/deploy_ed25519` |
-| `SITE_URL`        | Main site URL (baked into images) | `https://eye-on-chess.com`        |
-| `ADMIN_URL`       | Admin panel URL (baked into web image) | `https://admin.eye-on-chess.com` |
+| Secret            | Description                            | Example                             |
+| ----------------- | -------------------------------------- | ----------------------------------- |
+| `SSH_HOST`        | Your VPS IP address or hostname        | `203.0.113.50`                      |
+| `SSH_PORT`        | SSH port (defaults to 22)              | `2222`                              |
+| `SSH_USER`        | The deploy user on your VPS            | `deploy`                            |
+| `SSH_PRIVATE_KEY` | Ed25519 private key for SSH            | Contents of `~/.ssh/deploy_ed25519` |
+| `SITE_URL`        | Main site URL (baked into images)      | `https://eye-on-chess.com`          |
+| `ADMIN_URL`       | Admin panel URL (baked into web image) | `https://admin.eye-on-chess.com`    |
 
 #### Using GitHub UI
 

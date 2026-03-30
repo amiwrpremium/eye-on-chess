@@ -41,11 +41,7 @@ export default function AnalysisProgress({
         />
       </div>
       {evalPoints.length > 1 && (
-        <EvalGraph
-          points={evalPoints}
-          currentPly={currentPly}
-          onClickPly={() => {}}
-        />
+        <EvalGraph points={evalPoints} currentPly={currentPly} onClickPly={() => {}} />
       )}
     </div>
   );

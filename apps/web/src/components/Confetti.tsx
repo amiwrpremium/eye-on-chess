@@ -77,10 +77,7 @@ export default function Confetti() {
   if (!visible) return null;
 
   return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0 overflow-hidden pointer-events-none z-20"
-    >
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none z-20">
       {particles.map((p) => (
         <div
           key={p.id}

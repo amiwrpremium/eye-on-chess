@@ -82,9 +82,7 @@ export default function BotSelector({ selected, onSelect, bots }: BotSelectorPro
               <span className="flex items-center gap-2">
                 <span className={bandColor.text}>{label.name}</span>
                 <span className="text-xs text-gray-500">{label.eloRange}</span>
-                {hasSelected && (
-                  <span className={`w-1.5 h-1.5 rounded-full ${bandColor.bg}`} />
-                )}
+                {hasSelected && <span className={`w-1.5 h-1.5 rounded-full ${bandColor.bg}`} />}
               </span>
               <svg
                 className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
@@ -119,11 +117,7 @@ export default function BotSelector({ selected, onSelect, bots }: BotSelectorPro
                           : "bg-gray-800/60 hover:bg-gray-700/80"
                       }`}
                     >
-                      <span
-                        className="text-3xl flex-shrink-0"
-                        role="img"
-                        aria-label={bot.name}
-                      >
+                      <span className="text-3xl flex-shrink-0" role="img" aria-label={bot.name}>
                         {bot.avatar}
                       </span>
                       <div className="min-w-0 flex-1">
@@ -137,9 +131,7 @@ export default function BotSelector({ selected, onSelect, bots }: BotSelectorPro
                             {bot.elo}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-0.5 truncate">
-                          {bot.description}
-                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5 truncate">{bot.description}</p>
                       </div>
                     </button>
                   );

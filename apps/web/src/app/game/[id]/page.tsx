@@ -397,7 +397,11 @@ export default function GamePage() {
                 check={false}
                 coordinates={showCoordinates}
                 onMove={handleMove}
-                arrows={previewArrow ? [{ from: previewArrow.from, to: previewArrow.to, color: "yellow" }] : undefined}
+                arrows={
+                  previewArrow
+                    ? [{ from: previewArrow.from, to: previewArrow.to, color: "yellow" }]
+                    : undefined
+                }
               />
               <ReactionOverlay reactions={activeReactions} onExpired={removeReaction} />
             </div>
@@ -487,10 +491,13 @@ export default function GamePage() {
               </button>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(displayFen).then(() => {
-                    setFenCopied(true);
-                    setTimeout(() => setFenCopied(false), 1500);
-                  }).catch(() => {});
+                  navigator.clipboard
+                    .writeText(displayFen)
+                    .then(() => {
+                      setFenCopied(true);
+                      setTimeout(() => setFenCopied(false), 1500);
+                    })
+                    .catch(() => {});
                 }}
                 className="px-3 py-2 min-h-[44px] bg-gray-700 hover:bg-gray-600 rounded text-xs"
                 title="Copy FEN to clipboard"

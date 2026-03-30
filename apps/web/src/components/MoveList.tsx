@@ -94,9 +94,7 @@ export default function MoveList({
         <div className="space-y-0.5">
           {pairs.map((pair) => (
             <div key={pair.moveNumber} className="flex items-center text-sm">
-              <span className="w-8 text-gray-500 text-right mr-2 shrink-0">
-                {pair.moveNumber}.
-              </span>
+              <span className="w-8 text-gray-500 text-right mr-2 shrink-0">{pair.moveNumber}.</span>
               {pair.white && (
                 <button
                   ref={pair.white.ply === currentPly ? currentRef : undefined}

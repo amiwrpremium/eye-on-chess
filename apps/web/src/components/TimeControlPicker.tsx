@@ -94,9 +94,7 @@ export default function TimeControlPicker({
               >
                 <span className="flex items-center gap-2">
                   {cat.label}
-                  {hasSelected && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  )}
+                  {hasSelected && <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />}
                 </span>
                 <svg
                   className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
@@ -141,9 +139,7 @@ export default function TimeControlPicker({
           onClick={() => onSelect("unlimited")}
           disabled={disabled}
           className={`w-full px-4 py-3 rounded-lg text-sm font-medium text-left transition-colors ${
-            isUnlimited
-              ? "bg-blue-600 text-white"
-              : "bg-gray-800 hover:bg-gray-700 text-gray-200"
+            isUnlimited ? "bg-blue-600 text-white" : "bg-gray-800 hover:bg-gray-700 text-gray-200"
           } disabled:opacity-50`}
         >
           No Time Limit

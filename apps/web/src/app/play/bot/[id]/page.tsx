@@ -761,7 +761,10 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
       }
       // Update engine lines after player move (before bot responds)
       if (activeSettings.engine) {
-        botEngine.evaluateMultiPV(chess.fen(), 3).then(setEngineLines).catch(() => {});
+        botEngine
+          .evaluateMultiPV(chess.fen(), 3)
+          .then(setEngineLines)
+          .catch(() => {});
       }
 
       // Bot games use client-side engine -- don't sync individual moves to server
@@ -968,8 +971,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
   for (const t of threatArrows) arrows.push({ from: t.from, to: t.to, color: "red" });
   if (suggestionArrow)
     arrows.push({ from: suggestionArrow.from, to: suggestionArrow.to, color: "blue" });
-  if (previewArrow)
-    arrows.push({ from: previewArrow.from, to: previewArrow.to, color: "yellow" });
+  if (previewArrow) arrows.push({ from: previewArrow.from, to: previewArrow.to, color: "yellow" });
   const highlightedSquares: { square: string; color: string }[] = [];
   if (hintStep >= 1 && hintSource) highlightedSquares.push({ square: hintSource, color: "green" });
 
@@ -1109,10 +1111,13 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
               </button>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(displayFen).then(() => {
-                    setFenCopied(true);
-                    setTimeout(() => setFenCopied(false), 1500);
-                  }).catch(() => {});
+                  navigator.clipboard
+                    .writeText(displayFen)
+                    .then(() => {
+                      setFenCopied(true);
+                      setTimeout(() => setFenCopied(false), 1500);
+                    })
+                    .catch(() => {});
                 }}
                 className="px-4 py-2 min-h-[44px] bg-gray-700 hover:bg-gray-600 rounded text-xs flex items-center justify-center"
                 title="Copy FEN to clipboard"

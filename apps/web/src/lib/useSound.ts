@@ -3,7 +3,15 @@
 import { useRef, useCallback } from "react";
 import { useSettingsStore } from "../stores/settings";
 
-type SoundName = "move" | "capture" | "check" | "castle" | "gameover" | "notify" | "lowtime" | "undo";
+type SoundName =
+  | "move"
+  | "capture"
+  | "check"
+  | "castle"
+  | "gameover"
+  | "notify"
+  | "lowtime"
+  | "undo";
 
 const SOUND_FILES: Record<SoundName, string> = {
   move: "/sounds/move.wav",

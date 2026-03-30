@@ -214,7 +214,18 @@ export default function ChessBoard({
         ],
       },
     });
-  }, [fen, orientation, movable, premovable, showCoords, lastMove, check, highlightedSquares, arrows, handleMove]);
+  }, [
+    fen,
+    orientation,
+    movable,
+    premovable,
+    showCoords,
+    lastMove,
+    check,
+    highlightedSquares,
+    arrows,
+    handleMove,
+  ]);
 
   function selectPromotion(piece: string) {
     if (promotion) {

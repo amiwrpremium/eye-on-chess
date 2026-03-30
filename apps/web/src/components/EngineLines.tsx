@@ -9,11 +9,7 @@ interface EngineLinesProps {
   fen: string;
 }
 
-const RANK_COLORS = [
-  "bg-green-600",
-  "bg-yellow-600",
-  "bg-orange-600",
-];
+const RANK_COLORS = ["bg-green-600", "bg-yellow-600", "bg-orange-600"];
 
 function formatScore(score: number, mate: number | null): string {
   if (mate !== null) {

@@ -37,7 +37,9 @@ export default function GameOverModal({
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
     >
       <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
-        <h2 id="game-over-title" className="text-xl font-bold mb-2">Game Over</h2>
+        <h2 id="game-over-title" className="text-xl font-bold mb-2">
+          Game Over
+        </h2>
         <p className="text-gray-300 mb-4">{resultLabel}</p>
         {gameOver.ratingChange && (
           <div className="flex justify-center gap-6 mb-4 text-sm">
@@ -81,11 +83,7 @@ export default function GameOverModal({
             <>
               {rematchOffered ? (
                 <div className="flex-1 py-2 bg-green-600/30 border border-green-600/50 rounded font-medium text-green-400 flex items-center justify-center gap-2 animate-pulse">
-                  <svg
-                    className="w-4 h-4 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle
                       className="opacity-25"
                       cx="12"

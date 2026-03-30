@@ -645,7 +645,7 @@ export async function adminRoutes(app: FastifyInstance) {
       "bot.create",
       "BotProfile",
       bot.id,
-      { botId, name: bot.name, elo: bot.elo },
+      { botId: body.botId, name: bot.name, elo: bot.elo },
       request.ip
     );
 

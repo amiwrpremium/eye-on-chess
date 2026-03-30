@@ -24,7 +24,7 @@ import {
   type InProgressGame,
 } from "../../../lib/offlineSync";
 import { ConfirmModal, useToast } from "@eyeonchess/ui";
-import type { BotPersonality } from "@eyeonchess/chess";
+import { TIME_CONTROL_PRESETS, type BotPersonality } from "@eyeonchess/chess";
 import { loadBotPrefs, saveBotPrefs } from "../../../lib/gamePrefs";
 import BotSelector from "../../../components/BotSelector";
 import TimeControlPicker from "../../../components/TimeControlPicker";
@@ -462,7 +462,7 @@ export default function PlayBotPage() {
         <ConfirmModal
           open={confirmStart}
           title="Start Game?"
-          message={`Mode: ${GAME_MODE_LABELS[modePreset].name}\nBot: ${selectedBot ? `${selectedBot.avatar} ${selectedBot.name}` : "Custom"} (${botElo} - ${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustomTime ? `${customMinutes}+${customIncrement}` : TIME_PRESETS.find((p) => p.key === selectedTime)?.label || selectedTime}${!isOnline ? "\n\nOffline — will sync later" : ""}`}
+          message={`Mode: ${GAME_MODE_LABELS[modePreset].name}\nBot: ${selectedBot ? `${selectedBot.avatar} ${selectedBot.name}` : "Custom"} (${botElo} - ${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustomTime ? `${customMinutes}+${customIncrement}` : TIME_CONTROL_PRESETS[selectedTime]?.label || selectedTime}${!isOnline ? "\n\nOffline — will sync later" : ""}`}
           confirmLabel="Start"
           confirmVariant="primary"
           onConfirm={startGame}

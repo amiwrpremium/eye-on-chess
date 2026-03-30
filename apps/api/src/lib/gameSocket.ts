@@ -92,14 +92,16 @@ async function endGame(
  */
 export function setupGameSocket(io: SocketServer) {
   /** Wrap an async socket handler with error logging to prevent unhandled rejections. */
-  function safe(event: string, handler: (...args: never[]) => Promise<void>) {
-    return async (...args: never[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function safe<T extends (...args: any[]) => Promise<void>>(event: string, handler: T): T {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (async (...args: any[]) => {
       try {
         await handler(...args);
       } catch (err) {
         logger.error({ err, event }, "socket handler error");
       }
-    };
+    }) as T;
   }
 
   io.on("connection", (socket: Socket) => {

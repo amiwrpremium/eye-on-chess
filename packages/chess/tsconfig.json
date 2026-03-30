@@ -1,4 +1,7 @@
 {
   "extends": "@eyeonchess/typescript-config/library",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
   "include": ["src"]
 }

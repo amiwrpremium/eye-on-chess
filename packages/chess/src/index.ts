@@ -67,6 +67,10 @@ export {
   getOpeningMove,
 } from "./bots/index";
 
+// ── Analysis ─────────────────────────────────────────────
+export type { ClassifiedMove } from "./analysis/index";
+export { classifyMove, computeAccuracy } from "./analysis/index";
+
 // ── Legacy types (kept for backwards compat) ─────────────
 /** @deprecated Use specific types from their domains instead */
 export type Color = "white" | "black";

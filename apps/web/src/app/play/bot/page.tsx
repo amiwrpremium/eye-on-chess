@@ -252,7 +252,7 @@ export default function PlayBotPage() {
             Syncing {pendingSyncCount} offline game{pendingSyncCount > 1 ? "s" : ""}...
           </div>
         )}
-        {savedGames.length > 0 && (
+        {savedGames.length > 0 && !showActivePrompt && (
           <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 space-y-2">
             <p className="text-sm font-medium text-blue-300 text-center">
               Resume in-progress game{savedGames.length > 1 ? "s" : ""}

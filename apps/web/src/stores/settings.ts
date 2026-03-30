@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import api from "../lib/api";
+import { useToast } from "@eyeonchess/ui";
 
 export type BoardTheme = "classic" | "wood" | "green" | "blue" | "purple" | "dark";
 export type PieceSet = "classic" | "modern" | "minimal";
@@ -25,6 +26,7 @@ interface SettingsState {
 async function savePreference(data: Record<string, unknown>) {
   try {
     await api.put("/api/v1/auth/preferences", data);
+    useToast.getState().show("Settings saved", "success");
   } catch {
     // Silently fail — will sync next login
   }

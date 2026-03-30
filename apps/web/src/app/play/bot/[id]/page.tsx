@@ -895,6 +895,12 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
     !gameOver &&
     ((game.turn() === "w" && playerIsWhite) || (game.turn() === "b" && !playerIsWhite));
   const isViewingLatest = currentPly === moves.length;
+
+  const openingName = useMemo(() => {
+    if (allSans.length === 0) return null;
+    const opening = lookupOpeningClient(allSans);
+    return opening ? `${opening.eco} ${opening.name}` : null;
+  }, [allSans]);
   const displayFen =
     currentPly === 0
       ? moves.length > 0
@@ -1059,6 +1065,11 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           </div>
 
           <div className="w-full lg:w-72 space-y-3">
+            {openingName && (
+              <div className="text-xs text-gray-400 text-center px-2 py-1 bg-gray-900 rounded">
+                {openingName}
+              </div>
+            )}
             <MoveList
               moves={moves}
               currentPly={currentPly}

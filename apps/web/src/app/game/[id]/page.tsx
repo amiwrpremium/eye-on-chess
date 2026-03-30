@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
@@ -23,6 +23,7 @@ import GameOverModal from "../../../components/GameOverModal";
 import CapturedPieces from "../../../components/CapturedPieces";
 import { useSound, detectMoveSound } from "../../../lib/useSound";
 import { useKeyboardShortcuts } from "../../../lib/useKeyboardShortcuts";
+import { lookupOpening } from "@eyeonchess/chess";
 import type { Player, MoveRecord, ClockState, ReactionType } from "@eyeonchess/chess";
 import { RESULT_LABELS, TERMINATION_LABELS } from "@eyeonchess/chess";
 
@@ -320,6 +321,13 @@ export default function GamePage() {
 
   const isViewingLatest = currentPly === moves.length;
 
+  const openingName = useMemo(() => {
+    if (moves.length === 0) return null;
+    const sans = moves.map((m) => m.san);
+    const opening = lookupOpening(sans);
+    return opening ? `${opening.eco} ${opening.name}` : null;
+  }, [moves]);
+
   // Players based on orientation
   const topPlayer = isWhite ? black : white;
   const bottomPlayer = isWhite ? white : black;
@@ -404,6 +412,11 @@ export default function GamePage() {
 
           {/* Right panel */}
           <div className="flex-1 space-y-4 min-w-0">
+            {openingName && (
+              <div className="text-xs text-gray-400 text-center px-2 py-1 bg-gray-900 rounded">
+                {openingName}
+              </div>
+            )}
             <MoveList
               moves={moves}
               currentPly={currentPly}

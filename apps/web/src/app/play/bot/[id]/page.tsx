@@ -48,6 +48,7 @@ import { useBotChat } from "../../../../lib/useBotChat";
 import BotChatBubble from "../../../../components/BotChatBubble";
 import { useBotReactions } from "../../../../lib/useBotReactions";
 import ReactionOverlay from "../../../../components/ReactionOverlay";
+import Confetti from "../../../../components/Confetti";
 import EngineLines from "../../../../components/EngineLines";
 import type { EngineLine } from "../../../../lib/useStockfish";
 
@@ -154,6 +155,9 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
 
   // Copy FEN feedback
   const [fenCopied, setFenCopied] = useState(false);
+
+  // Confetti on player win
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Mode preset label (for display)
   const [modePreset, setModePreset] = useState<GameModePreset>("friendly");
@@ -591,6 +595,10 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
         else botChat.triggerMessage("onDraw");
         botReactions.triggerReaction("gameEnd", personality);
         setGameOver(result);
+        const playerWon =
+          (playerIsWhite && result.includes("White wins")) ||
+          (!playerIsWhite && result.includes("Black wins"));
+        if (playerWon) setShowConfetti(true);
         pickGameOverQuote(result);
         clearInProgress(id);
         sound.playGameOver();
@@ -692,6 +700,10 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
         else botChat.triggerMessage("onDraw");
         botReactions.triggerReaction("gameEnd", pEnd);
         setGameOver(result);
+        const playerWon2 =
+          (playerIsWhite && result.includes("White wins")) ||
+          (!playerIsWhite && result.includes("Black wins"));
+        if (playerWon2) setShowConfetti(true);
         clearInProgress(id);
         sound.playGameOver();
         if (!gameId) saveGameOffline(newMoves, [...allUciMoves, playerUci], result);
@@ -1002,6 +1014,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                   reactions={botReactions.activeReactions}
                   onExpired={botReactions.removeReaction}
                 />
+                {showConfetti && <Confetti />}
                 {activeSettings.engine && engineLines.length > 0 && (
                   <div className="absolute top-0 left-0 right-0 z-10">
                     <EngineLines lines={engineLines} fen={displayFen} />

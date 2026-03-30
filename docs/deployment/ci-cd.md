@@ -72,13 +72,16 @@ Replace `{owner}/{repo}` with your GitHub username and repository name (e.g., `a
 
 ### 1.2 Add Repository Secrets
 
-The CD workflow needs three secrets to SSH into your VPS and deploy:
+The CD workflow needs these secrets to SSH into your VPS and deploy:
 
 | Secret            | Description                     | Example                             |
 | ----------------- | ------------------------------- | ----------------------------------- |
 | `SSH_HOST`        | Your VPS IP address or hostname | `203.0.113.50`                      |
+| `SSH_PORT`        | SSH port (defaults to 22)       | `2222`                              |
 | `SSH_USER`        | The deploy user on your VPS     | `deploy`                            |
 | `SSH_PRIVATE_KEY` | Ed25519 private key for SSH     | Contents of `~/.ssh/deploy_ed25519` |
+| `SITE_URL`        | Main site URL (baked into images) | `https://eye-on-chess.com`        |
+| `ADMIN_URL`       | Admin panel URL (baked into web image) | `https://admin.eye-on-chess.com` |
 
 #### Using GitHub UI
 
@@ -89,21 +92,27 @@ The CD workflow needs three secrets to SSH into your VPS and deploy:
 5. Click **New repository secret**
 6. Enter the secret name (e.g., `SSH_HOST`) and value
 7. Click **Add secret**
-8. Repeat for `SSH_USER` and `SSH_PRIVATE_KEY`
+8. Repeat for `SSH_PORT`, `SSH_USER`, `SSH_PRIVATE_KEY`, `SITE_URL`, `ADMIN_URL`
 
 #### Using `gh` CLI
 
 ```bash
 # Set each secret interactively (prompts for value)
 gh secret set SSH_HOST
+gh secret set SSH_PORT
 gh secret set SSH_USER
+gh secret set SITE_URL
+gh secret set ADMIN_URL
 
 # Set SSH key from a file
 gh secret set SSH_PRIVATE_KEY < ~/.ssh/deploy_ed25519
 
 # Or set with a value directly
 gh secret set SSH_HOST --body "203.0.113.50"
+gh secret set SSH_PORT --body "2222"
 gh secret set SSH_USER --body "deploy"
+gh secret set SITE_URL --body "https://eye-on-chess.com"
+gh secret set ADMIN_URL --body "https://admin.eye-on-chess.com"
 ```
 
 To verify your secrets are set:
@@ -115,9 +124,12 @@ gh secret list
 This shows secret names (values are never displayed):
 
 ```
-SSH_HOST    Updated 2026-03-25
+ADMIN_URL         Updated 2026-03-30
+SSH_HOST          Updated 2026-03-25
+SSH_PORT          Updated 2026-03-30
 SSH_PRIVATE_KEY   Updated 2026-03-25
-SSH_USER    Updated 2026-03-25
+SSH_USER          Updated 2026-03-25
+SITE_URL          Updated 2026-03-25
 ```
 
 ### 1.3 Create a Deployment Environment (Optional)
@@ -647,9 +659,11 @@ Go to your project → **Settings** → **CI/CD** → **Variables** → **Add va
 | Variable          | Value                               | Flags                        |
 | ----------------- | ----------------------------------- | ---------------------------- |
 | `SSH_HOST`        | Your VPS IP                         | Protected                    |
+| `SSH_PORT`        | `2222` (or your SSH port)           | Protected                    |
 | `SSH_USER`        | `deploy`                            | Protected                    |
 | `SSH_PRIVATE_KEY` | Contents of `~/.ssh/deploy_ed25519` | Protected, Masked, File type |
-| `SITE_URL`        | `http://your-domain.com`            | Protected                    |
+| `SITE_URL`        | `https://your-domain.com`           | Protected                    |
+| `ADMIN_URL`       | `https://admin.your-domain.com`     | Protected                    |
 
 The `CI_REGISTRY`, `CI_REGISTRY_USER`, `CI_REGISTRY_PASSWORD`, and `CI_REGISTRY_IMAGE` variables are provided automatically by GitLab — you don't need to set them.
 

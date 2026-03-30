@@ -102,11 +102,14 @@ Required for the CD pipeline to SSH into your server.
 
 Add these three secrets:
 
-| Secret            | Value                               | Description                        |
-| ----------------- | ----------------------------------- | ---------------------------------- |
-| `SSH_HOST`        | Your VPS IP (e.g., `203.0.113.50`)  | Server to deploy to                |
-| `SSH_USER`        | `deploy`                            | SSH username on the server         |
-| `SSH_PRIVATE_KEY` | Contents of your deploy private key | Ed25519 key for SSH authentication |
+| Secret            | Value                               | Description                             |
+| ----------------- | ----------------------------------- | --------------------------------------- |
+| `SSH_HOST`        | Your VPS IP (e.g., `203.0.113.50`)  | Server to deploy to                     |
+| `SSH_PORT`        | `2222` (or your SSH port)           | SSH port (defaults to 22 if not set)    |
+| `SSH_USER`        | `deploy`                            | SSH username on the server              |
+| `SSH_PRIVATE_KEY` | Contents of your deploy private key | Ed25519 key for SSH authentication      |
+| `SITE_URL`        | `https://eye-on-chess.com`          | Main site URL (baked into Docker images)|
+| `ADMIN_URL`       | `https://admin.eye-on-chess.com`    | Admin panel URL (baked into web image)  |
 
 To generate a deploy key pair:
 
@@ -201,7 +204,7 @@ After completing all steps, verify:
 - [ ] **Branch ruleset** active on `master` with Lint + Test status checks
 - [ ] **Tag ruleset** active on `v*` pattern with creation/deletion restrictions
 - [ ] **Production environment** created with required reviewer
-- [ ] **Secrets** configured: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`
+- [ ] **Secrets** configured: `SSH_HOST`, `SSH_PORT`, `SSH_USER`, `SSH_PRIVATE_KEY`, `SITE_URL`, `ADMIN_URL`
 - [ ] **Dependabot alerts** enabled
 - [ ] **Dependabot security updates** enabled
 - [ ] **Push protection** enabled

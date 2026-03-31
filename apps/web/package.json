@@ -1,6 +1,6 @@
 {
   "name": "@eyeonchess/web",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --port 3000 --hostname 0.0.0.0",

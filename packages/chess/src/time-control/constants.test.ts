@@ -69,7 +69,7 @@ describe("TIME_CONTROL_PRESETS", () => {
     "blitz_3_2",
     "blitz_5_0",
     "blitz_5_3",
-    "blitz_5_5",
+    "blitz_5_2",
     "rapid_10_0",
     "rapid_10_5",
     "rapid_15_10",

@@ -13,7 +13,7 @@ export const TIME_CONTROL_PRESETS: Record<string, TimeControlPreset> = {
   blitz_3_2: { label: "3+2", timeControl: "BLITZ", initialTime: 180, increment: 2 },
   blitz_5_0: { label: "5+0", timeControl: "BLITZ", initialTime: 300, increment: 0 },
   blitz_5_3: { label: "5+3", timeControl: "BLITZ", initialTime: 300, increment: 3 },
-  blitz_5_5: { label: "5+5", timeControl: "BLITZ", initialTime: 300, increment: 5 },
+  blitz_5_2: { label: "5+2", timeControl: "BLITZ", initialTime: 300, increment: 2 },
   rapid_10_0: { label: "10+0", timeControl: "RAPID", initialTime: 600, increment: 0 },
   rapid_10_5: { label: "10+5", timeControl: "RAPID", initialTime: 600, increment: 5 },
   rapid_15_10: { label: "15+10", timeControl: "RAPID", initialTime: 900, increment: 10 },

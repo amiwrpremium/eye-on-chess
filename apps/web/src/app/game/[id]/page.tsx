@@ -370,7 +370,7 @@ export default function GamePage() {
       <div className="max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0 lg:block">
         <div className="flex flex-col lg:flex-row gap-1 lg:gap-6 items-start flex-1 min-h-0">
           {/* ── LEFT: Board area ── */}
-          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full">
+          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full justify-center lg:justify-start">
             {/* Top player */}
             <div className="flex items-center justify-between px-1 py-0.5">
               <div className="flex items-center gap-1.5">
@@ -438,40 +438,22 @@ export default function GamePage() {
 
             {/* Mobile: move timeline */}
             <div className="lg:hidden">
-              <MoveTimeline moves={moves} currentPly={currentPly} onGoToPly={goToPly} />
+              <MoveTimeline
+                moves={moves}
+                currentPly={currentPly}
+                totalMoves={moves.length}
+                onGoToPly={goToPly}
+              />
             </div>
 
-            {/* Mobile: compact buttons */}
-            <div className="lg:hidden flex flex-wrap gap-1 justify-center px-1 py-0.5">
-              <button
-                onClick={() => goToPly(0)}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                &laquo;
-              </button>
-              <button
-                onClick={() => goToPly(Math.max(0, currentPly - 1))}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                &lsaquo;
-              </button>
-              <button
-                onClick={() => goToPly(Math.min(moves.length, currentPly + 1))}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                &rsaquo;
-              </button>
-              <button
-                onClick={() => goToPly(moves.length)}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                &raquo;
-              </button>
+            {/* Mobile: action buttons (icons) */}
+            <div className="lg:hidden flex gap-1.5 justify-center px-1 py-0.5">
               <button
                 onClick={() => setFlipDisplay((f) => !f)}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                title="Flip board"
               >
-                &updownarrow;
+                {"\uD83D\uDD04"}
               </button>
               {isActive && !gameOver && (
                 <>
@@ -495,22 +477,21 @@ export default function GamePage() {
                       <button
                         onClick={() => setConfirmDraw(true)}
                         disabled={drawOffered}
-                        className="px-2 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded text-xs"
+                        className="px-2 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded text-sm"
+                        title="Offer draw"
                       >
-                        {drawOffered ? "Offered" : "Draw"}
+                        {drawOffered ? "\u2713" : "\uD83E\uDD1D"}
                       </button>
                       <button
                         onClick={() => setConfirmResign(true)}
-                        className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+                        className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                        title="Resign"
                       >
-                        Resign
+                        {"\uD83C\uDFF3\uFE0F"}
                       </button>
                     </>
                   )}
                 </>
-              )}
-              {isActive && !gameOver && (
-                <ReactionPicker onReact={sendReaction} disabled={!isActive} />
               )}
             </div>
           </div>

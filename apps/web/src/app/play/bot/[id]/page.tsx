@@ -982,7 +982,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
       <div className="w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 lg:block">
         <div className="flex flex-col lg:flex-row gap-1 lg:gap-4 items-start flex-1 min-h-0">
           {/* ── LEFT: Board area ── */}
-          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full">
+          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full justify-center lg:justify-start">
             {/* Bot info */}
             <div className="flex items-center gap-1.5 px-1 py-0.5">
               <div className="w-5 h-5 lg:w-7 lg:h-7 bg-gray-700 rounded-full flex items-center justify-center text-xs lg:text-base shrink-0">
@@ -1078,65 +1078,50 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
 
             {/* Mobile: move timeline */}
             <div className="lg:hidden">
-              <MoveTimeline moves={moves} currentPly={currentPly} onGoToPly={setCurrentPly} />
+              <MoveTimeline
+                moves={moves}
+                currentPly={currentPly}
+                totalMoves={moves.length}
+                onGoToPly={setCurrentPly}
+              />
             </div>
 
-            {/* Mobile: compact buttons */}
-            <div className="lg:hidden flex flex-wrap gap-1 justify-center px-1 py-0.5">
-              <button
-                onClick={() => setCurrentPly(0)}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                &laquo;
-              </button>
-              <button
-                onClick={() => setCurrentPly(Math.max(0, currentPly - 1))}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                &lsaquo;
-              </button>
-              <button
-                onClick={() => setCurrentPly(Math.min(moves.length, currentPly + 1))}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                &rsaquo;
-              </button>
-              <button
-                onClick={() => setCurrentPly(moves.length)}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
-              >
-                &raquo;
-              </button>
+            {/* Mobile: action buttons (icons only) */}
+            <div className="lg:hidden flex gap-1.5 justify-center px-1 py-0.5">
               <button
                 onClick={() => setFlipDisplay((f) => !f)}
-                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                title="Flip board"
               >
-                &updownarrow;
+                {"\uD83D\uDD04"}
               </button>
               {!gameOver && activeSettings.hints && (
                 <button
                   onClick={handleHint}
                   disabled={!isMyTurn || !botEngine.ready}
-                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded text-xs"
+                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded text-sm"
+                  title="Hint"
                 >
-                  {hintStep === 0 ? "Hint" : hintStep === 1 ? "Show" : "Hide"}
+                  {"\uD83D\uDCA1"}
                 </button>
               )}
               {!gameOver && activeSettings.takeback && moves.length >= 2 && (
                 <button
                   onClick={handleTakeback}
                   disabled={thinking}
-                  className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 rounded text-xs"
+                  className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 rounded text-sm"
+                  title="Takeback"
                 >
-                  Undo
+                  {"\u21A9\uFE0F"}
                 </button>
               )}
               {!gameOver && (
                 <button
                   onClick={() => setConfirmResign(true)}
-                  className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+                  className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                  title="Resign"
                 >
-                  Resign
+                  {"\uD83C\uDFF3\uFE0F"}
                 </button>
               )}
             </div>

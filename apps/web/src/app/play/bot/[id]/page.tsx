@@ -1018,9 +1018,9 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
             )}
 
             {/* Engine lines (flow element, not overlaid) */}
-            {activeSettings.engine && engineLines.length > 0 && (
+            {activeSettings.engine && (
               <div className="lg:hidden">
-                <EngineLines lines={engineLines} fen={displayFen} />
+                <EngineLines lines={engineLines} fen={displayFen} loading={thinking} />
               </div>
             )}
 
@@ -1149,8 +1149,8 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                 {openingName}
               </div>
             )}
-            {activeSettings.engine && engineLines.length > 0 && (
-              <EngineLines lines={engineLines} fen={displayFen} />
+            {activeSettings.engine && (
+              <EngineLines lines={engineLines} fen={displayFen} loading={thinking} />
             )}
             <MoveList
               moves={moves}

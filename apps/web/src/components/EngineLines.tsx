@@ -7,6 +7,7 @@ import type { EngineLine } from "../lib/useStockfish";
 interface EngineLinesProps {
   lines: EngineLine[];
   fen: string;
+  loading?: boolean;
 }
 
 const RANK_COLORS = ["bg-green-600", "bg-yellow-600", "bg-orange-600"];
@@ -62,7 +63,7 @@ function formatMoveSequence(sanMoves: string[], fen: string): string {
  * Renders multiple engine principal variations in a chess.com-style panel.
  * Each line shows rank indicator, evaluation score, and SAN move sequence.
  */
-export default function EngineLines({ lines, fen }: EngineLinesProps) {
+export default function EngineLines({ lines, fen, loading }: EngineLinesProps) {
   const formattedLines = useMemo(
     () =>
       lines.map((line, i) => ({
@@ -75,7 +76,23 @@ export default function EngineLines({ lines, fen }: EngineLinesProps) {
     [lines, fen]
   );
 
-  if (formattedLines.length === 0) return null;
+  if (formattedLines.length === 0) {
+    if (!loading) return null;
+    return (
+      <div className="bg-gray-900 rounded-lg overflow-hidden text-xs font-mono">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="flex items-center gap-2 px-3 py-1.5 border-b border-gray-800 last:border-0"
+          >
+            <span className="w-5 h-5 rounded bg-gray-700 animate-pulse shrink-0" />
+            <span className="w-12 h-4 rounded bg-gray-700 animate-pulse shrink-0" />
+            <span className="flex-1 h-4 rounded bg-gray-800 animate-pulse" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-900 rounded-lg overflow-hidden text-xs font-mono">

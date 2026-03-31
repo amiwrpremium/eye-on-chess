@@ -45,7 +45,7 @@ export default function MoveFeedbackPopup({ classification }: MoveFeedbackPopupP
 
   return (
     <div
-      className={`absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-lg bg-gray-900/90 backdrop-blur transition-all duration-300 ${
+      className={`absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-lg bg-gray-900/90 backdrop-blur pointer-events-none transition-all duration-300 ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
       }`}
     >

@@ -26,6 +26,7 @@ import type { Player } from "@eyeonchess/chess";
 import { CLASSIFICATION_COLORS, CLASSIFICATION_SYMBOLS } from "@eyeonchess/chess";
 import { useClientAnalysis } from "../../../../lib/useClientAnalysis";
 import AnalysisProgress from "../../../../components/AnalysisProgress";
+import MoveTimeline from "../../../../components/MoveTimeline";
 
 interface FeedbackEntry {
   ply: number;
@@ -314,32 +315,92 @@ export default function AnalysisPage() {
     }
   }
 
+  const timelineMoves = analysis.feedback.map((f) => ({ ply: f.ply, san: f.san }));
+
   return (
-    <main className="min-h-screen p-4 pt-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Board + Eval */}
-          <div className="flex gap-2">
-            <div className="h-auto flex">
+    <main className="flex flex-col h-[100dvh] lg:h-auto lg:min-h-screen overflow-hidden lg:overflow-auto p-1 lg:p-4">
+      <div className="max-w-6xl mx-auto flex flex-col flex-1 min-h-0 lg:block w-full">
+        <div className="flex flex-col lg:flex-row gap-1 lg:gap-6 items-start flex-1 min-h-0">
+          {/* ── LEFT: Board area ── */}
+          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full justify-center lg:justify-start">
+            {/* Accuracy summary (compact on mobile) */}
+            <div className="flex items-center justify-between px-1 py-0.5 text-xs">
+              <span className="text-gray-400">
+                {white?.username || "White"}:{" "}
+                <strong>{analysis.whiteAccuracy?.toFixed(1) ?? "—"}%</strong>
+              </span>
+              <span className="text-gray-400">
+                {black?.username || "Black"}:{" "}
+                <strong>{analysis.blackAccuracy?.toFixed(1) ?? "—"}%</strong>
+              </span>
+            </div>
+
+            {/* Mobile: horizontal eval bar */}
+            <div className="lg:hidden h-3 w-full">
               <EvaluationBar evalCP={currentEval} mate={null} />
             </div>
-            <div className="w-[min(100%,480px)] space-y-2">
-              <ChessBoard
-                fen={currentFen}
-                orientation="white"
-                movable={false}
-                lastMove={lastMove}
-                check={false}
-                onMove={() => {}}
-                arrows={bestMoveArrow}
-              />
+
+            {/* Eval bar + board (desktop: side by side) */}
+            <div className="flex gap-2 items-stretch">
+              <div className="hidden lg:flex">
+                <EvaluationBar evalCP={currentEval} mate={null} />
+              </div>
+              <div className="flex flex-col min-w-0 flex-1">
+                <div className="relative w-full lg:max-w-[480px]">
+                  <ChessBoard
+                    fen={currentFen}
+                    orientation="white"
+                    movable={false}
+                    lastMove={lastMove}
+                    check={false}
+                    onMove={() => {}}
+                    arrows={bestMoveArrow}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile: eval graph (compact) */}
+            <div className="lg:hidden h-16">
               <EvalGraph points={evalPoints} currentPly={currentPly} onClickPly={setCurrentPly} />
+            </div>
+
+            {/* Mobile: move timeline with nav */}
+            <div className="lg:hidden">
+              <MoveTimeline
+                moves={timelineMoves}
+                currentPly={currentPly}
+                totalMoves={analysis.feedback.length}
+                onGoToPly={setCurrentPly}
+              />
+            </div>
+
+            {/* Mobile: current move classification */}
+            {currentFeedback && (
+              <div className="lg:hidden text-center py-0.5">
+                <span
+                  className={`text-sm font-bold ${CLASSIFICATION_COLORS[currentFeedback.classification] || ""}`}
+                >
+                  {CLASSIFICATION_SYMBOLS[currentFeedback.classification] || ""}{" "}
+                  {currentFeedback.classification}
+                </span>
+              </div>
+            )}
+
+            {/* Mobile: compact actions */}
+            <div className="lg:hidden flex gap-1.5 justify-center px-1 py-0.5">
+              <Link
+                href={`/game/${gameId}`}
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+              >
+                {"\u2190"} Game
+              </Link>
+              <ExportPGN gameId={gameId} compact />
             </div>
           </div>
 
-          {/* Right panel */}
-          <div className="flex-1 space-y-4 min-w-0">
-            {/* Opening */}
+          {/* ── RIGHT: Desktop panel ── */}
+          <div className="hidden lg:block flex-1 space-y-4 min-w-0">
             {analysis.opening && (
               <div className="bg-gray-900 rounded-lg px-4 py-2">
                 <span className="text-gray-400 text-xs">{analysis.opening.eco}</span>{" "}
@@ -347,7 +408,8 @@ export default function AnalysisPage() {
               </div>
             )}
 
-            {/* Move list with classifications */}
+            <EvalGraph points={evalPoints} currentPly={currentPly} onClickPly={setCurrentPly} />
+
             <div className="bg-gray-900 rounded-lg p-3 overflow-y-auto max-h-72">
               <div className="space-y-0.5">
                 {pairs.map((pair) => (
@@ -356,17 +418,11 @@ export default function AnalysisPage() {
                     {pair.white && (
                       <button
                         onClick={() => setCurrentPly(pair.white!.ply)}
-                        className={`px-2 py-0.5 rounded mr-1 min-w-[5rem] text-left font-mono transition-colors ${
-                          pair.white.ply === currentPly
-                            ? "bg-blue-600 text-white"
-                            : "hover:bg-gray-800 text-gray-300"
-                        }`}
+                        className={`px-2 py-0.5 rounded mr-1 min-w-[5rem] text-left font-mono transition-colors ${pair.white.ply === currentPly ? "bg-blue-600 text-white" : "hover:bg-gray-800 text-gray-300"}`}
                       >
                         {pair.white.san}{" "}
                         <span
-                          className={`text-xs ${
-                            CLASSIFICATION_COLORS[pair.white.classification] || ""
-                          }`}
+                          className={`text-xs ${CLASSIFICATION_COLORS[pair.white.classification] || ""}`}
                         >
                           {CLASSIFICATION_SYMBOLS[pair.white.classification] || ""}
                         </span>
@@ -375,17 +431,11 @@ export default function AnalysisPage() {
                     {pair.black && (
                       <button
                         onClick={() => setCurrentPly(pair.black!.ply)}
-                        className={`px-2 py-0.5 rounded min-w-[5rem] text-left font-mono transition-colors ${
-                          pair.black.ply === currentPly
-                            ? "bg-blue-600 text-white"
-                            : "hover:bg-gray-800 text-gray-300"
-                        }`}
+                        className={`px-2 py-0.5 rounded min-w-[5rem] text-left font-mono transition-colors ${pair.black.ply === currentPly ? "bg-blue-600 text-white" : "hover:bg-gray-800 text-gray-300"}`}
                       >
                         {pair.black.san}{" "}
                         <span
-                          className={`text-xs ${
-                            CLASSIFICATION_COLORS[pair.black.classification] || ""
-                          }`}
+                          className={`text-xs ${CLASSIFICATION_COLORS[pair.black.classification] || ""}`}
                         >
                           {CLASSIFICATION_SYMBOLS[pair.black.classification] || ""}
                         </span>
@@ -396,35 +446,33 @@ export default function AnalysisPage() {
               </div>
             </div>
 
-            {/* Navigation */}
             <div className="flex gap-2 justify-center">
               <button
                 onClick={() => setCurrentPly(0)}
-                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
               >
                 &laquo;
               </button>
               <button
                 onClick={() => setCurrentPly(Math.max(0, currentPly - 1))}
-                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
               >
                 &lsaquo;
               </button>
               <button
                 onClick={() => setCurrentPly(Math.min(analysis.feedback.length, currentPly + 1))}
-                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
               >
                 &rsaquo;
               </button>
               <button
                 onClick={() => setCurrentPly(analysis.feedback.length)}
-                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
               >
                 &raquo;
               </button>
             </div>
 
-            {/* Summary panel */}
             <div className="bg-gray-900 rounded-lg p-4">
               <h2 className="text-sm font-semibold text-gray-400 mb-3">Accuracy</h2>
               <div className="grid grid-cols-2 gap-4 mb-4">
@@ -437,7 +485,6 @@ export default function AnalysisPage() {
                   <p className="text-2xl font-bold">{analysis.blackAccuracy?.toFixed(1) ?? "—"}%</p>
                 </div>
               </div>
-
               <h2 className="text-sm font-semibold text-gray-400 mb-2">Move Classifications</h2>
               <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
                 {[
@@ -463,9 +510,7 @@ export default function AnalysisPage() {
             </div>
 
             <ExportPGN gameId={gameId} />
-
             <GameNoteEditor gameId={gameId} />
-
             <div className="text-center">
               <Link href={`/game/${gameId}`} className="text-gray-400 hover:text-white text-sm">
                 &larr; Back to game

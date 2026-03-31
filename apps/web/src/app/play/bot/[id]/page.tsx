@@ -1038,9 +1038,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                 </div>
 
                 {/* BOARD */}
-                <div
-                  className="relative w-full lg:max-w-[640px] border border-gray-700 rounded"
-                >
+                <div className="relative w-full lg:max-w-[640px] border border-gray-700 rounded">
                   <ChessBoard
                     fen={displayFen}
                     orientation={orientation}

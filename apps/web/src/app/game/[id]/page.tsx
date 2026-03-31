@@ -393,9 +393,7 @@ export default function GamePage() {
             </div>
 
             {/* Board */}
-            <div
-              className="w-full lg:w-[min(100%,480px)] relative"
-            >
+            <div className="w-full lg:w-[min(100%,480px)] relative">
               <ChessBoard
                 fen={displayFen}
                 orientation={orientation}

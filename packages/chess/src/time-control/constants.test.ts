@@ -62,14 +62,22 @@ describe("categorizeTimeControl", () => {
 describe("TIME_CONTROL_PRESETS", () => {
   const expectedKeys = [
     "bullet_1_0",
+    "bullet_1_1",
+    "bullet_2_0",
     "bullet_2_1",
     "blitz_3_0",
     "blitz_3_2",
     "blitz_5_0",
     "blitz_5_3",
+    "blitz_5_5",
     "rapid_10_0",
+    "rapid_10_5",
     "rapid_15_10",
+    "rapid_20_0",
     "classical_30_0",
+    "classical_30_20",
+    "classical_45_15",
+    "classical_60_0",
     "unlimited",
   ];
 

@@ -60,9 +60,16 @@ export default function CapturedPieces({ fen, color }: CapturedPiecesProps) {
   if (captured.length === 0) return null;
 
   return (
-    <div className="flex gap-0.5 text-lg h-6">
+    <div className="flex flex-wrap gap-0.5 text-base lg:text-lg min-h-[20px] lg:min-h-[24px] overflow-hidden">
       {captured.map((p, i) => (
-        <span key={i} className={color === "white" ? "text-gray-300" : "text-gray-600"}>
+        <span
+          key={i}
+          className={
+            color === "white"
+              ? "text-white opacity-80 drop-shadow-[0_0_1px_rgba(0,0,0,0.8)]"
+              : "text-gray-400 drop-shadow-[0_0_1px_rgba(255,255,255,0.3)]"
+          }
+        >
           {PIECE_SYMBOLS[p]}
         </span>
       ))}

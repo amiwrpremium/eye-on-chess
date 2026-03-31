@@ -983,7 +983,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
         <div className="flex flex-col lg:flex-row gap-1 lg:gap-4 items-start flex-1 min-h-0">
           {/* ── LEFT: Board area ── */}
           <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full justify-center lg:justify-start">
-            {/* Bot info */}
+            {/* Bot info (above board+evalbar area) */}
             <div className="flex items-center gap-1.5 px-1 py-0.5">
               <div className="w-5 h-5 lg:w-7 lg:h-7 bg-gray-700 rounded-full flex items-center justify-center text-xs lg:text-base shrink-0">
                 {bot ? bot.avatar : "\u{1F916}"}
@@ -1010,34 +1010,31 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
               )}
             </div>
 
-            {/* Eval bar (horizontal on mobile, vertical on desktop) */}
+            {/* Mobile: horizontal eval bar */}
             {activeSettings.evalBar && (
               <div className="lg:hidden h-3 w-full">
                 <EvaluationBar evalCP={evalScore} mate={null} />
               </div>
             )}
 
-            {/* Engine lines (flow element, not overlaid) */}
+            {/* Mobile: engine lines */}
             {activeSettings.engine && (
               <div className="lg:hidden">
                 <EngineLines lines={engineLines} fen={displayFen} loading={thinking} />
               </div>
             )}
 
-            {/* Board + desktop eval bar wrapper */}
-            <div className="flex gap-1 flex-1 min-h-0">
+            {/* Eval bar + board (desktop: side by side with gap, eval bar matches board height) */}
+            <div className="flex gap-2 items-stretch">
               {activeSettings.evalBar && (
-                <div className="hidden lg:flex h-auto">
+                <div className="hidden lg:flex">
                   <EvaluationBar evalCP={evalScore} mate={null} />
                 </div>
               )}
-              <div className="flex flex-col flex-1 min-h-0 min-w-0">
-                {/* Desktop: captured pieces */}
+              <div className="flex flex-col min-w-0 flex-1">
                 <div className="hidden lg:block">
                   <CapturedPieces fen={displayFen} color={playerIsWhite ? "white" : "black"} />
                 </div>
-
-                {/* BOARD */}
                 <div className="relative w-full lg:max-w-[640px] border border-gray-700 rounded">
                   <ChessBoard
                     fen={displayFen}
@@ -1060,15 +1057,13 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                   />
                   {showConfetti && <Confetti />}
                 </div>
-
-                {/* Desktop: captured pieces */}
                 <div className="hidden lg:block">
                   <CapturedPieces fen={displayFen} color={playerIsWhite ? "black" : "white"} />
                 </div>
               </div>
             </div>
 
-            {/* Player info */}
+            {/* Player info (below board+evalbar area) */}
             <div className="flex items-center gap-1.5 px-1 py-0.5">
               <div className="w-5 h-5 lg:w-7 lg:h-7 bg-gray-700 rounded-full flex items-center justify-center text-[10px] lg:text-xs font-bold shrink-0">
                 {user.username[0].toUpperCase()}

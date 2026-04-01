@@ -81,8 +81,19 @@ export async function analysisRoutes(app: FastifyInstance) {
     });
 
     if (!analysis) {
+      // Include progress info for queued/processing jobs
+      let progress = null;
+      if (jobStatus === "processing" || jobStatus === "queued") {
+        const progressRaw = await redis.get(`analysis:progress:${gameId}`);
+        if (progressRaw) {
+          try {
+            progress = JSON.parse(progressRaw);
+          } catch {}
+        }
+      }
       return {
         status: jobStatus || "none",
+        progress,
         analysis: null,
       };
     }

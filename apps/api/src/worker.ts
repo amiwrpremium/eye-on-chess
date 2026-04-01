@@ -17,6 +17,10 @@ function statusKey(gameId: string) {
   return `analysis:status:${gameId}`;
 }
 
+function progressKey(gameId: string) {
+  return `analysis:progress:${gameId}`;
+}
+
 async function analyzeGame(gameId: string, engine: StockfishEngine) {
   await redis.set(statusKey(gameId), "processing");
   log.info({ gameId }, "analyzing game");
@@ -108,8 +112,18 @@ async function analyzeGame(gameId: string, engine: StockfishEngine) {
       },
     });
 
+    // Update progress in Redis for real-time tracking
+    await redis.setex(
+      progressKey(gameId),
+      3600,
+      JSON.stringify({ currentMove: move.ply, totalMoves: game.moves.length })
+    );
+
     prevEval = evalAfterResult;
   }
+
+  // Clean up progress key
+  await redis.del(progressKey(gameId));
 
   // Compute accuracy
   const whiteAccuracy = computeAccuracy(whiteCPLosses);
